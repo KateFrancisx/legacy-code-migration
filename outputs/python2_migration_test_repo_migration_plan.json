@@ -1,0 +1,445 @@
+{
+  "repository": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+  "source_language": "Python 2",
+  "target_language": "Python 3",
+  "strategy": "dependency_first",
+  "summary": {
+    "total_python_files": 6,
+    "production_files": 4,
+    "test_files": 2,
+    "migration_candidates": 3,
+    "migration_units": 3,
+    "dependency_cycles": 0
+  },
+  "migration_order": [
+    "utils.py",
+    "billing.py",
+    "main.py"
+  ],
+  "units": [
+    {
+      "order": 1,
+      "file": "utils.py",
+      "version": "Python 2",
+      "dependencies": [],
+      "dependents": [
+        "billing.py",
+        "main.py"
+      ],
+      "dependency_details": [],
+      "dependent_details": [
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "normalize_name",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "calculate_percentage",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "format_money",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "normalize_name",
+            "line": 11
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "calculate_percentage",
+            "line": 25
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "calculate_percentage",
+            "line": 34
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 41
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 42
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 43
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 44
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "chunk_items",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "chunk_items",
+            "line": 21
+          }
+        }
+      ],
+      "related_tests": [],
+      "migration_reasons": [
+        "unicode",
+        "xrange"
+      ],
+      "risk": "medium",
+      "risk_score": 46,
+      "migration_notes": [
+        "Review unicode handling and convert to Python 3 string semantics.",
+        "Replace xrange with range."
+      ]
+    },
+    {
+      "order": 2,
+      "file": "billing.py",
+      "version": "Python 2",
+      "dependencies": [
+        "utils.py"
+      ],
+      "dependents": [
+        "main.py"
+      ],
+      "dependency_details": [
+        {
+          "source": "billing.py",
+          "target": "config.py",
+          "type": "from_import",
+          "details": {
+            "module": "config",
+            "name": "get_config",
+            "alias": null,
+            "line": 4
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "config.py",
+          "type": "function_call",
+          "details": {
+            "function": "get_config",
+            "line": 21
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "config.py",
+          "type": "function_call",
+          "details": {
+            "function": "get_config",
+            "line": 32
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "normalize_name",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "calculate_percentage",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "format_money",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "normalize_name",
+            "line": 11
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "calculate_percentage",
+            "line": 25
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "calculate_percentage",
+            "line": 34
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 41
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 42
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 43
+          }
+        },
+        {
+          "source": "billing.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "format_money",
+            "line": 44
+          }
+        }
+      ],
+      "dependent_details": [
+        {
+          "source": "main.py",
+          "target": "billing.py",
+          "type": "from_import",
+          "details": {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "billing.py",
+          "type": "function_call",
+          "details": {
+            "function": "build_invoice",
+            "line": 15
+          }
+        },
+        {
+          "source": "tests/test_billing.py",
+          "target": "billing.py",
+          "type": "from_import",
+          "details": {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          }
+        },
+        {
+          "source": "tests/test_billing.py",
+          "target": "billing.py",
+          "type": "function_call",
+          "details": {
+            "function": "build_invoice",
+            "line": 16
+          }
+        },
+        {
+          "source": "tests/test_billing.py",
+          "target": "billing.py",
+          "type": "function_call",
+          "details": {
+            "function": "build_invoice",
+            "line": 24
+          }
+        },
+        {
+          "source": "tests/test_billing.py",
+          "target": "billing.py",
+          "type": "function_call",
+          "details": {
+            "function": "build_invoice",
+            "line": 31
+          }
+        }
+      ],
+      "related_tests": [
+        "tests/test_billing.py"
+      ],
+      "migration_reasons": [
+        "old_raise",
+        "print_statement"
+      ],
+      "risk": "medium",
+      "risk_score": 61,
+      "migration_notes": [
+        "Convert Python 2 raise syntax.",
+        "Convert Python 2 print statements to Python 3 print() calls."
+      ]
+    },
+    {
+      "order": 3,
+      "file": "main.py",
+      "version": "Python 2",
+      "dependencies": [
+        "billing.py",
+        "utils.py"
+      ],
+      "dependents": [],
+      "dependency_details": [
+        {
+          "source": "main.py",
+          "target": "billing.py",
+          "type": "from_import",
+          "details": {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "billing.py",
+          "type": "function_call",
+          "details": {
+            "function": "build_invoice",
+            "line": 15
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "utils.py",
+          "type": "from_import",
+          "details": {
+            "module": "utils",
+            "name": "chunk_items",
+            "alias": null,
+            "line": 5
+          }
+        },
+        {
+          "source": "main.py",
+          "target": "utils.py",
+          "type": "function_call",
+          "details": {
+            "function": "chunk_items",
+            "line": 21
+          }
+        }
+      ],
+      "dependent_details": [],
+      "related_tests": [],
+      "migration_reasons": [
+        "print_statement"
+      ],
+      "risk": "low",
+      "risk_score": 20,
+      "migration_notes": [
+        "Convert Python 2 print statements to Python 3 print() calls."
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "file": "config.py",
+      "reason": "Python version is ambiguous; requires manual review."
+    }
+  ],
+  "cycles": [],
+  "tests": [
+    "tests/__init__.py",
+    "tests/test_billing.py"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "repository": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+  "repository_name": "python2_migration_test_repo",
+  "stages_completed": [
+    "repository_scanning",
+    "python_version_detection",
+    "migration_job_selection",
+    "code_extraction",
+    "codebert_embeddings",
+    "dependency_analysis",
+    "migration_planning",
+    "repository_context",
+    "rag_retrieval",
+    "llm_prompt_generation"
+  ],
+  "statistics": {
+    "migration_units": 3,
+    "contexts": 3,
+    "rag_files": 13,
+    "prompts": 3,
+    "embeddings": 13
+  },
+  "llm_called": false,
+  "status": "READY_FOR_LLM_MIGRATION"
+}

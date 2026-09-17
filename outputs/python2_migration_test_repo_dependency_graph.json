@@ -1,0 +1,1305 @@
+{
+  "repository": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+  "files": [
+    "billing.py",
+    "config.py",
+    "main.py",
+    "tests/__init__.py",
+    "tests/test_billing.py",
+    "utils.py"
+  ],
+  "file_count": 6,
+  "modules": {
+    "billing": "billing.py",
+    "config": "config.py",
+    "main": "main.py",
+    "tests": "tests/__init__.py",
+    "tests.test_billing": "tests/test_billing.py",
+    "test_billing": "tests/test_billing.py",
+    "utils": "utils.py"
+  },
+  "graph": {
+    "billing.py": [
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "from_import",
+        "details": {
+          "module": "config",
+          "name": "get_config",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "function_call",
+        "details": {
+          "function": "get_config",
+          "line": 21
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "function_call",
+        "details": {
+          "function": "get_config",
+          "line": 32
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "normalize_name",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "calculate_percentage",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "format_money",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "normalize_name",
+          "line": 11
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "calculate_percentage",
+          "line": 25
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "calculate_percentage",
+          "line": 34
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 41
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 42
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 43
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 44
+        }
+      }
+    ],
+    "config.py": [],
+    "main.py": [
+      {
+        "source": "main.py",
+        "target": "billing.py",
+        "type": "from_import",
+        "details": {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 15
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "chunk_items",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "chunk_items",
+          "line": 21
+        }
+      }
+    ],
+    "tests/__init__.py": [],
+    "tests/test_billing.py": [
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "from_import",
+        "details": {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 16
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 24
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 31
+        }
+      }
+    ],
+    "utils.py": []
+  },
+  "dependency_graph": {
+    "billing.py": {
+      "config.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "config",
+            "name": "get_config",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "get_config",
+            "line": 21
+          },
+          {
+            "function": "get_config",
+            "line": 32
+          }
+        ]
+      },
+      "utils.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "utils",
+            "name": "normalize_name",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "module": "utils",
+            "name": "calculate_percentage",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "module": "utils",
+            "name": "format_money",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "function": "normalize_name",
+            "line": 11
+          },
+          {
+            "function": "calculate_percentage",
+            "line": 25
+          },
+          {
+            "function": "calculate_percentage",
+            "line": 34
+          },
+          {
+            "function": "format_money",
+            "line": 41
+          },
+          {
+            "function": "format_money",
+            "line": 42
+          },
+          {
+            "function": "format_money",
+            "line": 43
+          },
+          {
+            "function": "format_money",
+            "line": 44
+          }
+        ]
+      }
+    },
+    "main.py": {
+      "billing.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "build_invoice",
+            "line": 15
+          }
+        ]
+      },
+      "utils.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "utils",
+            "name": "chunk_items",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "function": "chunk_items",
+            "line": 21
+          }
+        ]
+      }
+    },
+    "tests/test_billing.py": {
+      "billing.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "build_invoice",
+            "line": 16
+          },
+          {
+            "function": "build_invoice",
+            "line": 24
+          },
+          {
+            "function": "build_invoice",
+            "line": 31
+          }
+        ]
+      }
+    }
+  },
+  "adjacency_graph": {
+    "billing.py": {
+      "config.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "config",
+            "name": "get_config",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "get_config",
+            "line": 21
+          },
+          {
+            "function": "get_config",
+            "line": 32
+          }
+        ]
+      },
+      "utils.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "utils",
+            "name": "normalize_name",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "module": "utils",
+            "name": "calculate_percentage",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "module": "utils",
+            "name": "format_money",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "function": "normalize_name",
+            "line": 11
+          },
+          {
+            "function": "calculate_percentage",
+            "line": 25
+          },
+          {
+            "function": "calculate_percentage",
+            "line": 34
+          },
+          {
+            "function": "format_money",
+            "line": 41
+          },
+          {
+            "function": "format_money",
+            "line": 42
+          },
+          {
+            "function": "format_money",
+            "line": 43
+          },
+          {
+            "function": "format_money",
+            "line": 44
+          }
+        ]
+      }
+    },
+    "main.py": {
+      "billing.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "build_invoice",
+            "line": 15
+          }
+        ]
+      },
+      "utils.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "utils",
+            "name": "chunk_items",
+            "alias": null,
+            "line": 5
+          },
+          {
+            "function": "chunk_items",
+            "line": 21
+          }
+        ]
+      }
+    },
+    "tests/test_billing.py": {
+      "billing.py": {
+        "types": [
+          "from_import",
+          "function_call"
+        ],
+        "details": [
+          {
+            "module": "billing",
+            "name": "build_invoice",
+            "alias": null,
+            "line": 4
+          },
+          {
+            "function": "build_invoice",
+            "line": 16
+          },
+          {
+            "function": "build_invoice",
+            "line": 24
+          },
+          {
+            "function": "build_invoice",
+            "line": 31
+          }
+        ]
+      }
+    }
+  },
+  "reverse_graph": {
+    "config.py": [
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "from_import",
+        "details": {
+          "module": "config",
+          "name": "get_config",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "function_call",
+        "details": {
+          "function": "get_config",
+          "line": 21
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "config.py",
+        "type": "function_call",
+        "details": {
+          "function": "get_config",
+          "line": 32
+        }
+      }
+    ],
+    "utils.py": [
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "normalize_name",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "calculate_percentage",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "format_money",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "normalize_name",
+          "line": 11
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "calculate_percentage",
+          "line": 25
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "calculate_percentage",
+          "line": 34
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 41
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 42
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 43
+        }
+      },
+      {
+        "source": "billing.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "format_money",
+          "line": 44
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "utils.py",
+        "type": "from_import",
+        "details": {
+          "module": "utils",
+          "name": "chunk_items",
+          "alias": null,
+          "line": 5
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "utils.py",
+        "type": "function_call",
+        "details": {
+          "function": "chunk_items",
+          "line": 21
+        }
+      }
+    ],
+    "billing.py": [
+      {
+        "source": "main.py",
+        "target": "billing.py",
+        "type": "from_import",
+        "details": {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "main.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 15
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "from_import",
+        "details": {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 16
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 24
+        }
+      },
+      {
+        "source": "tests/test_billing.py",
+        "target": "billing.py",
+        "type": "function_call",
+        "details": {
+          "function": "build_invoice",
+          "line": 31
+        }
+      }
+    ],
+    "main.py": [],
+    "tests/__init__.py": [],
+    "tests/test_billing.py": []
+  },
+  "edges": [
+    {
+      "source": "billing.py",
+      "target": "config.py",
+      "type": "from_import",
+      "details": {
+        "module": "config",
+        "name": "get_config",
+        "alias": null,
+        "line": 4
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "config.py",
+      "type": "function_call",
+      "details": {
+        "function": "get_config",
+        "line": 21
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "config.py",
+      "type": "function_call",
+      "details": {
+        "function": "get_config",
+        "line": 32
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "from_import",
+      "details": {
+        "module": "utils",
+        "name": "normalize_name",
+        "alias": null,
+        "line": 5
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "from_import",
+      "details": {
+        "module": "utils",
+        "name": "calculate_percentage",
+        "alias": null,
+        "line": 5
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "from_import",
+      "details": {
+        "module": "utils",
+        "name": "format_money",
+        "alias": null,
+        "line": 5
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "normalize_name",
+        "line": 11
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "calculate_percentage",
+        "line": 25
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "calculate_percentage",
+        "line": 34
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "format_money",
+        "line": 41
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "format_money",
+        "line": 42
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "format_money",
+        "line": 43
+      }
+    },
+    {
+      "source": "billing.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "format_money",
+        "line": 44
+      }
+    },
+    {
+      "source": "main.py",
+      "target": "billing.py",
+      "type": "from_import",
+      "details": {
+        "module": "billing",
+        "name": "build_invoice",
+        "alias": null,
+        "line": 4
+      }
+    },
+    {
+      "source": "main.py",
+      "target": "billing.py",
+      "type": "function_call",
+      "details": {
+        "function": "build_invoice",
+        "line": 15
+      }
+    },
+    {
+      "source": "main.py",
+      "target": "utils.py",
+      "type": "from_import",
+      "details": {
+        "module": "utils",
+        "name": "chunk_items",
+        "alias": null,
+        "line": 5
+      }
+    },
+    {
+      "source": "main.py",
+      "target": "utils.py",
+      "type": "function_call",
+      "details": {
+        "function": "chunk_items",
+        "line": 21
+      }
+    },
+    {
+      "source": "tests/test_billing.py",
+      "target": "billing.py",
+      "type": "from_import",
+      "details": {
+        "module": "billing",
+        "name": "build_invoice",
+        "alias": null,
+        "line": 4
+      }
+    },
+    {
+      "source": "tests/test_billing.py",
+      "target": "billing.py",
+      "type": "function_call",
+      "details": {
+        "function": "build_invoice",
+        "line": 16
+      }
+    },
+    {
+      "source": "tests/test_billing.py",
+      "target": "billing.py",
+      "type": "function_call",
+      "details": {
+        "function": "build_invoice",
+        "line": 24
+      }
+    },
+    {
+      "source": "tests/test_billing.py",
+      "target": "billing.py",
+      "type": "function_call",
+      "details": {
+        "function": "build_invoice",
+        "line": 31
+      }
+    }
+  ],
+  "symbols": {
+    "billing.py": [
+      {
+        "type": "class",
+        "name": "Invoice",
+        "line": 8
+      },
+      {
+        "type": "function",
+        "name": "__init__",
+        "line": 10
+      },
+      {
+        "type": "function",
+        "name": "subtotal",
+        "line": 14
+      },
+      {
+        "type": "function",
+        "name": "discount",
+        "line": 20
+      },
+      {
+        "type": "function",
+        "name": "tax",
+        "line": 31
+      },
+      {
+        "type": "function",
+        "name": "total",
+        "line": 36
+      },
+      {
+        "type": "function",
+        "name": "summary",
+        "line": 39
+      },
+      {
+        "type": "function",
+        "name": "item_count",
+        "line": 46
+      },
+      {
+        "type": "function",
+        "name": "build_invoice",
+        "line": 50
+      }
+    ],
+    "config.py": [
+      {
+        "type": "function",
+        "name": "get_config",
+        "line": 8
+      }
+    ],
+    "main.py": [
+      {
+        "type": "function",
+        "name": "create_demo_invoice",
+        "line": 8
+      }
+    ],
+    "tests/__init__.py": [],
+    "tests/test_billing.py": [
+      {
+        "type": "class",
+        "name": "BillingTests",
+        "line": 7
+      },
+      {
+        "type": "function",
+        "name": "setUp",
+        "line": 9
+      },
+      {
+        "type": "function",
+        "name": "test_invoice_total",
+        "line": 15
+      },
+      {
+        "type": "function",
+        "name": "test_customer_name_is_normalized",
+        "line": 23
+      },
+      {
+        "type": "function",
+        "name": "test_empty_invoice_is_rejected",
+        "line": 27
+      },
+      {
+        "type": "function",
+        "name": "test_item_count",
+        "line": 30
+      }
+    ],
+    "utils.py": [
+      {
+        "type": "function",
+        "name": "normalize_name",
+        "line": 3
+      },
+      {
+        "type": "function",
+        "name": "calculate_percentage",
+        "line": 10
+      },
+      {
+        "type": "function",
+        "name": "format_money",
+        "line": 14
+      },
+      {
+        "type": "function",
+        "name": "chunk_items",
+        "line": 18
+      }
+    ]
+  },
+  "file_metadata": {
+    "billing.py": {
+      "file": "billing.py",
+      "module": "billing",
+      "version": "Python 2",
+      "migration_reasons": [
+        "old_raise",
+        "print_statement"
+      ],
+      "functions": [
+        {
+          "type": "function",
+          "name": "__init__",
+          "line": 10
+        },
+        {
+          "type": "function",
+          "name": "subtotal",
+          "line": 14
+        },
+        {
+          "type": "function",
+          "name": "discount",
+          "line": 20
+        },
+        {
+          "type": "function",
+          "name": "tax",
+          "line": 31
+        },
+        {
+          "type": "function",
+          "name": "total",
+          "line": 36
+        },
+        {
+          "type": "function",
+          "name": "summary",
+          "line": 39
+        },
+        {
+          "type": "function",
+          "name": "item_count",
+          "line": 46
+        },
+        {
+          "type": "function",
+          "name": "build_invoice",
+          "line": 50
+        }
+      ],
+      "classes": [
+        {
+          "type": "class",
+          "name": "Invoice",
+          "line": 8
+        }
+      ],
+      "imports": [],
+      "from_imports": [
+        {
+          "module": "config",
+          "name": "get_config",
+          "alias": null,
+          "line": 4
+        },
+        {
+          "module": "utils",
+          "name": "normalize_name",
+          "alias": null,
+          "line": 5
+        },
+        {
+          "module": "utils",
+          "name": "calculate_percentage",
+          "alias": null,
+          "line": 5
+        },
+        {
+          "module": "utils",
+          "name": "format_money",
+          "alias": null,
+          "line": 5
+        }
+      ],
+      "is_test": false
+    },
+    "config.py": {
+      "file": "config.py",
+      "module": "config",
+      "version": "Ambiguous",
+      "migration_reasons": [],
+      "functions": [
+        {
+          "type": "function",
+          "name": "get_config",
+          "line": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "from_imports": [],
+      "is_test": false
+    },
+    "main.py": {
+      "file": "main.py",
+      "module": "main",
+      "version": "Python 2",
+      "migration_reasons": [
+        "print_statement"
+      ],
+      "functions": [
+        {
+          "type": "function",
+          "name": "create_demo_invoice",
+          "line": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "from_imports": [
+        {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        },
+        {
+          "module": "utils",
+          "name": "chunk_items",
+          "alias": null,
+          "line": 5
+        }
+      ],
+      "is_test": false
+    },
+    "tests/__init__.py": {
+      "file": "tests/__init__.py",
+      "module": "tests",
+      "version": "Ambiguous",
+      "migration_reasons": [],
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "from_imports": [],
+      "is_test": true
+    },
+    "tests/test_billing.py": {
+      "file": "tests/test_billing.py",
+      "module": "tests.test_billing",
+      "version": "Ambiguous",
+      "migration_reasons": [],
+      "functions": [
+        {
+          "type": "function",
+          "name": "setUp",
+          "line": 9
+        },
+        {
+          "type": "function",
+          "name": "test_invoice_total",
+          "line": 15
+        },
+        {
+          "type": "function",
+          "name": "test_customer_name_is_normalized",
+          "line": 23
+        },
+        {
+          "type": "function",
+          "name": "test_empty_invoice_is_rejected",
+          "line": 27
+        },
+        {
+          "type": "function",
+          "name": "test_item_count",
+          "line": 30
+        }
+      ],
+      "classes": [
+        {
+          "type": "class",
+          "name": "BillingTests",
+          "line": 7
+        }
+      ],
+      "imports": [],
+      "from_imports": [
+        {
+          "module": "billing",
+          "name": "build_invoice",
+          "alias": null,
+          "line": 4
+        }
+      ],
+      "is_test": true
+    },
+    "utils.py": {
+      "file": "utils.py",
+      "module": "utils",
+      "version": "Python 2",
+      "migration_reasons": [
+        "unicode",
+        "xrange"
+      ],
+      "functions": [
+        {
+          "type": "function",
+          "name": "normalize_name",
+          "line": 3
+        },
+        {
+          "type": "function",
+          "name": "calculate_percentage",
+          "line": 10
+        },
+        {
+          "type": "function",
+          "name": "format_money",
+          "line": 14
+        },
+        {
+          "type": "function",
+          "name": "chunk_items",
+          "line": 18
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "from_imports": [],
+      "is_test": false
+    }
+  },
+  "statistics": {
+    "python_files": 6,
+    "dependency_edges": 21,
+    "import_edges": 0,
+    "from_import_edges": 7,
+    "function_call_edges": 14,
+    "inheritance_edges": 0
+  }
+}

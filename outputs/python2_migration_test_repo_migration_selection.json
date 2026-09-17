@@ -1,0 +1,156 @@
+{
+  "job_spec": {
+    "language": "Python",
+    "from_version": "2",
+    "to_version": "3",
+    "min_confidence": "medium"
+  },
+  "counts": {
+    "targets": 3,
+    "needs_review": 0,
+    "skipped": 8
+  },
+  "targets": [
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "billing.py",
+      "size_bytes": 1570,
+      "version_detection": {
+        "version": "2",
+        "confidence": "high",
+        "method": "parso_grammar",
+        "signals": [
+          "parses cleanly as Python 2 only"
+        ]
+      }
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "main.py",
+      "size_bytes": 688,
+      "version_detection": {
+        "version": "2",
+        "confidence": "high",
+        "method": "parso_grammar",
+        "signals": [
+          "parses cleanly as Python 2 only"
+        ]
+      }
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "utils.py",
+      "size_bytes": 587,
+      "version_detection": {
+        "version": "2",
+        "confidence": "medium",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": [
+          "xrange() builtin"
+        ]
+      }
+    }
+  ],
+  "needs_review": [],
+  "skipped": [
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": ".gitignore",
+      "size_bytes": 126,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "config.py",
+      "size_bytes": 300,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      },
+      "skip_reason": "version_unknown_excluded"
+    },
+    {
+      "language": "Documentation",
+      "category": "non_code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "README.md",
+      "size_bytes": 616,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "Text",
+      "category": "non_code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "requirements.txt",
+      "size_bytes": 17,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "JSON",
+      "category": "config",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "data/sample_items.json",
+      "size_bytes": 207,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "JavaScript",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "frontend/summary.js",
+      "size_bytes": 329,
+      "skip_reason": "wrong_language"
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "tests/test_billing.py",
+      "size_bytes": 1035,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      },
+      "skip_reason": "version_unknown_excluded"
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "tests/__init__.py",
+      "size_bytes": 0,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      },
+      "skip_reason": "version_unknown_excluded"
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+# ============================================================
+# CodeMigration - AI-Powered Legacy Code Migration Platform
+# ============================================================
+
+
+# ============================================================
+# PYTHON
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.env/
+paddle_env/
+
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checking / linting / formatting caches
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.cache/
+
+
+# ============================================================
+# SECRETS / ENVIRONMENT VARIABLES
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# Local credentials / API keys
+*.pem
+*.key
+secrets.json
+credentials.json
+
+
+# ============================================================
+# IDE / EDITOR
+# ============================================================
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# VS Code local settings
+.history/
+
+
+# ============================================================
+# WINDOWS / OS
+# ============================================================
+
+Thumbs.db
+desktop.ini
+.DS_Store
+
+
+# ============================================================
+# NODE.JS / REACT / VITE FRONTEND
+# ============================================================
+
+node_modules/
+frontend/node_modules/
+
+# Vite build output
+dist/
+frontend/dist/
+frontend/.vite/
+
+# Node logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+
+# ============================================================
+# CODEMIGRATE RUNTIME / UI JOB DATA
+# ============================================================
+
+# Temporary migration jobs created by the FastAPI UI
+outputs/ui_jobs/
+
+# Uploaded repositories copied into runtime job directories
+outputs/**/repository/
+
+# Temporary archives
+outputs/**/*.zip
+
+# Temporary extracted repositories
+outputs/**/extracted/
+
+# Temporary generated files
+outputs/**/tmp/
+outputs/**/temp/
+
+
+# ============================================================
+# LARGE / GENERATED DATA
+# ============================================================
+
+# Large mined source-code corpus
+data/files/
+
+# Local datasets / archives
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Local model files / checkpoints
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+
+# ML experiment outputs
+runs/
+wandb/
+mlruns/
+
+
+# ============================================================
+# EMBEDDING / VECTOR / MODEL CACHE
+# ============================================================
+
+.embeddings/
+embedding_cache/
+model_cache/
+hf_cache/
+huggingface_cache/
+
+# Hugging Face cache
+.cache/huggingface/
+~/.cache/
+
+
+# ============================================================
+# LOGS
+# ============================================================
+
+*.log
+logs/
+
+
+# ============================================================
+# TEMPORARY PROJECT FILES
+# ============================================================
+
+project_structure.txt
+
+# Temporary Python/debug files
+debug_*.py
+diagnose_*.py
+
+# Temporary output files
+*.tmp
+*.temp
+
+
+# ============================================================
+# GENERATED FRONTEND FILES
+# ============================================================
+
+frontend/coverage/
+frontend/.eslintcache
+
+
+# ============================================================
+# LOCAL DATABASE FILES
+# ============================================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# ============================================================
+# JUPYTER
+# ============================================================
+
+.ipynb_checkpoints/
+
+
+# ============================================================
+# OS / TOOL SPECIFIC
+# ============================================================
+
+*.DS_Store
+
+
+# ============================================================
+# TEMPORARY / LOCAL PROJECT FILES
+# ============================================================
+
+# Local test files
+test/
+
+# Temporary project structure listing
+project_structure.txt
+
+# Temporary/debug files
+debug_*.py
+diagnose_*.py

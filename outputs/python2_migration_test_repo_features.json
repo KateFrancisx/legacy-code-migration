@@ -1,0 +1,1484 @@
+[
+  {
+    "chunk_id": "billing.py::Invoice.__init__::L10-L13",
+    "chunk_type": "function",
+    "function_name": "__init__",
+    "function_full_name": "Invoice.__init__",
+    "original_code": "    def __init__(self, customer_name, items):\n        self.customer_name = normalize_name(customer_name)\n        self.items = items\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [
+      "normalize_name"
+    ],
+    "static_analysis": {
+      "loc": 3,
+      "branch_count": 0,
+      "param_count": 3,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": false,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "power": 3
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self",
+        "customer_name",
+        "items"
+      ],
+      "start_line": 10,
+      "end_line": 13,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.__init__::L10-L13",
+      "chunk_type": "function",
+      "function_name": "__init__",
+      "function_full_name": "Invoice.__init__",
+      "original_code": "    def __init__(self, customer_name, items):\n        self.customer_name = normalize_name(customer_name)\n        self.items = items\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [
+        "normalize_name"
+      ],
+      "static_analysis": {
+        "loc": 3,
+        "branch_count": 0,
+        "param_count": 3,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": false,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "power": 3
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self",
+          "customer_name",
+          "items"
+        ],
+        "start_line": 10,
+        "end_line": 13,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.subtotal::L14-L19",
+    "chunk_type": "function",
+    "function_name": "subtotal",
+    "function_full_name": "Invoice.subtotal",
+    "original_code": "    def subtotal(self):\n        total = 0\n        for item in self.items:\n            total += item[\"price\"] * item[\"quantity\"]\n        return total\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [],
+    "static_analysis": {
+      "loc": 5,
+      "branch_count": 1,
+      "param_count": 1,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 1,
+      "has_loop": true,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "for_stmt": 1,
+        "power": 3,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 14,
+      "end_line": 19,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.subtotal::L14-L19",
+      "chunk_type": "function",
+      "function_name": "subtotal",
+      "function_full_name": "Invoice.subtotal",
+      "original_code": "    def subtotal(self):\n        total = 0\n        for item in self.items:\n            total += item[\"price\"] * item[\"quantity\"]\n        return total\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [],
+      "static_analysis": {
+        "loc": 5,
+        "branch_count": 1,
+        "param_count": 1,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 1,
+        "has_loop": true,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "for_stmt": 1,
+          "power": 3,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 14,
+        "end_line": 19,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.discount::L20-L30",
+    "chunk_type": "function",
+    "function_name": "discount",
+    "function_full_name": "Invoice.discount",
+    "original_code": "    def discount(self):\n        config = get_config()\n        subtotal = self.subtotal()\n\n        if subtotal >= config[\"discount_threshold\"]:\n            return calculate_percentage(\n                subtotal,\n                config[\"discount_rate\"] * 100\n            )\n        return 0\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [
+      "calculate_percentage",
+      "get_config"
+    ],
+    "static_analysis": {
+      "loc": 9,
+      "branch_count": 1,
+      "param_count": 1,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 1,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "power": 5,
+        "if_stmt": 1,
+        "comparison": 1,
+        "return_stmt": 2
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 20,
+      "end_line": 30,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.discount::L20-L30",
+      "chunk_type": "function",
+      "function_name": "discount",
+      "function_full_name": "Invoice.discount",
+      "original_code": "    def discount(self):\n        config = get_config()\n        subtotal = self.subtotal()\n\n        if subtotal >= config[\"discount_threshold\"]:\n            return calculate_percentage(\n                subtotal,\n                config[\"discount_rate\"] * 100\n            )\n        return 0\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [
+        "calculate_percentage",
+        "get_config"
+      ],
+      "static_analysis": {
+        "loc": 9,
+        "branch_count": 1,
+        "param_count": 1,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 1,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "power": 5,
+          "if_stmt": 1,
+          "comparison": 1,
+          "return_stmt": 2
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 20,
+        "end_line": 30,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.tax::L31-L35",
+    "chunk_type": "function",
+    "function_name": "tax",
+    "function_full_name": "Invoice.tax",
+    "original_code": "    def tax(self):\n        config = get_config()\n        taxable = self.subtotal() - self.discount()\n        return calculate_percentage(taxable, config[\"tax_rate\"] * 100)\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [
+      "calculate_percentage",
+      "get_config"
+    ],
+    "static_analysis": {
+      "loc": 4,
+      "branch_count": 0,
+      "param_count": 1,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "power": 5,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 31,
+      "end_line": 35,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.tax::L31-L35",
+      "chunk_type": "function",
+      "function_name": "tax",
+      "function_full_name": "Invoice.tax",
+      "original_code": "    def tax(self):\n        config = get_config()\n        taxable = self.subtotal() - self.discount()\n        return calculate_percentage(taxable, config[\"tax_rate\"] * 100)\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [
+        "calculate_percentage",
+        "get_config"
+      ],
+      "static_analysis": {
+        "loc": 4,
+        "branch_count": 0,
+        "param_count": 1,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "power": 5,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 31,
+        "end_line": 35,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.total::L36-L38",
+    "chunk_type": "function",
+    "function_name": "total",
+    "function_full_name": "Invoice.total",
+    "original_code": "    def total(self):\n        return self.subtotal() - self.discount() + self.tax()\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [],
+    "static_analysis": {
+      "loc": 2,
+      "branch_count": 0,
+      "param_count": 1,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "return_stmt": 1,
+        "power": 3
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 36,
+      "end_line": 38,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.total::L36-L38",
+      "chunk_type": "function",
+      "function_name": "total",
+      "function_full_name": "Invoice.total",
+      "original_code": "    def total(self):\n        return self.subtotal() - self.discount() + self.tax()\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [],
+      "static_analysis": {
+        "loc": 2,
+        "branch_count": 0,
+        "param_count": 1,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "return_stmt": 1,
+          "power": 3
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 36,
+        "end_line": 38,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.summary::L39-L45",
+    "chunk_type": "function",
+    "function_name": "summary",
+    "function_full_name": "Invoice.summary",
+    "original_code": "    def summary(self):\n        print \"Customer: %s\" % self.customer_name\n        print \"Subtotal: %s\" % format_money(self.subtotal())\n        print \"Discount: %s\" % format_money(self.discount())\n        print \"Tax: %s\" % format_money(self.tax())\n        print \"Total: %s\" % format_money(self.total())\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [
+      "format_money"
+    ],
+    "static_analysis": {
+      "loc": 6,
+      "branch_count": 0,
+      "param_count": 1,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": false,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "power": 9
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 39,
+      "end_line": 45,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.summary::L39-L45",
+      "chunk_type": "function",
+      "function_name": "summary",
+      "function_full_name": "Invoice.summary",
+      "original_code": "    def summary(self):\n        print \"Customer: %s\" % self.customer_name\n        print \"Subtotal: %s\" % format_money(self.subtotal())\n        print \"Discount: %s\" % format_money(self.discount())\n        print \"Tax: %s\" % format_money(self.tax())\n        print \"Total: %s\" % format_money(self.total())\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [
+        "format_money"
+      ],
+      "static_analysis": {
+        "loc": 6,
+        "branch_count": 0,
+        "param_count": 1,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": false,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "power": 9
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 39,
+        "end_line": 45,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::Invoice.item_count::L46-L48",
+    "chunk_type": "function",
+    "function_name": "item_count",
+    "function_full_name": "Invoice.item_count",
+    "original_code": "    def item_count(self):\n        return sum(item[\"quantity\"] for item in self.items)\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": {
+      "name": "Invoice",
+      "bases": [
+        "object"
+      ]
+    },
+    "functions": [
+      "sum"
+    ],
+    "static_analysis": {
+      "loc": 2,
+      "branch_count": 1,
+      "param_count": 1,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "return_stmt": 1,
+        "power": 3
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "self"
+      ],
+      "start_line": 46,
+      "end_line": 48,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::Invoice.item_count::L46-L48",
+      "chunk_type": "function",
+      "function_name": "item_count",
+      "function_full_name": "Invoice.item_count",
+      "original_code": "    def item_count(self):\n        return sum(item[\"quantity\"] for item in self.items)\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": {
+        "name": "Invoice",
+        "bases": [
+          "object"
+        ]
+      },
+      "functions": [
+        "sum"
+      ],
+      "static_analysis": {
+        "loc": 2,
+        "branch_count": 1,
+        "param_count": 1,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "return_stmt": 1,
+          "power": 3
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "self"
+        ],
+        "start_line": 46,
+        "end_line": 48,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "billing.py::build_invoice::L50-L54",
+    "chunk_type": "function",
+    "function_name": "build_invoice",
+    "function_full_name": "build_invoice",
+    "original_code": "def build_invoice(customer, items):\n    if not items:\n        raise ValueError, \"Invoice must contain at least one item\"\n    return Invoice(customer, items)",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "billing.py",
+    "source_file": "billing.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+      "from utils import normalize_name, calculate_percentage, format_money"
+    ],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [
+      "Invoice"
+    ],
+    "static_analysis": {
+      "loc": 4,
+      "branch_count": 1,
+      "param_count": 2,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 1,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "if_stmt": 1,
+        "return_stmt": 1,
+        "power": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "customer",
+        "items"
+      ],
+      "start_line": 50,
+      "end_line": 54,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "billing.py::build_invoice::L50-L54",
+      "chunk_type": "function",
+      "function_name": "build_invoice",
+      "function_full_name": "build_invoice",
+      "original_code": "def build_invoice(customer, items):\n    if not items:\n        raise ValueError, \"Invoice must contain at least one item\"\n    return Invoice(customer, items)",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "billing.py",
+      "source_file": "billing.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config",
+        "from utils import normalize_name, calculate_percentage, format_money"
+      ],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [
+        "Invoice"
+      ],
+      "static_analysis": {
+        "loc": 4,
+        "branch_count": 1,
+        "param_count": 2,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 1,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "if_stmt": 1,
+          "return_stmt": 1,
+          "power": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "customer",
+          "items"
+        ],
+        "start_line": 50,
+        "end_line": 54,
+        "language_version": "2"
+      }
+    },
+    "file": "billing.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "main.py::create_demo_invoice::L8-L25",
+    "chunk_type": "function",
+    "function_name": "create_demo_invoice",
+    "function_full_name": "create_demo_invoice",
+    "original_code": "def create_demo_invoice():\n    items = [\n        {\"name\": \"Keyboard\", \"price\": 1200, \"quantity\": 1},\n        {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2},\n        {\"name\": \"USB Cable\", \"price\": 150, \"quantity\": 3}\n    ]\n\n    invoice = build_invoice(\"Alice\", items)\n\n    print \"=== Legacy Billing Demo ===\"\n    invoice.summary()\n\n    # Demonstrates a dependency on a utility using xrange.\n    batches = chunk_items(items, 2)\n    print \"Number of item batches: %d\" % len(batches)\n\n    return invoice\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "main.py",
+    "source_file": "main.py",
+    "target_file": null,
+    "imports_original": [
+      "# Python 2 legacy application entry point\n# Depends on billing.py\n\nfrom billing import build_invoice",
+      "from utils import chunk_items"
+    ],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [
+      "build_invoice",
+      "chunk_items",
+      "len"
+    ],
+    "static_analysis": {
+      "loc": 13,
+      "branch_count": 0,
+      "param_count": 0,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "power": 4,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [],
+      "start_line": 8,
+      "end_line": 25,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "main.py::create_demo_invoice::L8-L25",
+      "chunk_type": "function",
+      "function_name": "create_demo_invoice",
+      "function_full_name": "create_demo_invoice",
+      "original_code": "def create_demo_invoice():\n    items = [\n        {\"name\": \"Keyboard\", \"price\": 1200, \"quantity\": 1},\n        {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2},\n        {\"name\": \"USB Cable\", \"price\": 150, \"quantity\": 3}\n    ]\n\n    invoice = build_invoice(\"Alice\", items)\n\n    print \"=== Legacy Billing Demo ===\"\n    invoice.summary()\n\n    # Demonstrates a dependency on a utility using xrange.\n    batches = chunk_items(items, 2)\n    print \"Number of item batches: %d\" % len(batches)\n\n    return invoice\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "main.py",
+      "source_file": "main.py",
+      "target_file": null,
+      "imports_original": [
+        "# Python 2 legacy application entry point\n# Depends on billing.py\n\nfrom billing import build_invoice",
+        "from utils import chunk_items"
+      ],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [
+        "build_invoice",
+        "chunk_items",
+        "len"
+      ],
+      "static_analysis": {
+        "loc": 13,
+        "branch_count": 0,
+        "param_count": 0,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "power": 4,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [],
+        "start_line": 8,
+        "end_line": 25,
+        "language_version": "2"
+      }
+    },
+    "file": "main.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "utils.py::normalize_name::L3-L8",
+    "chunk_type": "function",
+    "function_name": "normalize_name",
+    "function_full_name": "normalize_name",
+    "original_code": "def normalize_name(name):\n    # Python 2 compatibility pattern\n    if isinstance(name, unicode):\n        name = name.encode(\"utf-8\")\n    return name.strip().lower()\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "utils.py",
+    "source_file": "utils.py",
+    "target_file": null,
+    "imports_original": [],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [
+      "isinstance"
+    ],
+    "static_analysis": {
+      "loc": 5,
+      "branch_count": 1,
+      "param_count": 1,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 1,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "if_stmt": 1,
+        "power": 3,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "name"
+      ],
+      "start_line": 3,
+      "end_line": 8,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "utils.py::normalize_name::L3-L8",
+      "chunk_type": "function",
+      "function_name": "normalize_name",
+      "function_full_name": "normalize_name",
+      "original_code": "def normalize_name(name):\n    # Python 2 compatibility pattern\n    if isinstance(name, unicode):\n        name = name.encode(\"utf-8\")\n    return name.strip().lower()\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "utils.py",
+      "source_file": "utils.py",
+      "target_file": null,
+      "imports_original": [],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [
+        "isinstance"
+      ],
+      "static_analysis": {
+        "loc": 5,
+        "branch_count": 1,
+        "param_count": 1,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 1,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "if_stmt": 1,
+          "power": 3,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "name"
+        ],
+        "start_line": 3,
+        "end_line": 8,
+        "language_version": "2"
+      }
+    },
+    "file": "utils.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "utils.py::calculate_percentage::L10-L12",
+    "chunk_type": "function",
+    "function_name": "calculate_percentage",
+    "function_full_name": "calculate_percentage",
+    "original_code": "def calculate_percentage(value, percentage):\n    return value * percentage / 100\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "utils.py",
+    "source_file": "utils.py",
+    "target_file": null,
+    "imports_original": [],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [],
+    "static_analysis": {
+      "loc": 2,
+      "branch_count": 0,
+      "param_count": 2,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "value",
+        "percentage"
+      ],
+      "start_line": 10,
+      "end_line": 12,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "utils.py::calculate_percentage::L10-L12",
+      "chunk_type": "function",
+      "function_name": "calculate_percentage",
+      "function_full_name": "calculate_percentage",
+      "original_code": "def calculate_percentage(value, percentage):\n    return value * percentage / 100\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "utils.py",
+      "source_file": "utils.py",
+      "target_file": null,
+      "imports_original": [],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [],
+      "static_analysis": {
+        "loc": 2,
+        "branch_count": 0,
+        "param_count": 2,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "value",
+          "percentage"
+        ],
+        "start_line": 10,
+        "end_line": 12,
+        "language_version": "2"
+      }
+    },
+    "file": "utils.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "utils.py::format_money::L14-L16",
+    "chunk_type": "function",
+    "function_name": "format_money",
+    "function_full_name": "format_money",
+    "original_code": "def format_money(amount, currency=\"INR\"):\n    return \"%s %.2f\" % (currency, amount)\n",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "utils.py",
+    "source_file": "utils.py",
+    "target_file": null,
+    "imports_original": [],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [],
+    "static_analysis": {
+      "loc": 2,
+      "branch_count": 0,
+      "param_count": 2,
+      "cyclomatic_complexity": 1,
+      "nesting_depth": 0,
+      "has_loop": false,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "amount",
+        "currency"
+      ],
+      "start_line": 14,
+      "end_line": 16,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "utils.py::format_money::L14-L16",
+      "chunk_type": "function",
+      "function_name": "format_money",
+      "function_full_name": "format_money",
+      "original_code": "def format_money(amount, currency=\"INR\"):\n    return \"%s %.2f\" % (currency, amount)\n",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "utils.py",
+      "source_file": "utils.py",
+      "target_file": null,
+      "imports_original": [],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [],
+      "static_analysis": {
+        "loc": 2,
+        "branch_count": 0,
+        "param_count": 2,
+        "cyclomatic_complexity": 1,
+        "nesting_depth": 0,
+        "has_loop": false,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "amount",
+          "currency"
+        ],
+        "start_line": 14,
+        "end_line": 16,
+        "language_version": "2"
+      }
+    },
+    "file": "utils.py",
+    "language_version": "2"
+  },
+  {
+    "chunk_id": "utils.py::chunk_items::L18-L24",
+    "chunk_type": "function",
+    "function_name": "chunk_items",
+    "function_full_name": "chunk_items",
+    "original_code": "def chunk_items(items, size):\n    # xrange is intentionally used for migration testing.\n    chunks = []\n    for start in xrange(0, len(items), size):\n        chunks.append(items[start:start + size])\n    return chunks",
+    "migrated_code": null,
+    "source_language": "Python",
+    "target_language": null,
+    "source_lib": null,
+    "target_lib": null,
+    "file_path": "utils.py",
+    "source_file": "utils.py",
+    "target_file": null,
+    "imports_original": [],
+    "imports_migrated": null,
+    "classes": null,
+    "functions": [
+      "len",
+      "xrange"
+    ],
+    "static_analysis": {
+      "loc": 6,
+      "branch_count": 1,
+      "param_count": 2,
+      "cyclomatic_complexity": 2,
+      "nesting_depth": 1,
+      "has_loop": true,
+      "has_exception_handling": false,
+      "nested_function_count": 0,
+      "has_return": true,
+      "has_yield": false,
+      "node_type_counts": {
+        "funcdef": 1,
+        "for_stmt": 1,
+        "power": 4,
+        "return_stmt": 1
+      }
+    },
+    "verified": null,
+    "verification": null,
+    "quality": null,
+    "embedding_model": null,
+    "embedding_dimension": null,
+    "metadata": {
+      "params": [
+        "items",
+        "size"
+      ],
+      "start_line": 18,
+      "end_line": 24,
+      "language_version": "2"
+    },
+    "full_record": {
+      "chunk_id": "utils.py::chunk_items::L18-L24",
+      "chunk_type": "function",
+      "function_name": "chunk_items",
+      "function_full_name": "chunk_items",
+      "original_code": "def chunk_items(items, size):\n    # xrange is intentionally used for migration testing.\n    chunks = []\n    for start in xrange(0, len(items), size):\n        chunks.append(items[start:start + size])\n    return chunks",
+      "migrated_code": null,
+      "source_language": "Python",
+      "target_language": null,
+      "source_lib": null,
+      "target_lib": null,
+      "file_path": "utils.py",
+      "source_file": "utils.py",
+      "target_file": null,
+      "imports_original": [],
+      "imports_migrated": null,
+      "classes": null,
+      "functions": [
+        "len",
+        "xrange"
+      ],
+      "static_analysis": {
+        "loc": 6,
+        "branch_count": 1,
+        "param_count": 2,
+        "cyclomatic_complexity": 2,
+        "nesting_depth": 1,
+        "has_loop": true,
+        "has_exception_handling": false,
+        "nested_function_count": 0,
+        "has_return": true,
+        "has_yield": false,
+        "node_type_counts": {
+          "funcdef": 1,
+          "for_stmt": 1,
+          "power": 4,
+          "return_stmt": 1
+        }
+      },
+      "verified": null,
+      "verification": null,
+      "quality": null,
+      "embedding_model": null,
+      "embedding_dimension": null,
+      "metadata": {
+        "params": [
+          "items",
+          "size"
+        ],
+        "start_line": 18,
+        "end_line": 24,
+        "language_version": "2"
+      }
+    },
+    "file": "utils.py",
+    "language_version": "2"
+  }
+]

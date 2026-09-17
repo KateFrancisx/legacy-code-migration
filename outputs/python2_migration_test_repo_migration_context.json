@@ -1,0 +1,665 @@
+[
+  {
+    "repository": {
+      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "name": "python2_migration_test_repo"
+    },
+    "target": {
+      "file": "utils.py",
+      "version": "Python 2",
+      "source_code": "# Python 2 legacy utility module\n\ndef normalize_name(name):\n    # Python 2 compatibility pattern\n    if isinstance(name, unicode):\n        name = name.encode(\"utf-8\")\n    return name.strip().lower()\n\n\ndef calculate_percentage(value, percentage):\n    return value * percentage / 100\n\n\ndef format_money(amount, currency=\"INR\"):\n    return \"%s %.2f\" % (currency, amount)\n\n\ndef chunk_items(items, size):\n    # xrange is intentionally used for migration testing.\n    chunks = []\n    for start in xrange(0, len(items), size):\n        chunks.append(items[start:start + size])\n    return chunks\n",
+      "symbols": [
+        {
+          "type": "function",
+          "name": "normalize_name",
+          "line": 3,
+          "class": null
+        },
+        {
+          "type": "function",
+          "name": "calculate_percentage",
+          "line": 10,
+          "class": null
+        },
+        {
+          "type": "function",
+          "name": "format_money",
+          "line": 14,
+          "class": null
+        },
+        {
+          "type": "function",
+          "name": "chunk_items",
+          "line": 18,
+          "class": null
+        }
+      ]
+    },
+    "migration": {
+      "source": "Python 2",
+      "target": "Python 3",
+      "strategy": "dependency_first",
+      "order": 1,
+      "total_units": 3,
+      "reasons": [
+        "unicode",
+        "xrange"
+      ],
+      "risk": "medium",
+      "risk_score": 46,
+      "migration_notes": [
+        "Review unicode handling and convert to Python 3 string semantics.",
+        "Replace xrange with range."
+      ],
+      "migration_order": [
+        "utils.py",
+        "billing.py",
+        "main.py"
+      ],
+      "state": {
+        "position": 1,
+        "total": 3,
+        "previous": [],
+        "current": "utils.py",
+        "next": [
+          "billing.py",
+          "main.py"
+        ]
+      }
+    },
+    "dependencies": [],
+    "dependents": [
+      {
+        "file": "billing.py",
+        "referenced_symbols": [
+          "calculate_percentage",
+          "format_money",
+          "normalize_name"
+        ],
+        "relationships": [
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "normalize_name",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "calculate_percentage",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "format_money",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "normalize_name",
+              "line": 11
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "calculate_percentage",
+              "line": 25
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "calculate_percentage",
+              "line": 34
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 41
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 42
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 43
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 44
+            }
+          }
+        ]
+      },
+      {
+        "file": "main.py",
+        "referenced_symbols": [
+          "chunk_items"
+        ],
+        "relationships": [
+          {
+            "source": "main.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "chunk_items",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "main.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "chunk_items",
+              "line": 21
+            }
+          }
+        ]
+      }
+    ],
+    "related_tests": [],
+    "relevant_source": [],
+    "dependent_source": [
+      {
+        "file": "billing.py",
+        "referenced_symbols": [
+          "calculate_percentage",
+          "format_money",
+          "normalize_name"
+        ],
+        "source_code": "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config\nfrom utils import normalize_name, calculate_percentage, format_money\n\n\nclass Invoice(object):\n\n    def __init__(self, customer_name, items):\n        self.customer_name = normalize_name(customer_name)\n        self.items = items\n\n    def subtotal(self):\n        total = 0\n        for item in self.items:\n            total += item[\"price\"] * item[\"quantity\"]\n        return total\n\n    def discount(self):\n        config = get_config()\n        subtotal = self.subtotal()\n\n        if subtotal >= config[\"discount_threshold\"]:\n            return calculate_percentage(\n                subtotal,\n                config[\"discount_rate\"] * 100\n            )\n        return 0\n\n    def tax(self):\n        config = get_config()\n        taxable = self.subtotal() - self.discount()\n        return calculate_percentage(taxable, config[\"tax_rate\"] * 100)\n\n    def total(self):\n        return self.subtotal() - self.discount() + self.tax()\n\n    def summary(self):\n        print \"Customer: %s\" % self.customer_name\n        print \"Subtotal: %s\" % format_money(self.subtotal())\n        print \"Discount: %s\" % format_money(self.discount())\n        print \"Tax: %s\" % format_money(self.tax())\n        print \"Total: %s\" % format_money(self.total())\n\n    def item_count(self):\n        return sum(item[\"quantity\"] for item in self.items)\n\n\ndef build_invoice(customer, items):\n    if not items:\n        raise ValueError, \"Invoice must contain at least one item\"\n    return Invoice(customer, items)\n"
+      },
+      {
+        "file": "main.py",
+        "referenced_symbols": [
+          "chunk_items"
+        ],
+        "source_code": "# Python 2 legacy application entry point\n# Depends on billing.py\n\nfrom billing import build_invoice\nfrom utils import chunk_items\n\n\ndef create_demo_invoice():\n    items = [\n        {\"name\": \"Keyboard\", \"price\": 1200, \"quantity\": 1},\n        {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2},\n        {\"name\": \"USB Cable\", \"price\": 150, \"quantity\": 3}\n    ]\n\n    invoice = build_invoice(\"Alice\", items)\n\n    print \"=== Legacy Billing Demo ===\"\n    invoice.summary()\n\n    # Demonstrates a dependency on a utility using xrange.\n    batches = chunk_items(items, 2)\n    print \"Number of item batches: %d\" % len(batches)\n\n    return invoice\n\n\nif __name__ == \"__main__\":\n    create_demo_invoice()\n"
+      }
+    ],
+    "repository_structure": [
+      "billing.py",
+      "config.py",
+      "data/sample_items.json",
+      "frontend/summary.js",
+      "main.py",
+      "README.md",
+      "requirements.txt",
+      "tests/__init__.py",
+      "tests/test_billing.py",
+      "utils.py"
+    ]
+  },
+  {
+    "repository": {
+      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "name": "python2_migration_test_repo"
+    },
+    "target": {
+      "file": "billing.py",
+      "version": "Python 2",
+      "source_code": "# Python 2 legacy billing module\n# Depends on config.py and utils.py\n\nfrom config import get_config\nfrom utils import normalize_name, calculate_percentage, format_money\n\n\nclass Invoice(object):\n\n    def __init__(self, customer_name, items):\n        self.customer_name = normalize_name(customer_name)\n        self.items = items\n\n    def subtotal(self):\n        total = 0\n        for item in self.items:\n            total += item[\"price\"] * item[\"quantity\"]\n        return total\n\n    def discount(self):\n        config = get_config()\n        subtotal = self.subtotal()\n\n        if subtotal >= config[\"discount_threshold\"]:\n            return calculate_percentage(\n                subtotal,\n                config[\"discount_rate\"] * 100\n            )\n        return 0\n\n    def tax(self):\n        config = get_config()\n        taxable = self.subtotal() - self.discount()\n        return calculate_percentage(taxable, config[\"tax_rate\"] * 100)\n\n    def total(self):\n        return self.subtotal() - self.discount() + self.tax()\n\n    def summary(self):\n        print \"Customer: %s\" % self.customer_name\n        print \"Subtotal: %s\" % format_money(self.subtotal())\n        print \"Discount: %s\" % format_money(self.discount())\n        print \"Tax: %s\" % format_money(self.tax())\n        print \"Total: %s\" % format_money(self.total())\n\n    def item_count(self):\n        return sum(item[\"quantity\"] for item in self.items)\n\n\ndef build_invoice(customer, items):\n    if not items:\n        raise ValueError, \"Invoice must contain at least one item\"\n    return Invoice(customer, items)\n",
+      "symbols": [
+        {
+          "type": "class",
+          "name": "Invoice",
+          "line": 8
+        },
+        {
+          "type": "method",
+          "name": "__init__",
+          "line": 10,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "subtotal",
+          "line": 14,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "discount",
+          "line": 20,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "tax",
+          "line": 31,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "total",
+          "line": 36,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "summary",
+          "line": 39,
+          "class": "Invoice"
+        },
+        {
+          "type": "method",
+          "name": "item_count",
+          "line": 46,
+          "class": "Invoice"
+        },
+        {
+          "type": "function",
+          "name": "build_invoice",
+          "line": 50,
+          "class": null
+        }
+      ]
+    },
+    "migration": {
+      "source": "Python 2",
+      "target": "Python 3",
+      "strategy": "dependency_first",
+      "order": 2,
+      "total_units": 3,
+      "reasons": [
+        "old_raise",
+        "print_statement"
+      ],
+      "risk": "medium",
+      "risk_score": 61,
+      "migration_notes": [
+        "Convert Python 2 raise syntax.",
+        "Convert Python 2 print statements to Python 3 print() calls."
+      ],
+      "migration_order": [
+        "utils.py",
+        "billing.py",
+        "main.py"
+      ],
+      "state": {
+        "position": 2,
+        "total": 3,
+        "previous": [
+          "utils.py"
+        ],
+        "current": "billing.py",
+        "next": [
+          "main.py"
+        ]
+      }
+    },
+    "dependencies": [
+      {
+        "file": "utils.py",
+        "exists": true,
+        "referenced_symbols": [
+          "calculate_percentage",
+          "format_money",
+          "normalize_name"
+        ],
+        "relationships": [
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "normalize_name",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "calculate_percentage",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "format_money",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "normalize_name",
+              "line": 11
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "calculate_percentage",
+              "line": 25
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "calculate_percentage",
+              "line": 34
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 41
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 42
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 43
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "format_money",
+              "line": 44
+            }
+          }
+        ]
+      }
+    ],
+    "dependents": [
+      {
+        "file": "main.py",
+        "referenced_symbols": [
+          "build_invoice"
+        ],
+        "relationships": [
+          {
+            "source": "main.py",
+            "target": "billing.py",
+            "type": "from_import",
+            "details": {
+              "module": "billing",
+              "name": "build_invoice",
+              "alias": null,
+              "line": 4
+            }
+          },
+          {
+            "source": "main.py",
+            "target": "billing.py",
+            "type": "function_call",
+            "details": {
+              "function": "build_invoice",
+              "line": 15
+            }
+          }
+        ]
+      }
+    ],
+    "related_tests": [
+      {
+        "file": "tests/test_billing.py",
+        "exists": true,
+        "source_code": "# Python 2 legacy tests\nimport unittest\n\nfrom billing import build_invoice\n\n\nclass BillingTests(unittest.TestCase):\n\n    def setUp(self):\n        self.items = [\n            {\"name\": \"Laptop\", \"price\": 2000, \"quantity\": 1},\n            {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2}\n        ]\n\n    def test_invoice_total(self):\n        invoice = build_invoice(\"Alice\", self.items)\n\n        self.assertEqual(invoice.subtotal(), 3000)\n        self.assertEqual(invoice.discount(), 300)\n        self.assertEqual(invoice.tax(), 486)\n        self.assertEqual(invoice.total(), 3186)\n\n    def test_customer_name_is_normalized(self):\n        invoice = build_invoice(\"  Alice  \", self.items)\n        self.assertEqual(invoice.customer_name, \"alice\")\n\n    def test_empty_invoice_is_rejected(self):\n        self.assertRaises(ValueError, build_invoice, \"Alice\", [])\n\n    def test_item_count(self):\n        invoice = build_invoice(\"Alice\", self.items)\n        self.assertEqual(invoice.item_count(), 3)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+        "relation": "planner_related_test"
+      }
+    ],
+    "relevant_source": [
+      {
+        "file": "utils.py",
+        "referenced_symbols": [
+          "calculate_percentage",
+          "format_money",
+          "normalize_name"
+        ],
+        "source_code": "def normalize_name(name):\n    # Python 2 compatibility pattern\n    if isinstance(name, unicode):\n        name = name.encode(\"utf-8\")\n    return name.strip().lower()\n\n\n\ndef calculate_percentage(value, percentage):\n    return value * percentage / 100\n\n\n\ndef format_money(amount, currency=\"INR\"):\n    return \"%s %.2f\" % (currency, amount)\n\n"
+      }
+    ],
+    "dependent_source": [
+      {
+        "file": "main.py",
+        "referenced_symbols": [
+          "build_invoice"
+        ],
+        "source_code": "# Python 2 legacy application entry point\n# Depends on billing.py\n\nfrom billing import build_invoice\nfrom utils import chunk_items\n\n\ndef create_demo_invoice():\n    items = [\n        {\"name\": \"Keyboard\", \"price\": 1200, \"quantity\": 1},\n        {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2},\n        {\"name\": \"USB Cable\", \"price\": 150, \"quantity\": 3}\n    ]\n\n    invoice = build_invoice(\"Alice\", items)\n\n    print \"=== Legacy Billing Demo ===\"\n    invoice.summary()\n\n    # Demonstrates a dependency on a utility using xrange.\n    batches = chunk_items(items, 2)\n    print \"Number of item batches: %d\" % len(batches)\n\n    return invoice\n\n\nif __name__ == \"__main__\":\n    create_demo_invoice()\n"
+      }
+    ],
+    "repository_structure": [
+      "billing.py",
+      "config.py",
+      "data/sample_items.json",
+      "frontend/summary.js",
+      "main.py",
+      "README.md",
+      "requirements.txt",
+      "tests/__init__.py",
+      "tests/test_billing.py",
+      "utils.py"
+    ]
+  },
+  {
+    "repository": {
+      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "name": "python2_migration_test_repo"
+    },
+    "target": {
+      "file": "main.py",
+      "version": "Python 2",
+      "source_code": "# Python 2 legacy application entry point\n# Depends on billing.py\n\nfrom billing import build_invoice\nfrom utils import chunk_items\n\n\ndef create_demo_invoice():\n    items = [\n        {\"name\": \"Keyboard\", \"price\": 1200, \"quantity\": 1},\n        {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2},\n        {\"name\": \"USB Cable\", \"price\": 150, \"quantity\": 3}\n    ]\n\n    invoice = build_invoice(\"Alice\", items)\n\n    print \"=== Legacy Billing Demo ===\"\n    invoice.summary()\n\n    # Demonstrates a dependency on a utility using xrange.\n    batches = chunk_items(items, 2)\n    print \"Number of item batches: %d\" % len(batches)\n\n    return invoice\n\n\nif __name__ == \"__main__\":\n    create_demo_invoice()\n",
+      "symbols": [
+        {
+          "type": "function",
+          "name": "create_demo_invoice",
+          "line": 8,
+          "class": null
+        }
+      ]
+    },
+    "migration": {
+      "source": "Python 2",
+      "target": "Python 3",
+      "strategy": "dependency_first",
+      "order": 3,
+      "total_units": 3,
+      "reasons": [
+        "print_statement"
+      ],
+      "risk": "low",
+      "risk_score": 20,
+      "migration_notes": [
+        "Convert Python 2 print statements to Python 3 print() calls."
+      ],
+      "migration_order": [
+        "utils.py",
+        "billing.py",
+        "main.py"
+      ],
+      "state": {
+        "position": 3,
+        "total": 3,
+        "previous": [
+          "utils.py",
+          "billing.py"
+        ],
+        "current": "main.py",
+        "next": []
+      }
+    },
+    "dependencies": [
+      {
+        "file": "billing.py",
+        "exists": true,
+        "referenced_symbols": [
+          "build_invoice"
+        ],
+        "relationships": [
+          {
+            "source": "main.py",
+            "target": "billing.py",
+            "type": "from_import",
+            "details": {
+              "module": "billing",
+              "name": "build_invoice",
+              "alias": null,
+              "line": 4
+            }
+          },
+          {
+            "source": "main.py",
+            "target": "billing.py",
+            "type": "function_call",
+            "details": {
+              "function": "build_invoice",
+              "line": 15
+            }
+          }
+        ]
+      },
+      {
+        "file": "utils.py",
+        "exists": true,
+        "referenced_symbols": [
+          "chunk_items"
+        ],
+        "relationships": [
+          {
+            "source": "main.py",
+            "target": "utils.py",
+            "type": "from_import",
+            "details": {
+              "module": "utils",
+              "name": "chunk_items",
+              "alias": null,
+              "line": 5
+            }
+          },
+          {
+            "source": "main.py",
+            "target": "utils.py",
+            "type": "function_call",
+            "details": {
+              "function": "chunk_items",
+              "line": 21
+            }
+          }
+        ]
+      }
+    ],
+    "dependents": [],
+    "related_tests": [
+      {
+        "file": "tests/test_billing.py",
+        "exists": true,
+        "source_code": "# Python 2 legacy tests\nimport unittest\n\nfrom billing import build_invoice\n\n\nclass BillingTests(unittest.TestCase):\n\n    def setUp(self):\n        self.items = [\n            {\"name\": \"Laptop\", \"price\": 2000, \"quantity\": 1},\n            {\"name\": \"Mouse\", \"price\": 500, \"quantity\": 2}\n        ]\n\n    def test_invoice_total(self):\n        invoice = build_invoice(\"Alice\", self.items)\n\n        self.assertEqual(invoice.subtotal(), 3000)\n        self.assertEqual(invoice.discount(), 300)\n        self.assertEqual(invoice.tax(), 486)\n        self.assertEqual(invoice.total(), 3186)\n\n    def test_customer_name_is_normalized(self):\n        invoice = build_invoice(\"  Alice  \", self.items)\n        self.assertEqual(invoice.customer_name, \"alice\")\n\n    def test_empty_invoice_is_rejected(self):\n        self.assertRaises(ValueError, build_invoice, \"Alice\", [])\n\n    def test_item_count(self):\n        invoice = build_invoice(\"Alice\", self.items)\n        self.assertEqual(invoice.item_count(), 3)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+        "relation": "inferred_test"
+      }
+    ],
+    "relevant_source": [
+      {
+        "file": "billing.py",
+        "referenced_symbols": [
+          "build_invoice"
+        ],
+        "source_code": "def build_invoice(customer, items):\n    if not items:\n        raise ValueError, \"Invoice must contain at least one item\"\n    return Invoice(customer, items)"
+      },
+      {
+        "file": "utils.py",
+        "referenced_symbols": [
+          "chunk_items"
+        ],
+        "source_code": "def chunk_items(items, size):\n    # xrange is intentionally used for migration testing.\n    chunks = []\n    for start in xrange(0, len(items), size):\n        chunks.append(items[start:start + size])\n    return chunks"
+      }
+    ],
+    "dependent_source": [],
+    "repository_structure": [
+      "billing.py",
+      "config.py",
+      "data/sample_items.json",
+      "frontend/summary.js",
+      "main.py",
+      "README.md",
+      "requirements.txt",
+      "tests/__init__.py",
+      "tests/test_billing.py",
+      "utils.py"
+    ]
+  }
+]

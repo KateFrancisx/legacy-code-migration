@@ -1,0 +1,160 @@
+{
+  "repository": "python2_migration_test_repo",
+  "scanned_at": "2026-09-04T08:52:26.291469+00:00",
+  "total_files": 11,
+  "summary": {
+    "languages_detected": [
+      "Documentation",
+      "JSON",
+      "JavaScript",
+      "Python",
+      "Text"
+    ],
+    "language_file_counts": {
+      "Unknown": 1,
+      "Python": 6,
+      "Documentation": 1,
+      "Text": 1,
+      "JSON": 1,
+      "JavaScript": 1
+    },
+    "category_counts": {
+      "code": 7,
+      "config": 1,
+      "non_code": 2,
+      "unknown": 1
+    }
+  },
+  "files": [
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": ".gitignore",
+      "size_bytes": 126
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "billing.py",
+      "size_bytes": 1570,
+      "version_detection": {
+        "version": "2",
+        "confidence": "high",
+        "method": "parso_grammar",
+        "signals": [
+          "parses cleanly as Python 2 only"
+        ]
+      }
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "config.py",
+      "size_bytes": 300,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      }
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "main.py",
+      "size_bytes": 688,
+      "version_detection": {
+        "version": "2",
+        "confidence": "high",
+        "method": "parso_grammar",
+        "signals": [
+          "parses cleanly as Python 2 only"
+        ]
+      }
+    },
+    {
+      "language": "Documentation",
+      "category": "non_code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "README.md",
+      "size_bytes": 616
+    },
+    {
+      "language": "Text",
+      "category": "non_code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "requirements.txt",
+      "size_bytes": 17
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "utils.py",
+      "size_bytes": 587,
+      "version_detection": {
+        "version": "2",
+        "confidence": "medium",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": [
+          "xrange() builtin"
+        ]
+      }
+    },
+    {
+      "language": "JSON",
+      "category": "config",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "data/sample_items.json",
+      "size_bytes": 207
+    },
+    {
+      "language": "JavaScript",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "frontend/summary.js",
+      "size_bytes": 329
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "tests/test_billing.py",
+      "size_bytes": 1035,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      }
+    },
+    {
+      "language": "Python",
+      "category": "code",
+      "detection_method": "extension",
+      "confidence": "high",
+      "path": "tests/__init__.py",
+      "size_bytes": 0,
+      "version_detection": {
+        "version": "unknown",
+        "confidence": "low",
+        "method": "regex_heuristic_after_inconclusive_parso",
+        "signals": []
+      }
+    }
+  ]
+}
