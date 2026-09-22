@@ -234,4 +234,4 @@ project_structure.txt
 
 # Temporary/debug files
 debug_*.py
-diagnose_*.py
+diagnose_*.py.env
