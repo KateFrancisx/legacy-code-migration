@@ -551,35 +551,19 @@ def main() -> None:
             "Dependency analyzer returned an unexpected result."
         )
 
-    print(
-        f"Python files: "
-        f"{len(dependency_result.get('python_files', []))}"
-    )
+    # The dependency analyzer stores authoritative counts inside
+    # dependency_result["statistics"].
+    statistics = dependency_result.get("statistics", {})
 
-    print(
-        f"Dependency edges: "
-        f"{dependency_result.get('edge_count', 0)}"
-    )
+    if not isinstance(statistics, dict):
+        statistics = {}
 
-    print(
-        f"Import edges: "
-        f"{dependency_result.get('import_edge_count', 0)}"
-    )
-
-    print(
-        f"From-import edges: "
-        f"{dependency_result.get('from_import_edge_count', 0)}"
-    )
-
-    print(
-        f"Function-call edges: "
-        f"{dependency_result.get('function_call_edge_count', 0)}"
-    )
-
-    print(
-        f"Inheritance edges: "
-        f"{dependency_result.get('inheritance_edge_count', 0)}"
-    )
+    print(f"Python files: {statistics.get('python_files', 0)}")
+    print(f"Dependency edges: {statistics.get('dependency_edges', 0)}")
+    print(f"Import edges: {statistics.get('import_edges', 0)}")
+    print(f"From-import edges: {statistics.get('from_import_edges', 0)}")
+    print(f"Function-call edges: {statistics.get('function_call_edges', 0)}")
+    print(f"Inheritance edges: {statistics.get('inheritance_edges', 0)}")
 
     # ========================================================
     # 7. MIGRATION PLANNING

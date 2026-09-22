@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+
+# Runtime output
+*.log
+output/
+tmp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

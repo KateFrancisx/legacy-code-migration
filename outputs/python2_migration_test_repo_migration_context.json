@@ -1,7 +1,7 @@
 [
   {
     "repository": {
-      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
@@ -239,7 +239,7 @@
   },
   {
     "repository": {
-      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
@@ -336,6 +336,44 @@
       }
     },
     "dependencies": [
+      {
+        "file": "config.py",
+        "exists": true,
+        "referenced_symbols": [
+          "get_config"
+        ],
+        "relationships": [
+          {
+            "source": "billing.py",
+            "target": "config.py",
+            "type": "from_import",
+            "details": {
+              "module": "config",
+              "name": "get_config",
+              "alias": null,
+              "line": 4
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "config.py",
+            "type": "function_call",
+            "details": {
+              "function": "get_config",
+              "line": 21
+            }
+          },
+          {
+            "source": "billing.py",
+            "target": "config.py",
+            "type": "function_call",
+            "details": {
+              "function": "get_config",
+              "line": 32
+            }
+          }
+        ]
+      },
       {
         "file": "utils.py",
         "exists": true,
@@ -484,6 +522,13 @@
     ],
     "relevant_source": [
       {
+        "file": "config.py",
+        "referenced_symbols": [
+          "get_config"
+        ],
+        "source_code": "def get_config():\n    return {\n        \"tax_rate\": TAX_RATE,\n        \"discount_threshold\": DISCOUNT_THRESHOLD,\n        \"discount_rate\": DISCOUNT_RATE,\n        \"currency\": CURRENCY\n    }"
+      },
+      {
         "file": "utils.py",
         "referenced_symbols": [
           "calculate_percentage",
@@ -517,7 +562,7 @@
   },
   {
     "repository": {
-      "path": "D:\\Projects\\CodeMigration\\outputs\\ui_jobs\\ebe44b927fd7\\repository\\python2_migration_test_repo",
+      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
