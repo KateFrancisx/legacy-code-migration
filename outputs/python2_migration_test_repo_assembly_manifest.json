@@ -1,0 +1,90 @@
+{
+  "original_repository": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
+  "output_repository": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated",
+  "files": [
+    {
+      "file": ".gitignore",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "reason": "AUTOMATIC_NON_MIGRATED_FILE",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "README.md",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "reason": "AUTOMATIC_NON_MIGRATED_FILE",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "billing.py",
+      "decision": "MIGRATE",
+      "source": "LLM",
+      "destination": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\billing.py",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "config.py",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "data/sample_items.json",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "reason": "AUTOMATIC_NON_MIGRATED_FILE",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "frontend/summary.js",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "reason": "AUTOMATIC_NON_MIGRATED_FILE",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "main.py",
+      "decision": "MIGRATE",
+      "source": "LLM",
+      "destination": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\main.py",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "requirements.txt",
+      "decision": "PRESERVE",
+      "source": "ORIGINAL",
+      "reason": "AUTOMATIC_NON_MIGRATED_FILE",
+      "status": "SUCCESS"
+    },
+    {
+      "file": "tests/__init__.py",
+      "decision": "SKIP",
+      "source": "ORIGINAL",
+      "status": "SKIPPED"
+    },
+    {
+      "file": "tests/test_billing.py",
+      "decision": "SKIP",
+      "source": "ORIGINAL",
+      "status": "SKIPPED"
+    },
+    {
+      "file": "utils.py",
+      "decision": "MIGRATE",
+      "source": "LLM",
+      "destination": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\utils.py",
+      "status": "SUCCESS"
+    }
+  ],
+  "statistics": {
+    "original_files": 11,
+    "migrated_files": 3,
+    "preserved_files": 6,
+    "skipped_files": 2,
+    "automatically_preserved_files": 5,
+    "errors": 0
+  },
+  "missing_llm_outputs": [],
+  "status": "SUCCESS"
+}
