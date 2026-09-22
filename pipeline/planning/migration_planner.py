@@ -9,6 +9,20 @@ class MigrationPlanner:
     """
     Repository-level Python 2 -> Python 3 migration planner.
 
+    Decisions:
+
+        MIGRATE
+            Python 2 production files that require migration.
+
+        PRESERVE
+            Python 3-compatible production files, plus ambiguous
+            production files that are required dependencies of files
+            being migrated.
+
+        SKIP
+            Test files or ambiguous production files that are not
+            required by migrated production files.
+
     Dependency direction:
 
         A -> B
@@ -18,53 +32,32 @@ class MigrationPlanner:
     Therefore:
 
         B should normally migrate before A.
-
-    The planner:
-
-        1. identifies Python 2 production files
-        2. separates tests
-        3. calculates dependency relationships
-        4. calculates reverse dependents
-        5. estimates migration risk
-        6. identifies Python 2 migration reasons
-        7. produces dependency-first migration order
-        8. identifies affected tests
-        9. detects dependency cycles
     """
 
     def __init__(
         self,
         dependency_result: Dict[str, Any],
     ):
-
         self.result = dependency_result
 
-        self.files = (
-            dependency_result.get(
-                "files",
-                []
-            )
+        self.files = dependency_result.get(
+            "files",
+            []
         )
 
-        self.metadata = (
-            dependency_result.get(
-                "file_metadata",
-                {}
-            )
+        self.metadata = dependency_result.get(
+            "file_metadata",
+            {}
         )
 
-        self.graph = (
-            dependency_result.get(
-                "graph",
-                {}
-            )
+        self.graph = dependency_result.get(
+            "graph",
+            {}
         )
 
-        self.reverse_graph = (
-            dependency_result.get(
-                "reverse_graph",
-                {}
-            )
+        self.reverse_graph = dependency_result.get(
+            "reverse_graph",
+            {}
         )
 
     # ==================================================================
@@ -76,26 +69,98 @@ class MigrationPlanner:
         production_files = [
             file_path
             for file_path in self.files
-            if not self._is_test_file(
-                file_path
-            )
+            if not self._is_test_file(file_path)
         ]
 
         test_files = [
             file_path
             for file_path in self.files
-            if self._is_test_file(
-                file_path
-            )
+            if self._is_test_file(file_path)
         ]
+
+        # --------------------------------------------------------------
+        # MIGRATE
+        #
+        # Python 2 production files are migrated by the LLM.
+        # --------------------------------------------------------------
 
         migration_candidates = [
             file_path
             for file_path in production_files
-            if self._is_python2(
-                file_path
+            if self._is_python2(file_path)
+        ]
+
+        # --------------------------------------------------------------
+        # PRESERVE
+        #
+        # Preserve:
+        #
+        #   1. Files already detected as Python 3.
+        #
+        #   2. Ambiguous production files that are required by a
+        #      file being migrated.
+        #
+        # Example:
+        #
+        #   billing.py -> config.py
+        #
+        # If billing.py is MIGRATE and config.py is ambiguous,
+        # config.py must not be discarded. It is preserved.
+        # --------------------------------------------------------------
+
+        preserve_files = [
+            file_path
+            for file_path in production_files
+            if (
+                file_path not in migration_candidates
+                and (
+                    self._is_python3(file_path)
+                    or self._is_required_by_migration(
+                        file_path,
+                        migration_candidates,
+                    )
+                )
             )
         ]
+
+        # --------------------------------------------------------------
+        # SKIP
+        #
+        # Tests are not part of the automatic source migration units.
+        #
+        # Ambiguous production files that are not required by migrated
+        # files remain skipped for manual review.
+        # --------------------------------------------------------------
+
+        skip_files = []
+
+        for file_path in test_files:
+
+            skip_files.append(
+                {
+                    "file": file_path,
+                    "reason": "Test file handled separately.",
+                }
+            )
+
+        for file_path in production_files:
+
+            if (
+                file_path not in migration_candidates
+                and file_path not in preserve_files
+            ):
+                skip_files.append(
+                    {
+                        "file": file_path,
+                        "reason": self._skip_reason(
+                            file_path
+                        ),
+                    }
+                )
+
+        # --------------------------------------------------------------
+        # Migration order
+        # --------------------------------------------------------------
 
         migration_order, cycles = (
             self._dependency_first_order(
@@ -103,13 +168,16 @@ class MigrationPlanner:
             )
         )
 
+        # --------------------------------------------------------------
+        # Migration units
+        # --------------------------------------------------------------
+
         units = []
 
         for index, file_path in enumerate(
             migration_order,
             start=1
         ):
-
             units.append(
                 self._build_unit(
                     file_path=file_path,
@@ -117,21 +185,29 @@ class MigrationPlanner:
                     migration_candidates=(
                         migration_candidates
                     ),
+                    preserve_files=preserve_files,
                     test_files=test_files,
                 )
             )
 
-        skipped = [
-            {
-                "file": file_path,
-                "reason": self._skip_reason(
-                    file_path
-                ),
-            }
-            for file_path in production_files
-            if file_path
-            not in migration_candidates
-        ]
+        # --------------------------------------------------------------
+        # Preserve details
+        # --------------------------------------------------------------
+
+        preserved = []
+
+        for file_path in preserve_files:
+
+            preserved.append(
+                self._build_preserve_record(
+                    file_path,
+                    migration_candidates,
+                )
+            )
+
+        # --------------------------------------------------------------
+        # Final plan
+        # --------------------------------------------------------------
 
         return {
             "repository": self.result.get(
@@ -142,9 +218,7 @@ class MigrationPlanner:
 
             "target_language": "Python 3",
 
-            "strategy": (
-                "dependency_first"
-            ),
+            "strategy": "dependency_first",
 
             "summary": {
                 "total_python_files": len(
@@ -163,6 +237,14 @@ class MigrationPlanner:
                     migration_candidates
                 ),
 
+                "preserve_files": len(
+                    preserve_files
+                ),
+
+                "skip_files": len(
+                    skip_files
+                ),
+
                 "migration_units": len(
                     units
                 ),
@@ -172,15 +254,124 @@ class MigrationPlanner:
                 ),
             },
 
+            # Explicit decision buckets.
+            "migrate": migration_candidates,
+
+            "preserve": preserved,
+
+            "skip": skip_files,
+
+            # Migration execution information.
             "migration_order": migration_order,
 
             "units": units,
 
-            "skipped": skipped,
-
             "cycles": cycles,
 
             "tests": test_files,
+        }
+
+    # ==================================================================
+    # PRESERVE
+    # ==================================================================
+
+    def _is_required_by_migration(
+        self,
+        file_path: str,
+        migration_candidates: List[str],
+    ) -> bool:
+        """
+        Determine whether a production file is required by at least
+        one file that is going to be migrated.
+
+        Example:
+
+            billing.py -> config.py
+
+        If billing.py is MIGRATE and config.py is ambiguous,
+        config.py should be PRESERVED rather than skipped.
+
+        This is dependency-aware preservation.
+        """
+
+        for migrated_file in migration_candidates:
+
+            dependencies = self._get_dependencies(
+                migrated_file
+            )
+
+            for edge in dependencies:
+
+                if edge.get("target") == file_path:
+                    return True
+
+        return False
+
+    def _build_preserve_record(
+        self,
+        file_path: str,
+        migration_candidates: List[str],
+    ) -> Dict[str, Any]:
+
+        dependents = self._get_dependents(
+            file_path
+        )
+
+        dependent_files = sorted(
+            {
+                edge.get("source")
+                for edge in dependents
+                if edge.get("source")
+                in migration_candidates
+            }
+        )
+
+        metadata = self.metadata.get(
+            file_path,
+            {}
+        )
+
+        version = metadata.get(
+            "version",
+            "Python 3"
+        )
+
+        # Explain why this file is being preserved.
+        if version == "Python 3":
+            reason = (
+                "Already compatible with "
+                "the target Python version."
+            )
+        else:
+            reason = (
+                "Required by one or more migrated "
+                "production files and preserved "
+                "unchanged because it does not "
+                "require automatic migration."
+            )
+
+        return {
+            "file": file_path,
+
+            "decision": "PRESERVE",
+
+            "version": version,
+
+            "reason": reason,
+
+            "required_by_migrated_files": (
+                dependent_files
+            ),
+
+            "dependencies": sorted(
+                {
+                    edge.get("target")
+                    for edge in self._get_dependencies(
+                        file_path
+                    )
+                    if edge.get("target")
+                }
+            ),
         }
 
     # ==================================================================
@@ -192,42 +383,38 @@ class MigrationPlanner:
         file_path: str,
         order: int,
         migration_candidates: List[str],
+        preserve_files: List[str],
         test_files: List[str],
     ) -> Dict[str, Any]:
 
-        dependencies = (
-            self._get_dependencies(
-                file_path
-            )
+        dependencies = self._get_dependencies(
+            file_path
         )
 
-        dependents = (
-            self._get_dependents(
-                file_path
-            )
+        dependents = self._get_dependents(
+            file_path
         )
 
         dependency_files = [
             edge["target"]
             for edge in dependencies
-            if edge.get(
-                "target"
-            ) in migration_candidates
+            if edge.get("target")
+            in (
+                migration_candidates
+                + preserve_files
+            )
         ]
 
         dependent_files = [
             edge["source"]
             for edge in dependents
-            if edge.get(
-                "source"
-            ) in migration_candidates
+            if edge.get("source")
+            in migration_candidates
         ]
 
-        related_tests = (
-            self._related_tests(
-                file_path,
-                test_files
-            )
+        related_tests = self._related_tests(
+            file_path,
+            test_files
         )
 
         reasons = (
@@ -242,14 +429,12 @@ class MigrationPlanner:
             )
         )
 
-        risk_score = (
-            self._risk_score(
-                file_path=file_path,
-                dependencies=dependencies,
-                dependents=dependents,
-                reasons=reasons,
-                related_tests=related_tests,
-            )
+        risk_score = self._risk_score(
+            file_path=file_path,
+            dependencies=dependencies,
+            dependents=dependents,
+            reasons=reasons,
+            related_tests=related_tests,
         )
 
         return {
@@ -257,12 +442,14 @@ class MigrationPlanner:
 
             "file": file_path,
 
+            "decision": "MIGRATE",
+
             "version": self.metadata.get(
                 file_path,
                 {}
             ).get(
                 "version",
-                "Ambiguous"
+                "Python 2"
             ),
 
             "dependencies": sorted(
@@ -319,15 +506,6 @@ class MigrationPlanner:
             candidates
         )
 
-        # A -> B means A depends on B.
-        #
-        # For migration order:
-        #
-        # B must appear before A.
-        #
-        # We therefore calculate indegree using the reversed
-        # migration relationship.
-
         dependencies = {
             file_path: set()
             for file_path in candidates
@@ -353,9 +531,7 @@ class MigrationPlanner:
                     )
 
         remaining = {
-            file_path: set(
-                deps
-            )
+            file_path: set(deps)
             for file_path, deps
             in dependencies.items()
         }
@@ -373,45 +549,29 @@ class MigrationPlanner:
 
             if not ready:
 
-                # Cycle exists.
                 cycle_nodes = sorted(
                     remaining.keys()
                 )
 
-                # Break cycle deterministically.
                 chosen = cycle_nodes[0]
 
-                order.append(
-                    chosen
-                )
+                order.append(chosen)
 
-                del remaining[
-                    chosen
-                ]
+                del remaining[chosen]
 
                 for deps in remaining.values():
-
-                    deps.discard(
-                        chosen
-                    )
+                    deps.discard(chosen)
 
                 continue
 
             for file_path in ready:
 
-                order.append(
-                    file_path
-                )
+                order.append(file_path)
 
-                del remaining[
-                    file_path
-                ]
+                del remaining[file_path]
 
                 for deps in remaining.values():
-
-                    deps.discard(
-                        file_path
-                    )
+                    deps.discard(file_path)
 
         cycles = self._detect_cycles(
             dependencies
@@ -425,10 +585,7 @@ class MigrationPlanner:
 
     def _detect_cycles(
         self,
-        graph: Dict[
-            str,
-            Set[str]
-        ]
+        graph: Dict[str, Set[str]]
     ) -> List[List[str]]:
 
         visited = set()
@@ -441,12 +598,12 @@ class MigrationPlanner:
             if node in stack_set:
 
                 try:
-                    start = stack.index(
-                        node
+                    start = stack.index(node)
+
+                    cycle = (
+                        stack[start:]
+                        + [node]
                     )
-                    cycle = stack[
-                        start:
-                    ] + [node]
 
                     normalized = sorted(
                         set(cycle)
@@ -465,38 +622,22 @@ class MigrationPlanner:
             if node in visited:
                 return
 
-            visited.add(
-                node
-            )
+            visited.add(node)
 
-            stack.append(
-                node
-            )
-
-            stack_set.add(
-                node
-            )
+            stack.append(node)
+            stack_set.add(node)
 
             for dependency in graph.get(
                 node,
                 set()
             ):
-
-                dfs(
-                    dependency
-                )
+                dfs(dependency)
 
             stack.pop()
-
-            stack_set.remove(
-                node
-            )
+            stack_set.remove(node)
 
         for node in graph:
-
-            dfs(
-                node
-            )
+            dfs(node)
 
         return cycles
 
@@ -541,9 +682,7 @@ class MigrationPlanner:
         result = []
 
         direct_dependents = {
-            edge.get(
-                "source"
-            )
+            edge.get("source")
             for edge in self.reverse_graph.get(
                 file_path,
                 []
@@ -557,10 +696,7 @@ class MigrationPlanner:
         for test_file in test_files:
 
             if test_file in direct_dependents:
-
-                result.append(
-                    test_file
-                )
+                result.append(test_file)
                 continue
 
             test_name = Path(
@@ -568,10 +704,7 @@ class MigrationPlanner:
             ).stem.lower()
 
             if stem in test_name:
-
-                result.append(
-                    test_file
-                )
+                result.append(test_file)
 
         return sorted(
             set(result)
@@ -592,45 +725,34 @@ class MigrationPlanner:
 
         score = 0
 
-        # Python 2 indicators.
         score += min(
             len(reasons) * 10,
             40
         )
 
-        # Number of dependencies.
         score += min(
             len(
                 {
-                    edge.get(
-                        "target"
-                    )
+                    edge.get("target")
                     for edge in dependencies
                 }
             ) * 5,
             20
         )
 
-        # Number of dependents.
         score += min(
             len(
                 {
-                    edge.get(
-                        "source"
-                    )
+                    edge.get("source")
                     for edge in dependents
                 }
             ) * 8,
             25
         )
 
-        # Tests make the file more important,
-        # but also give us a verification path.
         if related_tests:
             score += 5
 
-        # Core modules with many relationships are
-        # inherently more migration-sensitive.
         if len(dependents) >= 5:
             score += 10
 
@@ -662,84 +784,56 @@ class MigrationPlanner:
     ) -> List[str]:
 
         mapping = {
-            "print_statement": (
-                "Convert Python 2 print statements "
-                "to Python 3 print() calls."
-            ),
+            "print_statement":
+                "Convert Python 2 print statements to Python 3 print() calls.",
 
-            "xrange": (
-                "Replace xrange with range."
-            ),
+            "xrange":
+                "Replace xrange with range.",
 
-            "raw_input": (
-                "Replace raw_input with input."
-            ),
+            "raw_input":
+                "Replace raw_input with input.",
 
-            "iteritems": (
-                "Replace dict.iteritems() with "
-                "dict.items() where appropriate."
-            ),
+            "iteritems":
+                "Replace dict.iteritems() with dict.items() where appropriate.",
 
-            "iterkeys": (
-                "Replace dict.iterkeys() with "
-                "dict.keys() or direct iteration."
-            ),
+            "iterkeys":
+                "Replace dict.iterkeys() with dict.keys() or direct iteration.",
 
-            "itervalues": (
-                "Replace dict.itervalues() with "
-                "dict.values() where appropriate."
-            ),
+            "itervalues":
+                "Replace dict.itervalues() with dict.values() where appropriate.",
 
-            "basestring": (
-                "Replace basestring checks with "
-                "str/bytes-aware Python 3 logic."
-            ),
+            "basestring":
+                "Replace basestring checks with str/bytes-aware Python 3 logic.",
 
-            "unicode": (
-                "Review unicode handling and convert "
-                "to Python 3 string semantics."
-            ),
+            "unicode":
+                "Review unicode handling and convert to Python 3 string semantics.",
 
-            "long": (
-                "Python 3 unifies int and long."
-            ),
+            "long":
+                "Python 3 unifies int and long.",
 
-            "execfile": (
-                "Replace execfile with explicit "
-                "file reading and exec or another "
-                "appropriate mechanism."
-            ),
+            "execfile":
+                "Replace execfile with explicit file reading and exec or another appropriate mechanism.",
 
-            "raw_urllib": (
-                "Review urllib2 usage and migrate "
-                "to Python 3 urllib modules."
-            ),
+            "raw_urllib":
+                "Review urllib2 usage and migrate to Python 3 urllib modules.",
 
-            "cStringIO": (
-                "Replace cStringIO with io.StringIO "
-                "or io.BytesIO as appropriate."
-            ),
+            "cStringIO":
+                "Replace cStringIO with io.StringIO or io.BytesIO as appropriate.",
 
-            "ConfigParser": (
-                "Replace ConfigParser with configparser."
-            ),
+            "ConfigParser":
+                "Replace ConfigParser with configparser.",
 
-            "old_raise": (
-                "Convert Python 2 raise syntax."
-            ),
+            "old_raise":
+                "Convert Python 2 raise syntax.",
 
-            "old_except": (
-                "Convert Python 2 exception binding syntax."
-            ),
+            "old_except":
+                "Convert Python 2 exception binding syntax.",
 
-            "has_key": (
-                "Replace has_key() with membership "
-                "testing using 'in'."
-            ),
+            "has_key":
+                "Replace has_key() with membership testing using 'in'.",
 
-            "unicode_literal": (
-                "Review Python 2 unicode literal usage."
-            ),
+            "unicode_literal":
+                "Review Python 2 unicode literal usage.",
         }
 
         return [
@@ -757,14 +851,26 @@ class MigrationPlanner:
         file_path: str
     ) -> bool:
 
-        version = self.metadata.get(
-            file_path,
-            {}
-        ).get(
-            "version"
+        return (
+            self.metadata.get(
+                file_path,
+                {}
+            ).get("version")
+            == "Python 2"
         )
 
-        return version == "Python 2"
+    def _is_python3(
+        self,
+        file_path: str
+    ) -> bool:
+
+        return (
+            self.metadata.get(
+                file_path,
+                {}
+            ).get("version")
+            == "Python 3"
+        )
 
     @staticmethod
     def _is_test_file(
@@ -799,13 +905,11 @@ class MigrationPlanner:
             "Ambiguous"
         )
 
-        if version == "Python 3":
-            return "Already detected as Python 3."
+        if version == "Python 2":
+            return "Python 2 file."
 
-        if self._is_test_file(
-            file_path
-        ):
-            return "Test file handled separately."
+        if version == "Python 3":
+            return "Already compatible with Python 3."
 
         return (
             "Python version is ambiguous; "
@@ -823,15 +927,9 @@ class MigrationPlanner:
 
         return [
             {
-                "source": edge.get(
-                    "source"
-                ),
-                "target": edge.get(
-                    "target"
-                ),
-                "type": edge.get(
-                    "type"
-                ),
+                "source": edge.get("source"),
+                "target": edge.get("target"),
+                "type": edge.get("type"),
                 "details": edge.get(
                     "details",
                     {}
