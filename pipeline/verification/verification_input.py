@@ -1,371 +1,413 @@
-"""
-Semantic verification input adapter.
-
-Consumes outputs produced by the upstream migration pipeline and exposes
-them in one normalized structure for semantic verification.
-
-This module does not perform repository analysis, dependency analysis,
-syntax analysis, or migration planning.
-"""
-
-import argparse
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-
-class VerificationInputError(Exception):
-    """Raised when required verification input is missing or invalid."""
 
 
 @dataclass
 class VerificationInput:
-    """Normalized input consumed by semantic verification."""
+    """
+    Normalized input for the semantic verification stage.
 
-    original_repository: Optional[str] = None
-    migrated_repository: Optional[str] = None
+    Paths from upstream manifests are treated as metadata.
+    The actual repository locations are resolved from the
+    current verification workspace.
+    """
 
-    migrated_files: List[str] = field(default_factory=list)
-    preserved_files: List[str] = field(default_factory=list)
-    skipped_files: List[str] = field(default_factory=list)
+    original_repository: str
+    migrated_repository: str
 
-    symbols: Dict[str, Any] = field(default_factory=dict)
-    dependencies: Dict[str, Any] = field(default_factory=dict)
+    migrated_files: list = field(
+        default_factory=list
+    )
 
-    tests: Dict[str, Any] = field(default_factory=dict)
+    preserved_files: list = field(
+        default_factory=list
+    )
 
-    migration_results: Any = field(default_factory=list)
+    skipped_files: list = field(
+        default_factory=list
+    )
 
-    syntax_verification: Dict[str, Any] = field(default_factory=dict)
-    dependency_verification: Dict[str, Any] = field(default_factory=dict)
+    symbols: dict = field(
+        default_factory=dict
+    )
 
-    assembly_manifest: Dict[str, Any] = field(default_factory=dict)
+    dependencies: dict = field(
+        default_factory=dict
+    )
+
+    tests: list = field(
+        default_factory=list
+    )
+
+    migration_results: dict = field(
+        default_factory=dict
+    )
+
+    syntax_verification: dict = field(
+        default_factory=dict
+    )
+
+    dependency_verification: dict = field(
+        default_factory=dict
+    )
+
+    assembly_manifest: dict = field(
+        default_factory=dict
+    )
 
 
-def _load_json(path: Path) -> Any:
-    """Load JSON while preserving its original structure."""
+def _load_json(path):
+    """
+    Load a JSON file.
+    """
 
     if not path.exists():
-        raise VerificationInputError(
-            "Required verification output was not found: "
-            + str(path)
+        return {}
+
+    with path.open(
+        "r",
+        encoding="utf-8",
+    ) as handle:
+        return json.load(handle)
+
+
+def _find_repository_from_manifest(
+    manifest,
+    output_directory,
+):
+    """
+    Resolve the original repository using the current
+    workspace rather than trusting a machine-specific
+    path stored in the manifest.
+
+    Resolution order:
+
+    1. Explicit repository path supplied through the
+       output directory's parent workspace.
+    2. Manifest path if it still exists.
+    3. A sibling repository matching the migrated
+       repository name.
+    """
+
+    manifest_path = Path(
+        manifest.get(
+            "original_repository",
+            "",
+        )
+    )
+
+    if manifest_path.exists():
+        return str(
+            manifest_path.resolve()
         )
 
-    try:
-        with path.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
+    output_path = Path(
+        output_directory
+    ).resolve()
 
-    except json.JSONDecodeError as exc:
-        raise VerificationInputError(
-            "Invalid JSON in verification output: "
-            + str(path)
-            + " - "
-            + str(exc)
-        ) from exc
+    migrated_repository = Path(
+        manifest.get(
+            "output_repository",
+            "",
+        )
+    )
 
-
-def _require_dict(data: Any, path: Path) -> Dict[str, Any]:
-    """Require a JSON object."""
-
-    if not isinstance(data, dict):
-        raise VerificationInputError(
-            "Expected a JSON object in: "
-            + str(path)
-            + " but found "
-            + type(data).__name__
+    if migrated_repository.exists():
+        migrated_repository = (
+            migrated_repository.resolve()
+        )
+    else:
+        migrated_repository = (
+            output_path
+            / f"{output_path.name}_migrated"
         )
 
-    return data
+    # The test workspace used by the local migration
+    # pipeline has the original repository alongside
+    # the migrated output when both are available.
+    candidates = [
+        output_path.parent
+        / "python2_migration_test_repo",
 
+        output_path.parent
+        / output_path.name,
 
-def _find_first_existing(
-    output_directory: Path,
-    candidates: List[str],
-) -> Path:
-    """Return the first existing candidate file."""
+        output_path.parent
+        / (
+            output_path.name
+            .replace(
+                "_migrated",
+                "",
+            )
+        ),
+    ]
 
     for candidate in candidates:
-        path = output_directory / candidate
+        candidate = candidate.resolve()
 
-        if path.exists():
-            return path
+        if candidate.exists() and candidate.is_dir():
+            return str(candidate)
 
-    raise VerificationInputError(
-        "Could not find any of the expected output files: "
-        + ", ".join(candidates)
-        + " in "
-        + str(output_directory)
+    # If the manifest path is stale, keep it as metadata
+    # rather than silently inventing a different location.
+    return str(
+        manifest_path
+    )
+
+
+def _resolve_migrated_repository(
+    manifest,
+    output_directory,
+):
+    """
+    Resolve the migrated repository.
+
+    Prefer the manifest path when it exists.
+
+    Otherwise, resolve the migrated repository relative
+    to the current output directory.
+    """
+
+    manifest_path = Path(
+        manifest.get(
+            "output_repository",
+            "",
+        )
+    )
+
+    if manifest_path.exists():
+        return str(
+            manifest_path.resolve()
+        )
+
+    output_path = Path(
+        output_directory
+    ).resolve()
+
+    candidates = [
+        output_path
+        / f"{output_path.name}_migrated",
+
+        output_path.parent
+        / f"{output_path.name}_migrated",
+    ]
+
+    for candidate in candidates:
+        candidate = candidate.resolve()
+
+        if candidate.exists() and candidate.is_dir():
+            return str(candidate)
+
+    return str(
+        manifest_path
     )
 
 
 def _extract_manifest_files(
-    manifest: Dict[str, Any],
-    decision: str,
-) -> List[str]:
+    manifest
+):
     """
-    Extract files from the assembly manifest according to decision.
-
-    The actual manifest structure is:
-
-        {
-            "files": [
-                {
-                    "file": "billing.py",
-                    "decision": "MIGRATE"
-                }
-            ]
-        }
+    Extract file decisions from the assembly manifest.
     """
 
-    files = manifest.get("files", [])
+    migrated_files = []
+    preserved_files = []
+    skipped_files = []
 
-    if not isinstance(files, list):
-        return []
+    for item in manifest.get(
+        "files",
+        [],
+    ):
+        file_name = item.get(
+            "file"
+        )
 
-    result = []
+        decision = str(
+            item.get(
+                "decision",
+                "",
+            )
+        ).upper()
 
-    for entry in files:
-        if not isinstance(entry, dict):
+        if not file_name:
             continue
 
-        if entry.get("decision") != decision:
-            continue
+        if decision == "MIGRATE":
+            migrated_files.append(
+                file_name
+            )
 
-        file_path = entry.get("file")
+        elif decision == "PRESERVE":
+            preserved_files.append(
+                file_name
+            )
 
-        if file_path:
-            result.append(str(file_path))
+        elif decision == "SKIP":
+            skipped_files.append(
+                file_name
+            )
 
-    return sorted(set(result))
+    return (
+        migrated_files,
+        preserved_files,
+        skipped_files,
+    )
 
 
 def _extract_symbols(
-    dependency_graph: Dict[str, Any],
-) -> Dict[str, Any]:
-    """Use symbols already produced by the upstream pipeline."""
+    dependency_graph
+):
+    """
+    Extract symbol information from the dependency graph.
+    """
 
-    symbols = dependency_graph.get("symbols", {})
-
-    if isinstance(symbols, dict):
-        return symbols
-
-    return {}
+    return dependency_graph.get(
+        "symbols",
+        dependency_graph.get(
+            "file_symbols",
+            {},
+        ),
+    )
 
 
 def _extract_dependencies(
-    dependency_graph: Dict[str, Any],
-) -> Dict[str, Any]:
+    dependency_graph
+):
     """
-    Preserve the dependency graph produced upstream.
-
-    No dependency analysis is performed here.
+    Extract dependency information from the dependency graph.
     """
 
-    return {
-        "adjacency": dependency_graph.get(
-            "adjacency",
-            {},
-        ),
-        "reverse_adjacency": dependency_graph.get(
-            "reverse_adjacency",
-            {},
-        ),
-        "edges": dependency_graph.get(
-            "edges",
-            [],
-        ),
-        "statistics": dependency_graph.get(
-            "statistics",
-            {},
-        ),
-    }
+    return dependency_graph.get(
+        "dependencies",
+        {},
+    )
 
 
 def _extract_tests(
-    dependency_graph: Dict[str, Any],
-    assembly_manifest: Dict[str, Any],
-) -> Dict[str, Any]:
+    dependency_graph,
+    skipped_files,
+):
     """
-    Extract test information from the upstream dependency graph
-    and assembly manifest.
+    Extract existing test information.
     """
 
-    test_files = []
+    tests = []
 
-    files = dependency_graph.get("files", [])
-
-    if isinstance(files, list):
-        for entry in files:
-            if not isinstance(entry, dict):
-                continue
-
-            if entry.get("is_test") is True:
-                path = (
-                    entry.get("path")
-                    or entry.get("file")
-                    or entry.get("relative_path")
-                )
-
-                if path:
-                    test_files.append(str(path))
-
-    # The dependency graph used by the current pipeline stores test
-    # information in symbols as well.
-    symbols = dependency_graph.get("symbols", {})
-
-    if isinstance(symbols, dict):
-        for path in symbols:
-            normalized = str(path).replace("\\", "/")
-
-            if (
-                normalized.startswith("tests/")
-                or normalized.startswith("test_")
-                or normalized.endswith("_test.py")
-            ):
-                test_files.append(str(path))
-
-    # Also inspect the assembly manifest for skipped tests.
-    skipped_files = _extract_manifest_files(
-        assembly_manifest,
-        "SKIP",
+    symbols = dependency_graph.get(
+        "symbols",
+        {},
     )
 
-    skipped_test_files = []
+    for file_name, file_symbols in symbols.items():
 
-    for path in skipped_files:
-        normalized = str(path).replace("\\", "/")
+        if file_name in skipped_files:
+            continue
 
-        if (
-            normalized.startswith("tests/")
-            or normalized.startswith("test_")
-            or normalized.endswith("_test.py")
+        if not (
+            file_name.startswith(
+                "test"
+            )
+            or "/tests/" in file_name.replace(
+                "\\",
+                "/",
+            )
+            or file_name.replace(
+                "\\",
+                "/",
+            ).startswith(
+                "tests/"
+            )
         ):
-            skipped_test_files.append(path)
+            continue
 
-    return {
-        "test_files": sorted(set(test_files)),
-        "skipped_test_files": sorted(
-            set(skipped_test_files)
-        ),
-    }
+        for symbol in file_symbols:
+            if symbol.get(
+                "type"
+            ) == "function":
+                tests.append(
+                    {
+                        "file": file_name,
+                        "name": symbol.get(
+                            "name"
+                        ),
+                        "line": symbol.get(
+                            "line"
+                        ),
+                    }
+                )
+
+    return tests
 
 
 def load_verification_input(
-    output_directory: str,
-) -> VerificationInput:
+    output_directory
+):
     """
-    Load upstream migration outputs for semantic verification.
+    Load all upstream migration-analysis outputs.
+
+    The upstream outputs provide analysis metadata.
+
+    Repository paths are resolved for the current
+    machine/workspace instead of blindly trusting paths
+    recorded on another machine.
     """
 
-    output_path = Path(output_directory)
+    output_path = Path(
+        output_directory
+    ).resolve()
 
-    if not output_path.exists():
-        raise VerificationInputError(
-            "Output directory does not exist: "
-            + str(output_path)
-        )
-
-    assembly_path = _find_first_existing(
-        output_path,
-        [
-            "python2_migration_test_repo_assembly_manifest.json",
-            "assembly_manifest.json",
-        ],
+    manifest_path = (
+        output_path
+        / "python2_migration_test_repo_assembly_manifest.json"
     )
 
-    dependency_graph_path = _find_first_existing(
-        output_path,
-        [
-            "python2_migration_test_repo_dependency_graph.json",
-            "dependency_graph.json",
-        ],
+    dependency_graph_path = (
+        output_path
+        / "python2_migration_test_repo_dependency_graph.json"
     )
 
-    syntax_path = _find_first_existing(
-        output_path,
-        [
-            "python2_migration_test_repo_syntax_verification.json",
-            "syntax_verification.json",
-        ],
+    syntax_path = (
+        output_path
+        / "python2_migration_test_repo_syntax_verification.json"
     )
 
-    dependency_verification_path = _find_first_existing(
-        output_path,
-        [
-            "python2_migration_test_repo_dependency_verification.json",
-            "dependency_verification.json",
-        ],
+    dependency_verification_path = (
+        output_path
+        / "python2_migration_test_repo_dependency_verification.json"
     )
 
-    migration_results_path = _find_first_existing(
-        output_path,
-        [
-            "python2_migration_test_repo_migration_results.json",
-            "migration_results.json",
-        ],
+    migration_results_path = (
+        output_path
+        / "python2_migration_test_repo_migration_results.json"
     )
 
-    assembly_manifest = _require_dict(
-        _load_json(assembly_path),
-        assembly_path,
+    manifest = _load_json(
+        manifest_path
     )
 
-    dependency_graph = _require_dict(
-        _load_json(dependency_graph_path),
-        dependency_graph_path,
+    dependency_graph = _load_json(
+        dependency_graph_path
     )
 
-    syntax_verification = _require_dict(
-        _load_json(syntax_path),
-        syntax_path,
+    syntax_verification = _load_json(
+        syntax_path
     )
 
-    dependency_verification = _require_dict(
-        _load_json(dependency_verification_path),
-        dependency_verification_path,
+    dependency_verification = _load_json(
+        dependency_verification_path
     )
 
-    # Migration results are currently a JSON list containing one
-    # record per migrated source file.
     migration_results = _load_json(
         migration_results_path
     )
 
-    if not isinstance(
-        migration_results,
-        (list, dict),
-    ):
-        raise VerificationInputError(
-            "Migration results must be a JSON list or object: "
-            + str(migration_results_path)
-        )
-
-    original_repository = (
-        assembly_manifest.get(
-            "original_repository"
-        )
-    )
-
-    migrated_repository = (
-        assembly_manifest.get(
-            "output_repository"
-        )
-    )
-
-    migrated_files = _extract_manifest_files(
-        assembly_manifest,
-        "MIGRATE",
-    )
-
-    preserved_files = _extract_manifest_files(
-        assembly_manifest,
-        "PRESERVE",
-    )
-
-    skipped_files = _extract_manifest_files(
-        assembly_manifest,
-        "SKIP",
+    (
+        migrated_files,
+        preserved_files,
+        skipped_files,
+    ) = _extract_manifest_files(
+        manifest
     )
 
     symbols = _extract_symbols(
@@ -378,7 +420,21 @@ def load_verification_input(
 
     tests = _extract_tests(
         dependency_graph,
-        assembly_manifest,
+        skipped_files,
+    )
+
+    original_repository = (
+        _find_repository_from_manifest(
+            manifest,
+            output_path,
+        )
+    )
+
+    migrated_repository = (
+        _resolve_migrated_repository(
+            manifest,
+            output_path,
+        )
     )
 
     return VerificationInput(
@@ -393,161 +449,5 @@ def load_verification_input(
         migration_results=migration_results,
         syntax_verification=syntax_verification,
         dependency_verification=dependency_verification,
-        assembly_manifest=assembly_manifest,
+        assembly_manifest=manifest,
     )
-
-
-def print_verification_input_summary(
-    verification_input: VerificationInput,
-) -> None:
-    """Print a compact verification-input summary."""
-
-    print("Semantic Verification Input")
-    print("=" * 32)
-
-    print(
-        "Original repository: "
-        + str(
-            verification_input.original_repository
-        )
-    )
-
-    print(
-        "Migrated repository: "
-        + str(
-            verification_input.migrated_repository
-        )
-    )
-
-    print(
-        "Migrated files: "
-        + str(
-            len(
-                verification_input.migrated_files
-            )
-        )
-    )
-
-    if verification_input.migrated_files:
-        for path in verification_input.migrated_files:
-            print("  MIGRATE: " + path)
-
-    print(
-        "Preserved files: "
-        + str(
-            len(
-                verification_input.preserved_files
-            )
-        )
-    )
-
-    if verification_input.preserved_files:
-        for path in verification_input.preserved_files:
-            print("  PRESERVE: " + path)
-
-    print(
-        "Skipped files: "
-        + str(
-            len(
-                verification_input.skipped_files
-            )
-        )
-    )
-
-    if verification_input.skipped_files:
-        for path in verification_input.skipped_files:
-            print("  SKIP: " + path)
-
-    print(
-        "Symbol files: "
-        + str(
-            len(
-                verification_input.symbols
-            )
-        )
-    )
-
-    print(
-        "Dependency edges: "
-        + str(
-            len(
-                verification_input.dependencies.get(
-                    "edges",
-                    [],
-                )
-            )
-        )
-    )
-
-    print(
-        "Test files: "
-        + str(
-            len(
-                verification_input.tests.get(
-                    "test_files",
-                    [],
-                )
-            )
-        )
-    )
-
-    migration_results = (
-        verification_input.migration_results
-    )
-
-    if isinstance(
-        migration_results,
-        list,
-    ):
-        print(
-            "Migration results: "
-            + str(
-                len(migration_results)
-            )
-            + " records"
-        )
-
-    elif isinstance(
-        migration_results,
-        dict,
-    ):
-        print(
-            "Migration results: "
-            + str(
-                len(migration_results)
-            )
-            + " fields"
-        )
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Load migration pipeline outputs "
-            "for semantic verification."
-        )
-    )
-
-    parser.add_argument(
-        "output_directory",
-        help=(
-            "Directory containing migration "
-            "outputs."
-        ),
-    )
-
-    args = parser.parse_args()
-
-    verification_input = (
-        load_verification_input(
-            args.output_directory
-        )
-    )
-
-    print_verification_input_summary(
-        verification_input
-    )
-
-
-if __name__ == "__main__":
-    main()
