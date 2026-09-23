@@ -1,0 +1,840 @@
+{
+  "input_file": "D:\\Projects\\CodeMigration\\verifier_dataset\\output\\verifier_dataset.csv",
+  "total_rows": 775,
+  "columns": {
+    "missing": [],
+    "extra": [
+      "_verify_note",
+      "function_name",
+      "repo",
+      "source_url"
+    ]
+  },
+  "distributions": {
+    "label": {
+      "equivalent": 318,
+      "not_equivalent": 457
+    },
+    "source": {
+      "real_curated": 20,
+      "real_mined": 298,
+      "mutation": 48,
+      "generic_mutation": 394,
+      "mismatch": 15
+    },
+    "split": {
+      "test": 107,
+      "val": 108,
+      "train": 560
+    },
+    "difficulty": {
+      "easy": 333,
+      "hard": 48,
+      "medium": 394
+    },
+    "verification_status": {
+      "strong": 351,
+      "pending": 424
+    },
+    "pattern": {
+      "dict_iteritems": 3,
+      "dict_iterkeys": 3,
+      "print_statement": 2,
+      "except_as": 4,
+      "division_operator": 4,
+      "xrange_range": 4,
+      "unicode_str": 3,
+      "map_returns_iterator": 4,
+      "dict_has_key": 3,
+      "iterator_next": 3,
+      "raise_from": 4,
+      "sorted_cmp_to_key": 3,
+      "basestring_str": 3,
+      "long_removed": 3,
+      "stdlib_reorg_urllib": 3,
+      "stdlib_reorg_stringio": 3,
+      "dict_values_view": 4,
+      "raw_input_input": 3,
+      "exec_statement": 2,
+      "zip_returns_iterator": 3,
+      "mined:six.PY3": 142,
+      "mined:six.PY2": 116,
+      "mined:six.PY2,unicode(": 3,
+      "mined:long(,six.PY2": 5,
+      "mined:inspect.getargspec(,six.PY2": 24,
+      "mined:inspect.getargspec(,six.PY3": 2,
+      "mined:six.PY2,six.PY3": 1,
+      "mined:long(": 2,
+      "mined:unknown": 13,
+      "mined:six.PY3,unicode(": 2,
+      "mined:.iteritems(": 6,
+      "mined:inspect.getargspec(": 10,
+      "mined:basestring": 14,
+      "mined:xrange(": 12,
+      "mined:.assertEquals(": 325,
+      "mined:.assertEquals(,.assertNotEquals(": 13,
+      "mined:except X, e:": 6,
+      "mined:six.PY2_vs_mined:.iteritems(": 1,
+      "mined:six.PY2_vs_dict_values_view": 1,
+      "mined:.assertEquals(_vs_mined:six.PY2": 2,
+      "mined:.assertEquals(_vs_mined:basestring": 1,
+      "mined:.assertEquals(_vs_mined:.assertEquals(": 4,
+      "mined:six.PY2_vs_mined:.assertEquals(": 1,
+      "mined:inspect.getargspec(,six.PY2_vs_mined:.assertEquals(": 1,
+      "mined:xrange(_vs_mined:.assertEquals(": 1,
+      "mined:six.PY3_vs_mined:six.PY3": 1,
+      "mined:.assertEquals(_vs_mined:six.PY3": 1,
+      "mined:six.PY3_vs_mined:six.PY2": 1
+    },
+    "mutation_type": {
+      "": 318,
+      "dict_iteritems_not_converted": 8,
+      "dict_iterkeys_not_converted": 6,
+      "print_argument_dropped": 1,
+      "division_operator_wrong_direction": 3,
+      "except_var_used_outside_scope": 1,
+      "division_operator_flipped": 13,
+      "range_off_by_one": 1,
+      "wrong_decode_encoding": 1,
+      "missing_list_wrap_on_iterator": 4,
+      "has_key_membership_check_dropped": 1,
+      "next_called_on_wrong_target": 1,
+      "raise_wrong_exception_type": 1,
+      "cmp_to_key_import_dropped": 1,
+      "basestring_narrowed_to_bytes": 1,
+      "long_to_int_became_float": 1,
+      "stdlib_rename_partial": 1,
+      "stringio_wrong_module": 1,
+      "input_prompt_dropped": 1,
+      "exec_argument_order_swapped": 1,
+      "generic_return_value_dropped": 97,
+      "generic_off_by_one": 158,
+      "generic_condition_negated": 67,
+      "generic_comparison_flip": 43,
+      "generic_boolop_flip": 29,
+      "cross_function_mismatch": 15
+    }
+  },
+  "quality_checks": {
+    "duplicate_ids": 0,
+    "duplicate_code_pairs": 0,
+    "cross_split_original_functions": 6,
+    "family_leakage": 0,
+    "pending_negatives": 424,
+    "long_code_rows": 0
+  },
+  "code_length": {
+    "original": {
+      "min": 29,
+      "max": 4530,
+      "mean": 750.9,
+      "median": 562,
+      "p90": 1684,
+      "p95": 2211,
+      "p99": 3353
+    },
+    "migrated": {
+      "min": 28,
+      "max": 4483,
+      "mean": 599.96,
+      "median": 444,
+      "p90": 1268,
+      "p95": 1862,
+      "p99": 2667
+    }
+  },
+  "cross_split_original_examples": [
+    [
+      {
+        "row_index": 30,
+        "id": "88bcf2a7-03e7-422e-94f2-67ba1ee2ba9e",
+        "family_id": "mined__github_py23_381d8546b5877771",
+        "split": "train",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 406,
+        "id": "12fdc852-4078-4559-96e2-08476beefcf4",
+        "family_id": "mined__github_py23_381d8546b5877771",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 407,
+        "id": "0425b097-0486-44d6-b572-24842a767c07",
+        "family_id": "mined__github_py23_381d8546b5877771",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 408,
+        "id": "1b44334a-a478-4702-9986-3bd3968426f7",
+        "family_id": "mined__github_py23_381d8546b5877771",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 760,
+        "id": "27e4f357-0d4a-445d-a7a1-c8f1664b3278",
+        "family_id": "mismatch__mined__github_py23_381d8546b5877771__mined__github_py23_461f5ee536ce06bb",
+        "split": "val",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ],
+    [
+      {
+        "row_index": 48,
+        "id": "034d7a81-0336-47de-804b-9da81bb94789",
+        "family_id": "mined__github_py23_dcc036a716667c56",
+        "split": "val",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 452,
+        "id": "f2b8cbba-9760-4741-99bb-c03df2f7962a",
+        "family_id": "mined__github_py23_dcc036a716667c56",
+        "split": "val",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 453,
+        "id": "d62889c6-8c2e-4c2a-940c-5aba8448a6cf",
+        "family_id": "mined__github_py23_dcc036a716667c56",
+        "split": "val",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 454,
+        "id": "f964e3f9-24c8-4831-a2f8-bc19b2c43714",
+        "family_id": "mined__github_py23_dcc036a716667c56",
+        "split": "val",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 770,
+        "id": "abc885ec-3418-4be5-8af5-3e7f1b74c793",
+        "family_id": "mismatch__mined__github_py23_dcc036a716667c56__mined__github_py23_06f8c3a348dab8c6",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ],
+    [
+      {
+        "row_index": 50,
+        "id": "d2c4a92c-0317-4b93-a959-ec303af46db3",
+        "family_id": "mined__github_py23_4820937316ce1966",
+        "split": "train",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 458,
+        "id": "a975b7d9-ee4b-4f0b-a69d-b128326d060a",
+        "family_id": "mined__github_py23_4820937316ce1966",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 459,
+        "id": "32b8d395-da1a-424b-94da-ac29fbb260e9",
+        "family_id": "mined__github_py23_4820937316ce1966",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 460,
+        "id": "fe0c10cc-1327-4694-8868-1b4dbf420917",
+        "family_id": "mined__github_py23_4820937316ce1966",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 774,
+        "id": "3d228794-e2cb-4bd4-9cde-4604c523c65b",
+        "family_id": "mismatch__mined__github_py23_4820937316ce1966__mined__github_py23_714742d93306762f",
+        "split": "test",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ],
+    [
+      {
+        "row_index": 169,
+        "id": "9744afdf-fb5b-4bf6-80fd-f4fb81a6d22b",
+        "family_id": "mined__github_py23_e4f59c5d3dcda6aa",
+        "split": "train",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 762,
+        "id": "d16e69be-3bf6-4fad-9a3f-e73b9fd1a726",
+        "family_id": "mismatch__mined__github_py23_e4f59c5d3dcda6aa__mined__github_py23_fa5d4b926242ef70",
+        "split": "test",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ],
+    [
+      {
+        "row_index": 208,
+        "id": "3c438076-7362-4535-b482-47869eab35c9",
+        "family_id": "mined__github_py23_a4adbcefee463847",
+        "split": "val",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 769,
+        "id": "a84e3988-0f9c-474a-85c4-55abad9cfdb3",
+        "family_id": "mismatch__mined__github_py23_a4adbcefee463847__mined__github_py23_d593795caf48ad7a",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ],
+    [
+      {
+        "row_index": 263,
+        "id": "2adb961f-c796-430f-a01f-8fd7350786fb",
+        "family_id": "mined__github_py23_2559304a4c99cb32",
+        "split": "val",
+        "label": "equivalent",
+        "source": "real_mined"
+      },
+      {
+        "row_index": 701,
+        "id": "287aeba9-6c5d-4370-9002-0489ba18f134",
+        "family_id": "mined__github_py23_2559304a4c99cb32",
+        "split": "val",
+        "label": "not_equivalent",
+        "source": "generic_mutation"
+      },
+      {
+        "row_index": 763,
+        "id": "626ca742-8a1e-4fd3-b12d-c6d2ae3e468b",
+        "family_id": "mismatch__mined__github_py23_2559304a4c99cb32__mined__github_py23_ba472204f605f4e3",
+        "split": "train",
+        "label": "not_equivalent",
+        "source": "mismatch"
+      }
+    ]
+  ],
+  "family_leakage_examples": [],
+  "pending_negative_examples": [
+    {
+      "row_index": 320,
+      "id": "06e237b6-6245-4290-b4ac-e5a41cf6797c",
+      "family_id": "print_statement_01",
+      "source": "mutation",
+      "mutation_type": "print_argument_dropped",
+      "pattern": "print_statement",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 333,
+      "id": "afc32dab-2ec3-4dc8-8ca5-f365178b3e84",
+      "family_id": "urllib_import_01",
+      "source": "mutation",
+      "mutation_type": "stdlib_rename_partial",
+      "pattern": "stdlib_reorg_urllib",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 336,
+      "id": "747bf923-1ee5-4b66-afec-33d25f5e265d",
+      "family_id": "input_raw_input_01",
+      "source": "mutation",
+      "mutation_type": "input_prompt_dropped",
+      "pattern": "raw_input_input",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 339,
+      "id": "00c80650-a85a-41bb-86be-ce8bee2d6bdb",
+      "family_id": "mined__github_py23_fea5b2c6db74a4d9",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:six.PY3",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 340,
+      "id": "520068fa-32a0-4b88-b68e-420364014e52",
+      "family_id": "mined__github_py23_fea5b2c6db74a4d9",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY3",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 341,
+      "id": "5090e677-bef1-4ae4-b4ba-713212736ffa",
+      "family_id": "mined__github_py23_e14435df73685e85",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 342,
+      "id": "25416873-8a83-4517-8bb9-748b0b4a41ae",
+      "family_id": "mined__github_py23_fa5d4b926242ef70",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 343,
+      "id": "354b46a8-4fad-4b79-8170-2016d4f6b3e7",
+      "family_id": "mined__github_py23_a7028b7606e9a577",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 344,
+      "id": "127cafe6-1862-482b-ac9a-17149bcabbc7",
+      "family_id": "mined__github_py23_12d484075c40e123",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY3",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 345,
+      "id": "3e73c4ba-483d-4969-a29e-4e76f7cb5c07",
+      "family_id": "mined__github_py23_78c3141b831cd1ba",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY3",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 346,
+      "id": "4e259495-2a70-481a-b34c-fcd9ab7a78f4",
+      "family_id": "mined__github_py23_f2dcd767f9d15aee",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 347,
+      "id": "b90974e6-e27a-44c5-b543-5f07229f25c5",
+      "family_id": "mined__github_py23_911c259f7108f81f",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 348,
+      "id": "13889a07-f0f6-44f2-8edf-c64d9d92ea19",
+      "family_id": "mined__github_py23_244953afef81edd2",
+      "source": "mutation",
+      "mutation_type": "division_operator_wrong_direction",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 349,
+      "id": "860071c4-c4d9-4184-8cab-011922167ee4",
+      "family_id": "mined__github_py23_72cb472888f5e754",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:inspect.getargspec(,six.PY2",
+      "difficulty": "hard",
+      "split": "test"
+    },
+    {
+      "row_index": 350,
+      "id": "b524f4cc-9757-4e07-a47c-3379303cd20f",
+      "family_id": "mined__github_py23_6a40a8596538dad6",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:inspect.getargspec(,six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 351,
+      "id": "0b7845b4-fa50-4d26-baad-44603734514e",
+      "family_id": "mined__github_py23_01238bf196ee31bf",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 352,
+      "id": "74017a00-713c-4c1f-9474-18bb685875c0",
+      "family_id": "mined__github_py23_6ce99cddecb1a0c7",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 353,
+      "id": "24e6c99a-cab9-4b9d-8c87-4590bf8fceb2",
+      "family_id": "mined__github_py23_1d83d807e7df383b",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:.iteritems(",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 354,
+      "id": "12f75051-e3a8-44bd-9036-b25e3c2f4141",
+      "family_id": "mined__github_py23_461f5ee536ce06bb",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:.iteritems(",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 355,
+      "id": "1d4baff7-13fc-44fa-ac26-d6ec216f61bf",
+      "family_id": "mined__github_py23_0599c01d84a6c605",
+      "source": "mutation",
+      "mutation_type": "division_operator_wrong_direction",
+      "pattern": "mined:xrange(",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 356,
+      "id": "6eb82927-7333-4fd8-98eb-0b5b40e7461b",
+      "family_id": "mined__github_py23_fe6228a697eb9e84",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:six.PY3",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 357,
+      "id": "30aa5346-37f8-445d-a40d-9efb5a7ce6e1",
+      "family_id": "mined__github_py23_804f04de65739059",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 358,
+      "id": "936abfdc-a6da-4099-86d3-12604166b63b",
+      "family_id": "mined__github_py23_804f04de65739059",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 359,
+      "id": "60cc5162-6d72-4bda-80f5-59a470be64a5",
+      "family_id": "mined__github_py23_804f04de65739059",
+      "source": "mutation",
+      "mutation_type": "missing_list_wrap_on_iterator",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 360,
+      "id": "917343e1-71da-43be-874d-3c559f3d67d2",
+      "family_id": "mined__github_py23_1e998f132b882108",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 361,
+      "id": "900479c0-f07c-49af-8568-42fcfdb67d9f",
+      "family_id": "mined__github_py23_bda2ebe43716097b",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "val"
+    },
+    {
+      "row_index": 362,
+      "id": "d2650df8-7426-4f3d-9985-139eb44bd618",
+      "family_id": "mined__github_py23_a73106e0905c255e",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(,.assertNotEquals(",
+      "difficulty": "hard",
+      "split": "test"
+    },
+    {
+      "row_index": 363,
+      "id": "60ac959c-4c82-4474-a6ad-afe2b9275eff",
+      "family_id": "mined__github_py23_406cbbaff2137f23",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "test"
+    },
+    {
+      "row_index": 364,
+      "id": "1a428cfd-03fb-45ca-9376-34aecd1094a6",
+      "family_id": "mined__github_py23_de25447a54f044c0",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "train"
+    },
+    {
+      "row_index": 365,
+      "id": "5eb7ee15-6577-43dc-9123-74eb90eff2b6",
+      "family_id": "mined__github_py23_272180831a7cce89",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "split": "test"
+    },
+    {
+      "row_index": 366,
+      "id": "fe9cb793-e4e3-4724-8f0a-63020d78a234",
+      "family_id": "dict_iteritems_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "dict_iteritems",
+      "difficulty": "medium",
+      "split": "test"
+    },
+    {
+      "row_index": 367,
+      "id": "3864d4af-d513-4b34-bfcd-602f1dbae02a",
+      "family_id": "dict_iterkeys_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "dict_iterkeys",
+      "difficulty": "medium",
+      "split": "val"
+    },
+    {
+      "row_index": 368,
+      "id": "aa3314f2-6c7d-4c3d-86b5-b559886e3293",
+      "family_id": "except_as_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "except_as",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 369,
+      "id": "7bb745ef-8ffa-47c1-91c9-1112057842be",
+      "family_id": "division_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_off_by_one",
+      "pattern": "division_operator",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 370,
+      "id": "5dec26d6-d06f-45c9-92d4-cff1de343318",
+      "family_id": "division_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "division_operator",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 371,
+      "id": "9d697711-2320-45c2-99b9-e508a08bab50",
+      "family_id": "xrange_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_off_by_one",
+      "pattern": "xrange_range",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 372,
+      "id": "b9297a07-897e-4faf-ae22-f3bd26c53e45",
+      "family_id": "xrange_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "xrange_range",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 373,
+      "id": "20805b40-b672-4f70-9da3-60fcf83d8466",
+      "family_id": "unicode_str_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "unicode_str",
+      "difficulty": "medium",
+      "split": "test"
+    },
+    {
+      "row_index": 374,
+      "id": "b0c28ae8-7d33-43b6-a70d-ff861e0395ff",
+      "family_id": "map_list_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_off_by_one",
+      "pattern": "map_returns_iterator",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 375,
+      "id": "8d1e39d2-6508-441a-adae-ac16aeedda38",
+      "family_id": "map_list_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "map_returns_iterator",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 376,
+      "id": "019d4213-01d4-4835-bbb9-6e837009c4a9",
+      "family_id": "has_key_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "dict_has_key",
+      "difficulty": "medium",
+      "split": "test"
+    },
+    {
+      "row_index": 377,
+      "id": "e9c9943e-5da0-454e-ba62-024b8ef6b16f",
+      "family_id": "next_method_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "iterator_next",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 378,
+      "id": "aab3315e-7cfe-46b4-a3c9-62ff802b4169",
+      "family_id": "raise_syntax_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "raise_from",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 379,
+      "id": "48558a58-b13b-4fee-97e7-7807d7fc0352",
+      "family_id": "raise_syntax_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_condition_negated",
+      "pattern": "raise_from",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 380,
+      "id": "20205363-61d5-4ff2-8879-b99a4ed26e4c",
+      "family_id": "sorted_cmp_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "sorted_cmp_to_key",
+      "difficulty": "medium",
+      "split": "test"
+    },
+    {
+      "row_index": 381,
+      "id": "8c5e0eb9-8e47-47b3-9da9-ca8e942a7b98",
+      "family_id": "basestring_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "basestring_str",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 382,
+      "id": "32023847-b7b2-4e1b-a957-6be8ad8aefb0",
+      "family_id": "long_int_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "long_removed",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 383,
+      "id": "198b339f-1d41-4614-9c1f-cb40dada0644",
+      "family_id": "urllib_import_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "stdlib_reorg_urllib",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 384,
+      "id": "6165a727-f7df-4743-b513-dda30b171b81",
+      "family_id": "stringio_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "stdlib_reorg_stringio",
+      "difficulty": "medium",
+      "split": "train"
+    },
+    {
+      "row_index": 385,
+      "id": "771c97fa-9b94-476a-8eb9-63efb3ca459d",
+      "family_id": "dict_values_list_01",
+      "source": "generic_mutation",
+      "mutation_type": "generic_off_by_one",
+      "pattern": "dict_values_view",
+      "difficulty": "medium",
+      "split": "train"
+    }
+  ],
+  "long_code_examples": []
+}

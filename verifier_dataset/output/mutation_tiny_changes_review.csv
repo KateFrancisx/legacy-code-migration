@@ -1,0 +1,208 @@
+id,family_id,source,mutation_type,pattern,difficulty,verification_status,split,change_ratio,function_name,repo,original_code,migrated_code
+1d4baff7-13fc-44fa-ac26-d6ec216f61bf,mined__github_py23_0599c01d84a6c605,mutation,division_operator_wrong_direction,mined:xrange(,hard,pending,train,0.0018,,,"def __init__(self, scale, tfm, texname, vf):
+        if not isinstance(texname, bytes):
+            raise ValueError(""texname must be a bytestring, got %s""
+                             % type(texname))
+        self._scale, self._tfm, self.texname, self._vf = \
+            scale, tfm, texname, vf
+        self.size = scale * (72.0 / (72.27 * 2**16))
+        try:
+            nchars = max(tfm.width) + 1
+        except ValueError:
+            nchars = 0
+        self.widths = [(1000*tfm.width.get(char, 0)) >> 20
+                       for char in xrange(nchars)]","def __init__(self, scale, tfm, texname, vf):
+        if not isinstance(texname, bytes):
+            raise ValueError(""texname must be a bytestring, got %s""
+                             % type(texname))
+        self._scale, self._tfm, self.texname, self._vf = \
+            scale, tfm, texname, vf
+        self.size = scale * (72.0 // (72.27 * 2**16))
+        try:
+            nchars = max(tfm.width) + 1
+        except ValueError:
+            nchars = 0
+        self.widths = [(1000*tfm.width.get(char, 0)) >> 20
+                       for char in range(nchars)]"
+30aa5346-37f8-445d-a40d-9efb5a7ce6e1,mined__github_py23_804f04de65739059,mutation,dict_iteritems_not_converted,mined:.assertEquals(,hard,pending,val,0.005,,,"def test_queue_status(self):
+        ids = self.client.ids
+        id0 = ids[0]
+        qs = self.client.queue_status(targets=id0)
+        self.assertTrue(isinstance(qs, dict))
+        self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])
+        allqs = self.client.queue_status()
+        self.assertTrue(isinstance(allqs, dict))
+        intkeys = list(allqs.keys())
+        intkeys.remove('unassigned')
+        self.assertEquals(sorted(intkeys), sorted(self.client.ids))
+        unassigned = allqs.pop('unassigned')
+        for eid,qs in allqs.items():
+            self.assertTrue(isinstance(qs, dict))
+            self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])","def test_queue_status(self):
+        ids = self.client.ids
+        id0 = ids[0]
+        qs = self.client.queue_status(targets=id0)
+        self.assertTrue(isinstance(qs, dict))
+        self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])
+        allqs = self.client.queue_status()
+        self.assertTrue(isinstance(allqs, dict))
+        intkeys = list(allqs.keys())
+        intkeys.remove('unassigned')
+        self.assertEqual(sorted(intkeys), sorted(self.client.ids))
+        unassigned = allqs.pop('unassigned')
+        for eid,qs in allqs.iteritems():
+            self.assertTrue(isinstance(qs, dict))
+            self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])"
+60cc5162-6d72-4bda-80f5-59a470be64a5,mined__github_py23_804f04de65739059,mutation,missing_list_wrap_on_iterator,mined:.assertEquals(,hard,pending,val,0.0065,,,"def test_queue_status(self):
+        ids = self.client.ids
+        id0 = ids[0]
+        qs = self.client.queue_status(targets=id0)
+        self.assertTrue(isinstance(qs, dict))
+        self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])
+        allqs = self.client.queue_status()
+        self.assertTrue(isinstance(allqs, dict))
+        intkeys = list(allqs.keys())
+        intkeys.remove('unassigned')
+        self.assertEquals(sorted(intkeys), sorted(self.client.ids))
+        unassigned = allqs.pop('unassigned')
+        for eid,qs in allqs.items():
+            self.assertTrue(isinstance(qs, dict))
+            self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])","def test_queue_status(self):
+        ids = self.client.ids
+        id0 = ids[0]
+        qs = self.client.queue_status(targets=id0)
+        self.assertTrue(isinstance(qs, dict))
+        self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])
+        allqs = self.client.queue_status()
+        self.assertTrue(isinstance(allqs, dict))
+        intkeys = allqs.keys()
+        intkeys.remove('unassigned')
+        self.assertEqual(sorted(intkeys), sorted(self.client.ids))
+        unassigned = allqs.pop('unassigned')
+        for eid,qs in allqs.items():
+            self.assertTrue(isinstance(qs, dict))
+            self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])"
+917343e1-71da-43be-874d-3c559f3d67d2,mined__github_py23_1e998f132b882108,mutation,division_operator_flipped,mined:.assertEquals(,hard,pending,train,0.0014,,,"def test_db_query_dt(self):
+        """"""test db query by date""""""
+        hist = self.client.hub_history()
+        middle = self.client.db_query({'msg_id' : hist[len(hist)//2]})[0]
+        tic = middle['submitted']
+        before = self.client.db_query({'submitted' : {'$lt' : tic}})
+        after = self.client.db_query({'submitted' : {'$gte' : tic}})
+        self.assertEquals(len(before)+len(after),len(hist))
+        for b in before:
+            self.assertTrue(b['submitted'] < tic)
+        for a in after:
+            self.assertTrue(a['submitted'] >= tic)
+        same = self.client.db_query({'submitted' : tic})
+        for s in same:
+            self.assertTrue(s['submitted'] == tic)","def test_db_query_dt(self):
+        """"""test db query by date""""""
+        hist = self.client.hub_history()
+        middle = self.client.db_query({'msg_id' : hist[len(hist)/2]})[0]
+        tic = middle['submitted']
+        before = self.client.db_query({'submitted' : {'$lt' : tic}})
+        after = self.client.db_query({'submitted' : {'$gte' : tic}})
+        self.assertEqual(len(before)+len(after),len(hist))
+        for b in before:
+            self.assertTrue(b['submitted'] < tic)
+        for a in after:
+            self.assertTrue(a['submitted'] >= tic)
+        same = self.client.db_query({'submitted' : tic})
+        for s in same:
+            self.assertTrue(s['submitted'] == tic)"
+d2650df8-7426-4f3d-9985-139eb44bd618,mined__github_py23_a73106e0905c255e,mutation,dict_iterkeys_not_converted,"mined:.assertEquals(,.assertNotEquals(",hard,pending,test,0.006,,,"def test_resubmit_header(self):
+        """"""resubmit shouldn't clobber the whole header""""""
+        def f():
+            import random
+            return random.random()
+        v = self.client.load_balanced_view()
+        v.retries = 1
+        ar = v.apply_async(f)
+        r1 = ar.get(1)
+        # give the Hub a chance to notice:
+        self._wait_for_idle()
+        ahr = self.client.resubmit(ar.msg_ids)
+        ahr.get(1)
+        time.sleep(0.5)
+        records = self.client.db_query({'msg_id': {'$in': ar.msg_ids + ahr.msg_ids}}, keys='header')
+        h1,h2 = [ r['header'] for r in records ]
+        for key in set(h1.keys()).union(set(h2.keys())):
+            if key in ('msg_id', 'date'):
+                self.assertNotEquals(h1[key], h2[key])
+            else:
+                self.assertEquals(h1[key], h2[key])","def test_resubmit_header(self):
+        """"""resubmit shouldn't clobber the whole header""""""
+        def f():
+            import random
+            return random.random()
+        v = self.client.load_balanced_view()
+        v.retries = 1
+        ar = v.apply_async(f)
+        r1 = ar.get(1)
+        # give the Hub a chance to notice:
+        self._wait_for_idle()
+        ahr = self.client.resubmit(ar.msg_ids)
+        ahr.get(1)
+        time.sleep(0.5)
+        records = self.client.db_query({'msg_id': {'$in': ar.msg_ids + ahr.msg_ids}}, keys='header')
+        h1,h2 = [ r['header'] for r in records ]
+        for key in set(h1.iterkeys()).union(set(h2.iterkeys())):
+            if key in ('msg_id', 'date'):
+                self.assertNotEqual(h1[key], h2[key])
+            else:
+                self.assertEqual(h1[key], h2[key])"
+60ac959c-4c82-4474-a6ad-afe2b9275eff,mined__github_py23_406cbbaff2137f23,mutation,division_operator_flipped,mined:.assertEquals(,hard,pending,test,0.0015,,,"def test_find_records_dt(self):
+        """"""test finding records by date""""""
+        hist = self.db.get_history()
+        middle = self.db.get_record(hist[len(hist)//2])
+        tic = middle['submitted']
+        before = self.db.find_records({'submitted' : {'$lt' : tic}})
+        after = self.db.find_records({'submitted' : {'$gte' : tic}})
+        self.assertEquals(len(before)+len(after),len(hist))
+        for b in before:
+            self.assertTrue(b['submitted'] < tic)
+        for a in after:
+            self.assertTrue(a['submitted'] >= tic)
+        same = self.db.find_records({'submitted' : tic})
+        for s in same:
+            self.assertTrue(s['submitted'] == tic)","def test_find_records_dt(self):
+        """"""test finding records by date""""""
+        hist = self.db.get_history()
+        middle = self.db.get_record(hist[len(hist)/2])
+        tic = middle['submitted']
+        before = self.db.find_records({'submitted' : {'$lt' : tic}})
+        after = self.db.find_records({'submitted' : {'$gte' : tic}})
+        self.assertEqual(len(before)+len(after),len(hist))
+        for b in before:
+            self.assertTrue(b['submitted'] < tic)
+        for a in after:
+            self.assertTrue(a['submitted'] >= tic)
+        same = self.db.find_records({'submitted' : tic})
+        for s in same:
+            self.assertTrue(s['submitted'] == tic)"
+5eb7ee15-6577-43dc-9123-74eb90eff2b6,mined__github_py23_272180831a7cce89,mutation,dict_iterkeys_not_converted,mined:.assertEquals(,hard,pending,test,0.0055,,,"def test_msg(self):
+        """"""message format""""""
+        msg = self.session.msg('execute')
+        thekeys = set('header parent_header content msg_type msg_id'.split())
+        s = set(msg.keys())
+        self.assertEquals(s, thekeys)
+        self.assertTrue(isinstance(msg['content'],dict))
+        self.assertTrue(isinstance(msg['header'],dict))
+        self.assertTrue(isinstance(msg['parent_header'],dict))
+        self.assertTrue(isinstance(msg['msg_id'],str))
+        self.assertTrue(isinstance(msg['msg_type'],str))
+        self.assertEquals(msg['header']['msg_type'], 'execute')
+        self.assertEquals(msg['msg_type'], 'execute')","def test_msg(self):
+        """"""message format""""""
+        msg = self.session.msg('execute')
+        thekeys = set('header parent_header content msg_type msg_id'.split())
+        s = set(msg.iterkeys())
+        self.assertEqual(s, thekeys)
+        self.assertTrue(isinstance(msg['content'],dict))
+        self.assertTrue(isinstance(msg['header'],dict))
+        self.assertTrue(isinstance(msg['parent_header'],dict))
+        self.assertTrue(isinstance(msg['msg_id'],str))
+        self.assertTrue(isinstance(msg['msg_type'],str))
+        self.assertEqual(msg['header']['msg_type'], 'execute')
+        self.assertEqual(msg['msg_type'], 'execute')"

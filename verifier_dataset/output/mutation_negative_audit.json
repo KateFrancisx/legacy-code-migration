@@ -1,0 +1,454 @@
+{
+  "dataset_total_rows": 775,
+  "mutation_negative_total": 442,
+  "mutation_type_distribution": {
+    "dict_iteritems_not_converted": 8,
+    "dict_iterkeys_not_converted": 6,
+    "print_argument_dropped": 1,
+    "division_operator_wrong_direction": 3,
+    "except_var_used_outside_scope": 1,
+    "division_operator_flipped": 13,
+    "range_off_by_one": 1,
+    "wrong_decode_encoding": 1,
+    "missing_list_wrap_on_iterator": 4,
+    "has_key_membership_check_dropped": 1,
+    "next_called_on_wrong_target": 1,
+    "raise_wrong_exception_type": 1,
+    "cmp_to_key_import_dropped": 1,
+    "basestring_narrowed_to_bytes": 1,
+    "long_to_int_became_float": 1,
+    "stdlib_rename_partial": 1,
+    "stringio_wrong_module": 1,
+    "input_prompt_dropped": 1,
+    "exec_argument_order_swapped": 1,
+    "generic_return_value_dropped": 97,
+    "generic_off_by_one": 158,
+    "generic_condition_negated": 67,
+    "generic_comparison_flip": 43,
+    "generic_boolop_flip": 29
+  },
+  "verification_status": {
+    "strong": 18,
+    "pending": 424
+  },
+  "source_distribution": {
+    "mutation": 48,
+    "generic_mutation": 394
+  },
+  "split_distribution": {
+    "test": 56,
+    "val": 59,
+    "train": 327
+  },
+  "change_analysis": {
+    "identical_code": 6,
+    "tiny_change_under_1_percent": 7,
+    "large_change_over_80_percent": 3
+  },
+  "family_split_leakage": {},
+  "mutation_type_verification": {
+    "dict_iteritems_not_converted": {
+      "strong": 1,
+      "pending": 7
+    },
+    "dict_iterkeys_not_converted": {
+      "strong": 1,
+      "pending": 5
+    },
+    "print_argument_dropped": {
+      "pending": 1
+    },
+    "division_operator_wrong_direction": {
+      "strong": 1,
+      "pending": 2
+    },
+    "except_var_used_outside_scope": {
+      "strong": 1
+    },
+    "division_operator_flipped": {
+      "strong": 1,
+      "pending": 12
+    },
+    "range_off_by_one": {
+      "strong": 1
+    },
+    "wrong_decode_encoding": {
+      "strong": 1
+    },
+    "missing_list_wrap_on_iterator": {
+      "strong": 3,
+      "pending": 1
+    },
+    "has_key_membership_check_dropped": {
+      "strong": 1
+    },
+    "next_called_on_wrong_target": {
+      "strong": 1
+    },
+    "raise_wrong_exception_type": {
+      "strong": 1
+    },
+    "cmp_to_key_import_dropped": {
+      "strong": 1
+    },
+    "basestring_narrowed_to_bytes": {
+      "strong": 1
+    },
+    "long_to_int_became_float": {
+      "strong": 1
+    },
+    "stdlib_rename_partial": {
+      "pending": 1
+    },
+    "stringio_wrong_module": {
+      "strong": 1
+    },
+    "input_prompt_dropped": {
+      "pending": 1
+    },
+    "exec_argument_order_swapped": {
+      "strong": 1
+    },
+    "generic_return_value_dropped": {
+      "pending": 97
+    },
+    "generic_off_by_one": {
+      "pending": 158
+    },
+    "generic_condition_negated": {
+      "pending": 67
+    },
+    "generic_comparison_flip": {
+      "pending": 43
+    },
+    "generic_boolop_flip": {
+      "pending": 29
+    }
+  },
+  "suspicious_same_code": [
+    {
+      "id": "aa083477-f246-4602-950d-6c7692b1d7a9",
+      "family_id": "dict_iteritems_01",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "dict_iteritems",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "test",
+      "original_chars": 114,
+      "migrated_chars": 114,
+      "original_lines": 5,
+      "migrated_lines": 5,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def count_items(d):\n    result = []\n    for k, v in d.iteritems():\n        result.append((k, v))\n    return result",
+      "migrated_code": "def count_items(d):\n    result = []\n    for k, v in d.iteritems():\n        result.append((k, v))\n    return result"
+    },
+    {
+      "id": "205524ec-b3b7-48d3-8907-eff5f8ffd163",
+      "family_id": "dict_iterkeys_01",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "dict_iterkeys",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "val",
+      "original_chars": 93,
+      "migrated_chars": 93,
+      "original_lines": 5,
+      "migrated_lines": 5,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def all_keys(d):\n    out = []\n    for k in d.iterkeys():\n        out.append(k)\n    return out",
+      "migrated_code": "def all_keys(d):\n    out = []\n    for k in d.iterkeys():\n        out.append(k)\n    return out"
+    },
+    {
+      "id": "f7a52cb6-3eeb-46ab-b2c8-640024b29884",
+      "family_id": "division_01",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "division_operator",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "train",
+      "original_chars": 29,
+      "migrated_chars": 29,
+      "original_lines": 2,
+      "migrated_lines": 2,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def half(n):\n    return n / 2",
+      "migrated_code": "def half(n):\n    return n / 2"
+    },
+    {
+      "id": "fa76c355-cbd7-4250-b031-e10768a80cc7",
+      "family_id": "map_list_01",
+      "source": "mutation",
+      "mutation_type": "missing_list_wrap_on_iterator",
+      "pattern": "map_returns_iterator",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "train",
+      "original_chars": 79,
+      "migrated_chars": 79,
+      "original_lines": 3,
+      "migrated_lines": 3,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def doubled(nums):\n    result = map(lambda x: x * 2, nums)\n    return result[0]",
+      "migrated_code": "def doubled(nums):\n    result = map(lambda x: x * 2, nums)\n    return result[0]"
+    },
+    {
+      "id": "55097ac0-93a3-4f9a-a582-878ba23261fc",
+      "family_id": "dict_values_list_01",
+      "source": "mutation",
+      "mutation_type": "missing_list_wrap_on_iterator",
+      "pattern": "dict_values_view",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "train",
+      "original_chars": 61,
+      "migrated_chars": 61,
+      "original_lines": 3,
+      "migrated_lines": 3,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def second_value(d):\n    vals = d.values()\n    return vals[1]",
+      "migrated_code": "def second_value(d):\n    vals = d.values()\n    return vals[1]"
+    },
+    {
+      "id": "a30d445a-c7e9-4bfb-8d02-d7e870a0dbe8",
+      "family_id": "zip_list_01",
+      "source": "mutation",
+      "mutation_type": "missing_list_wrap_on_iterator",
+      "pattern": "zip_returns_iterator",
+      "difficulty": "hard",
+      "verification_status": "strong",
+      "split": "val",
+      "original_chars": 62,
+      "migrated_chars": 62,
+      "original_lines": 3,
+      "migrated_lines": 3,
+      "change_ratio": 0.0,
+      "same_code": true,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def pair_up(a, b):\n    pairs = zip(a, b)\n    return len(pairs)",
+      "migrated_code": "def pair_up(a, b):\n    pairs = zip(a, b)\n    return len(pairs)"
+    }
+  ],
+  "suspicious_tiny_changes": [
+    {
+      "id": "1d4baff7-13fc-44fa-ac26-d6ec216f61bf",
+      "family_id": "mined__github_py23_0599c01d84a6c605",
+      "source": "mutation",
+      "mutation_type": "division_operator_wrong_direction",
+      "pattern": "mined:xrange(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "train",
+      "original_chars": 562,
+      "migrated_chars": 562,
+      "original_lines": 13,
+      "migrated_lines": 13,
+      "change_ratio": 0.0018,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def __init__(self, scale, tfm, texname, vf):\n        if not isinstance(texname, bytes):\n            raise ValueError(\"texname must be a bytestring, got %s\"\n                             % type(texname))\n        self._scale, self._tfm, self.texname, self._vf = \\\n            scale, tfm, texname, vf\n        self.size = scale * (72.0 / (72.27 * 2**16))\n        try:\n            nchars = max(tfm.width) + 1\n        except ValueError:\n            nchars = 0\n        self.widths = [(1000*tfm.width.get(char, 0)) >> 20\n                       for char in xrange(nchars)]",
+      "migrated_code": "def __init__(self, scale, tfm, texname, vf):\n        if not isinstance(texname, bytes):\n            raise ValueError(\"texname must be a bytestring, got %s\"\n                             % type(texname))\n        self._scale, self._tfm, self.texname, self._vf = \\\n            scale, tfm, texname, vf\n        self.size = scale * (72.0 // (72.27 * 2**16))\n        try:\n            nchars = max(tfm.width) + 1\n        except ValueError:\n            nchars = 0\n        self.widths = [(1000*tfm.width.get(char, 0)) >> 20\n                       for char in range(nchars)]"
+    },
+    {
+      "id": "30aa5346-37f8-445d-a40d-9efb5a7ce6e1",
+      "family_id": "mined__github_py23_804f04de65739059",
+      "source": "mutation",
+      "mutation_type": "dict_iteritems_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "val",
+      "original_chars": 702,
+      "migrated_chars": 703,
+      "original_lines": 15,
+      "migrated_lines": 15,
+      "change_ratio": 0.005,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_queue_status(self):\n        ids = self.client.ids\n        id0 = ids[0]\n        qs = self.client.queue_status(targets=id0)\n        self.assertTrue(isinstance(qs, dict))\n        self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])\n        allqs = self.client.queue_status()\n        self.assertTrue(isinstance(allqs, dict))\n        intkeys = list(allqs.keys())\n        intkeys.remove('unassigned')\n        self.assertEquals(sorted(intkeys), sorted(self.client.ids))\n        unassigned = allqs.pop('unassigned')\n        for eid,qs in allqs.items():\n            self.assertTrue(isinstance(qs, dict))\n            self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])",
+      "migrated_code": "def test_queue_status(self):\n        ids = self.client.ids\n        id0 = ids[0]\n        qs = self.client.queue_status(targets=id0)\n        self.assertTrue(isinstance(qs, dict))\n        self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])\n        allqs = self.client.queue_status()\n        self.assertTrue(isinstance(allqs, dict))\n        intkeys = list(allqs.keys())\n        intkeys.remove('unassigned')\n        self.assertEqual(sorted(intkeys), sorted(self.client.ids))\n        unassigned = allqs.pop('unassigned')\n        for eid,qs in allqs.iteritems():\n            self.assertTrue(isinstance(qs, dict))\n            self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])"
+    },
+    {
+      "id": "60cc5162-6d72-4bda-80f5-59a470be64a5",
+      "family_id": "mined__github_py23_804f04de65739059",
+      "source": "mutation",
+      "mutation_type": "missing_list_wrap_on_iterator",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "val",
+      "original_chars": 702,
+      "migrated_chars": 693,
+      "original_lines": 15,
+      "migrated_lines": 15,
+      "change_ratio": 0.0065,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_queue_status(self):\n        ids = self.client.ids\n        id0 = ids[0]\n        qs = self.client.queue_status(targets=id0)\n        self.assertTrue(isinstance(qs, dict))\n        self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])\n        allqs = self.client.queue_status()\n        self.assertTrue(isinstance(allqs, dict))\n        intkeys = list(allqs.keys())\n        intkeys.remove('unassigned')\n        self.assertEquals(sorted(intkeys), sorted(self.client.ids))\n        unassigned = allqs.pop('unassigned')\n        for eid,qs in allqs.items():\n            self.assertTrue(isinstance(qs, dict))\n            self.assertEquals(sorted(qs.keys()), ['completed', 'queue', 'tasks'])",
+      "migrated_code": "def test_queue_status(self):\n        ids = self.client.ids\n        id0 = ids[0]\n        qs = self.client.queue_status(targets=id0)\n        self.assertTrue(isinstance(qs, dict))\n        self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])\n        allqs = self.client.queue_status()\n        self.assertTrue(isinstance(allqs, dict))\n        intkeys = allqs.keys()\n        intkeys.remove('unassigned')\n        self.assertEqual(sorted(intkeys), sorted(self.client.ids))\n        unassigned = allqs.pop('unassigned')\n        for eid,qs in allqs.items():\n            self.assertTrue(isinstance(qs, dict))\n            self.assertEqual(sorted(qs.keys()), ['completed', 'queue', 'tasks'])"
+    },
+    {
+      "id": "917343e1-71da-43be-874d-3c559f3d67d2",
+      "family_id": "mined__github_py23_1e998f132b882108",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "train",
+      "original_chars": 691,
+      "migrated_chars": 689,
+      "original_lines": 15,
+      "migrated_lines": 15,
+      "change_ratio": 0.0014,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_db_query_dt(self):\n        \"\"\"test db query by date\"\"\"\n        hist = self.client.hub_history()\n        middle = self.client.db_query({'msg_id' : hist[len(hist)//2]})[0]\n        tic = middle['submitted']\n        before = self.client.db_query({'submitted' : {'$lt' : tic}})\n        after = self.client.db_query({'submitted' : {'$gte' : tic}})\n        self.assertEquals(len(before)+len(after),len(hist))\n        for b in before:\n            self.assertTrue(b['submitted'] < tic)\n        for a in after:\n            self.assertTrue(a['submitted'] >= tic)\n        same = self.client.db_query({'submitted' : tic})\n        for s in same:\n            self.assertTrue(s['submitted'] == tic)",
+      "migrated_code": "def test_db_query_dt(self):\n        \"\"\"test db query by date\"\"\"\n        hist = self.client.hub_history()\n        middle = self.client.db_query({'msg_id' : hist[len(hist)/2]})[0]\n        tic = middle['submitted']\n        before = self.client.db_query({'submitted' : {'$lt' : tic}})\n        after = self.client.db_query({'submitted' : {'$gte' : tic}})\n        self.assertEqual(len(before)+len(after),len(hist))\n        for b in before:\n            self.assertTrue(b['submitted'] < tic)\n        for a in after:\n            self.assertTrue(a['submitted'] >= tic)\n        same = self.client.db_query({'submitted' : tic})\n        for s in same:\n            self.assertTrue(s['submitted'] == tic)"
+    },
+    {
+      "id": "d2650df8-7426-4f3d-9985-139eb44bd618",
+      "family_id": "mined__github_py23_a73106e0905c255e",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(,.assertNotEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "test",
+      "original_chars": 824,
+      "migrated_chars": 830,
+      "original_lines": 21,
+      "migrated_lines": 21,
+      "change_ratio": 0.006,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_resubmit_header(self):\n        \"\"\"resubmit shouldn't clobber the whole header\"\"\"\n        def f():\n            import random\n            return random.random()\n        v = self.client.load_balanced_view()\n        v.retries = 1\n        ar = v.apply_async(f)\n        r1 = ar.get(1)\n        # give the Hub a chance to notice:\n        self._wait_for_idle()\n        ahr = self.client.resubmit(ar.msg_ids)\n        ahr.get(1)\n        time.sleep(0.5)\n        records = self.client.db_query({'msg_id': {'$in': ar.msg_ids + ahr.msg_ids}}, keys='header')\n        h1,h2 = [ r['header'] for r in records ]\n        for key in set(h1.keys()).union(set(h2.keys())):\n            if key in ('msg_id', 'date'):\n                self.assertNotEquals(h1[key], h2[key])\n            else:\n                self.assertEquals(h1[key], h2[key])",
+      "migrated_code": "def test_resubmit_header(self):\n        \"\"\"resubmit shouldn't clobber the whole header\"\"\"\n        def f():\n            import random\n            return random.random()\n        v = self.client.load_balanced_view()\n        v.retries = 1\n        ar = v.apply_async(f)\n        r1 = ar.get(1)\n        # give the Hub a chance to notice:\n        self._wait_for_idle()\n        ahr = self.client.resubmit(ar.msg_ids)\n        ahr.get(1)\n        time.sleep(0.5)\n        records = self.client.db_query({'msg_id': {'$in': ar.msg_ids + ahr.msg_ids}}, keys='header')\n        h1,h2 = [ r['header'] for r in records ]\n        for key in set(h1.iterkeys()).union(set(h2.iterkeys())):\n            if key in ('msg_id', 'date'):\n                self.assertNotEqual(h1[key], h2[key])\n            else:\n                self.assertEqual(h1[key], h2[key])"
+    },
+    {
+      "id": "60ac959c-4c82-4474-a6ad-afe2b9275eff",
+      "family_id": "mined__github_py23_406cbbaff2137f23",
+      "source": "mutation",
+      "mutation_type": "division_operator_flipped",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "test",
+      "original_chars": 680,
+      "migrated_chars": 678,
+      "original_lines": 15,
+      "migrated_lines": 15,
+      "change_ratio": 0.0015,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_find_records_dt(self):\n        \"\"\"test finding records by date\"\"\"\n        hist = self.db.get_history()\n        middle = self.db.get_record(hist[len(hist)//2])\n        tic = middle['submitted']\n        before = self.db.find_records({'submitted' : {'$lt' : tic}})\n        after = self.db.find_records({'submitted' : {'$gte' : tic}})\n        self.assertEquals(len(before)+len(after),len(hist))\n        for b in before:\n            self.assertTrue(b['submitted'] < tic)\n        for a in after:\n            self.assertTrue(a['submitted'] >= tic)\n        same = self.db.find_records({'submitted' : tic})\n        for s in same:\n            self.assertTrue(s['submitted'] == tic)",
+      "migrated_code": "def test_find_records_dt(self):\n        \"\"\"test finding records by date\"\"\"\n        hist = self.db.get_history()\n        middle = self.db.get_record(hist[len(hist)/2])\n        tic = middle['submitted']\n        before = self.db.find_records({'submitted' : {'$lt' : tic}})\n        after = self.db.find_records({'submitted' : {'$gte' : tic}})\n        self.assertEqual(len(before)+len(after),len(hist))\n        for b in before:\n            self.assertTrue(b['submitted'] < tic)\n        for a in after:\n            self.assertTrue(a['submitted'] >= tic)\n        same = self.db.find_records({'submitted' : tic})\n        for s in same:\n            self.assertTrue(s['submitted'] == tic)"
+    },
+    {
+      "id": "5eb7ee15-6577-43dc-9123-74eb90eff2b6",
+      "family_id": "mined__github_py23_272180831a7cce89",
+      "source": "mutation",
+      "mutation_type": "dict_iterkeys_not_converted",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "hard",
+      "verification_status": "pending",
+      "split": "test",
+      "original_chars": 640,
+      "migrated_chars": 641,
+      "original_lines": 13,
+      "migrated_lines": 13,
+      "change_ratio": 0.0055,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_msg(self):\n        \"\"\"message format\"\"\"\n        msg = self.session.msg('execute')\n        thekeys = set('header parent_header content msg_type msg_id'.split())\n        s = set(msg.keys())\n        self.assertEquals(s, thekeys)\n        self.assertTrue(isinstance(msg['content'],dict))\n        self.assertTrue(isinstance(msg['header'],dict))\n        self.assertTrue(isinstance(msg['parent_header'],dict))\n        self.assertTrue(isinstance(msg['msg_id'],str))\n        self.assertTrue(isinstance(msg['msg_type'],str))\n        self.assertEquals(msg['header']['msg_type'], 'execute')\n        self.assertEquals(msg['msg_type'], 'execute')",
+      "migrated_code": "def test_msg(self):\n        \"\"\"message format\"\"\"\n        msg = self.session.msg('execute')\n        thekeys = set('header parent_header content msg_type msg_id'.split())\n        s = set(msg.iterkeys())\n        self.assertEqual(s, thekeys)\n        self.assertTrue(isinstance(msg['content'],dict))\n        self.assertTrue(isinstance(msg['header'],dict))\n        self.assertTrue(isinstance(msg['parent_header'],dict))\n        self.assertTrue(isinstance(msg['msg_id'],str))\n        self.assertTrue(isinstance(msg['msg_type'],str))\n        self.assertEqual(msg['header']['msg_type'], 'execute')\n        self.assertEqual(msg['msg_type'], 'execute')"
+    }
+  ],
+  "representative_large_changes": [
+    {
+      "id": "74b0222c-2b7b-49f0-96e6-64c902cdbe7b",
+      "family_id": "mined__github_py23_eaa65bd15dcfd57c",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "mined:inspect.getargspec(,six.PY2",
+      "difficulty": "medium",
+      "verification_status": "pending",
+      "split": "val",
+      "original_chars": 704,
+      "migrated_chars": 46,
+      "original_lines": 19,
+      "migrated_lines": 2,
+      "change_ratio": 0.8773,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def func_accepts_kwargs(func):\n    if six.PY2:\n        # Not all callables are inspectable with getargspec, so we'll\n        # try a couple different ways but in the end fall back on assuming\n        # it is -- we don't want to prevent registration of valid but weird\n        # callables.\n        try:\n            argspec = inspect.getargspec(func)\n        except TypeError:\n            try:\n                argspec = inspect.getargspec(func.__call__)\n            except (TypeError, AttributeError):\n                argspec = None\n        return not argspec or argspec[2] is not None\n\n    return any(\n        p for p in inspect.signature(func).parameters.values()\n        if p.kind == p.VAR_KEYWORD\n    )",
+      "migrated_code": "def func_accepts_kwargs(func):\n    return None"
+    },
+    {
+      "id": "c8d7f83c-9991-4cf2-a8ca-7063aaec8ac9",
+      "family_id": "mined__github_py23_220f0ba07a258afb",
+      "source": "generic_mutation",
+      "mutation_type": "generic_return_value_dropped",
+      "pattern": "mined:six.PY2",
+      "difficulty": "medium",
+      "verification_status": "pending",
+      "split": "train",
+      "original_chars": 1149,
+      "migrated_chars": 409,
+      "original_lines": 32,
+      "migrated_lines": 17,
+      "change_ratio": 0.8344,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_html_safe_subclass(self):\n        if six.PY2:\n            class BaseClass(object):\n                def __html__(self):\n                    # defines __html__ on its own\n                    return 'some html content'\n\n                def __unicode__(self):\n                    return 'some non html content'\n\n            @html.html_safe\n            class Subclass(BaseClass):\n                def __unicode__(self):\n                    # overrides __unicode__ and is marked as html_safe\n                    return 'some html safe content'\n        else:\n            class BaseClass(object):\n                def __html__(self):\n                    # defines __html__ on its own\n                    return 'some html content'\n\n                def __str__(self):\n                    return 'some non html content'\n\n            @html.html_safe\n            class Subclass(BaseClass):\n                def __str__(self):\n                    # overrides __str__ and is marked as html_safe\n                    return 'some html safe content'\n\n        subclass_obj = Subclass()\n        self.assertEqual(force_text(subclass_obj), subclass_obj.__html__())",
+      "migrated_code": "def test_html_safe_subclass(self):\n\n    class BaseClass(object):\n\n        def __html__(self):\n            return 'some html content'\n\n        def __str__(self):\n            return 'some non html content'\n\n    @html.html_safe\n    class Subclass(BaseClass):\n\n        def __str__(self):\n            return None\n    subclass_obj = Subclass()\n    self.assertEqual(force_text(subclass_obj), subclass_obj.__html__())"
+    },
+    {
+      "id": "bdbb28d5-3da8-4b6b-9d9f-81a6f4ea7764",
+      "family_id": "mined__github_py23_29fa9ff144335c42",
+      "source": "generic_mutation",
+      "mutation_type": "generic_off_by_one",
+      "pattern": "mined:.assertEquals(",
+      "difficulty": "medium",
+      "verification_status": "pending",
+      "split": "train",
+      "original_chars": 967,
+      "migrated_chars": 884,
+      "original_lines": 25,
+      "migrated_lines": 25,
+      "change_ratio": 0.8401,
+      "same_code": false,
+      "function_name": "",
+      "repo": "",
+      "original_code": "def test_push_pull(self):\n        \"\"\"test pushing and pulling\"\"\"\n        data = dict(a=10, b=1.05, c=range(10), d={'e':(1,2),'f':'hi'})\n        t = self.client.ids[-1]\n        v = self.client[t]\n        push = v.push\n        pull = v.pull\n        v.block=True\n        nengines = len(self.client)\n        push({'data':data})\n        d = pull('data')\n        self.assertEquals(d, data)\n        self.client[:].push({'data':data})\n        d = self.client[:].pull('data', block=True)\n        self.assertEquals(d, nengines*[data])\n        ar = push({'data':data}, block=False)\n        self.assertTrue(isinstance(ar, AsyncResult))\n        r = ar.get()\n        ar = self.client[:].pull('data', block=False)\n        self.assertTrue(isinstance(ar, AsyncResult))\n        r = ar.get()\n        self.assertEquals(r, nengines*[data])\n        self.client[:].push(dict(a=10,b=20))\n        r = self.client[:].pull(('a','b'), block=True)\n        self.assertEquals(r, nengines*[[10,20]])",
+      "migrated_code": "def test_push_pull(self):\n    \"\"\"test pushing and pulling\"\"\"\n    data = dict(a=10, b=1.05, c=range(9), d={'e': (1, 2), 'f': 'hi'})\n    t = self.client.ids[-1]\n    v = self.client[t]\n    push = v.push\n    pull = v.pull\n    v.block = True\n    nengines = len(self.client)\n    push({'data': data})\n    d = pull('data')\n    self.assertEqual(d, data)\n    self.client[:].push({'data': data})\n    d = self.client[:].pull('data', block=True)\n    self.assertEqual(d, nengines * [data])\n    ar = push({'data': data}, block=False)\n    self.assertTrue(isinstance(ar, AsyncResult))\n    r = ar.get()\n    ar = self.client[:].pull('data', block=False)\n    self.assertTrue(isinstance(ar, AsyncResult))\n    r = ar.get()\n    self.assertEqual(r, nengines * [data])\n    self.client[:].push(dict(a=10, b=20))\n    r = self.client[:].pull(('a', 'b'), block=True)\n    self.assertEqual(r, nengines * [[10, 20]])"
+    }
+  ]
+}
