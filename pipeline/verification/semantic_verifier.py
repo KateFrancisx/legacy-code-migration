@@ -1,342 +1,410 @@
+import json
+import math
 import os
+import shlex
+import shutil
 import subprocess
-from dataclasses import dataclass
+import tempfile
 from pathlib import Path
 
+from pipeline.verification.callable_discovery import (
+    discover_callables,
+)
 from pipeline.verification.differential_executor import (
     execute_function,
 )
-from pipeline.verification.result_normalizer import (
-    normalize_result,
-)
-from pipeline.verification.test_discovery import (
-    discover_test_suite,
-)
 from pipeline.verification.test_generator import (
-    generate_llm_cases_for_functions,
+    generate_cases_for_callables,
 )
 from pipeline.verification.verification_input import (
     load_verification_input,
 )
 
 
-@dataclass
-class RepositoryTestResult:
-    """
-    Result of running an existing repository test suite.
-    """
-
-    return_code: int
-    stdout: str
-    stderr: str
-    timed_out: bool = False
-
-
-def compare_results(original, migrated):
-    """
-    Compare repository test results or function execution results.
-
-    Repository test suites are compared by actual success/failure
-    status rather than unittest's textual output.
-
-    Function execution results are compared semantically.
-    """
-
-    if (
-        hasattr(original, "return_value")
-        and hasattr(migrated, "return_value")
-    ):
-        return _compare_function_results(
-            original,
-            migrated,
-        )
-
-    original_normalized = normalize_result(
-        original
-    )
-
-    migrated_normalized = normalize_result(
-        migrated
-    )
-
-    original_success = (
-        original.return_code == 0
-        and not original.timed_out
-    )
-
-    migrated_success = (
-        migrated.return_code == 0
-        and not migrated.timed_out
-    )
-
-    return {
-        "equivalent": (
-            original_success
-            == migrated_success
-        ),
-        "original": original_normalized,
-        "migrated": migrated_normalized,
-    }
-
-
 def _values_semantically_equal(
-    original,
-    migrated,
+    left,
+    right,
 ):
     """
-    Compare values while allowing legitimate Python 2/3
-    representation differences such as 10 vs 10.0.
+    Compare two values semantically.
+
+    The comparison is recursive and does not require exact
+    Python runtime types when the values are behaviorally
+    equivalent.
     """
 
-    if (
-        isinstance(original, bool)
-        or isinstance(migrated, bool)
+    if left is None or right is None:
+        return left is None and right is None
+
+    if isinstance(
+        left,
+        bool,
+    ) or isinstance(
+        right,
+        bool,
     ):
         return (
-            type(original) is type(migrated)
-            and original == migrated
+            isinstance(left, bool)
+            and isinstance(right, bool)
+            and left == right
         )
 
-    numeric_types = (
-        int,
-        float,
-    )
-
-    if (
-        isinstance(original, numeric_types)
-        and isinstance(migrated, numeric_types)
+    if isinstance(
+        left,
+        (int, float),
+    ) and isinstance(
+        right,
+        (int, float),
     ):
-        return original == migrated
 
-    if type(original) is not type(migrated):
-        return False
+        try:
+            if (
+                isinstance(left, float)
+                and math.isnan(left)
+            ):
+                return (
+                    isinstance(right, float)
+                    and math.isnan(right)
+                )
 
-    if isinstance(original, list):
-        return (
-            len(original)
-            == len(migrated)
-            and all(
-                _values_semantically_equal(
-                    left,
-                    right,
-                )
-                for left, right in zip(
-                    original,
-                    migrated,
-                )
+            if (
+                isinstance(right, float)
+                and math.isnan(right)
+            ):
+                return False
+
+            return left == right
+
+        except Exception:
+            return False
+
+    if isinstance(
+        left,
+        list,
+    ) and isinstance(
+        right,
+        list,
+    ):
+
+        if len(left) != len(right):
+            return False
+
+        return all(
+            _values_semantically_equal(
+                left_item,
+                right_item,
+            )
+            for left_item, right_item in zip(
+                left,
+                right,
             )
         )
 
-    if isinstance(original, tuple):
-        return (
-            len(original)
-            == len(migrated)
-            and all(
-                _values_semantically_equal(
-                    left,
-                    right,
-                )
-                for left, right in zip(
-                    original,
-                    migrated,
-                )
+    if isinstance(
+        left,
+        tuple,
+    ) and isinstance(
+        right,
+        tuple,
+    ):
+
+        if len(left) != len(right):
+            return False
+
+        return all(
+            _values_semantically_equal(
+                left_item,
+                right_item,
+            )
+            for left_item, right_item in zip(
+                left,
+                right,
             )
         )
 
-    if isinstance(original, dict):
-        if (
-            set(original.keys())
-            != set(migrated.keys())
+    if isinstance(
+        left,
+        dict,
+    ) and isinstance(
+        right,
+        dict,
+    ):
+
+        if set(left.keys()) != set(
+            right.keys()
         ):
             return False
 
         return all(
             _values_semantically_equal(
-                original[key],
-                migrated[key],
+                left[key],
+                right[key],
             )
-            for key in original
+            for key in left
         )
 
-    if isinstance(original, set):
-        return original == migrated
+    if isinstance(
+        left,
+        set,
+    ) and isinstance(
+        right,
+        set,
+    ):
 
-    return original == migrated
+        return left == right
+
+    return left == right
 
 
-def _compare_function_results(
+def _compare_execution_results(
     original,
     migrated,
 ):
     """
-    Compare FunctionExecutionResult objects.
+    Compare two callable execution results.
+
+    Return types are deliberately not treated as a semantic
+    difference when the returned values are equivalent.
     """
 
-    differences = {}
-    semantic_differences = {}
+    differences = []
 
     if original.status != migrated.status:
-        differences["status"] = {
-            "original": original.status,
-            "migrated": migrated.status,
-            "semantic_difference": True,
-        }
 
-        semantic_differences["status"] = {
-            "original": original.status,
-            "migrated": migrated.status,
-        }
+        differences.append(
+            {
+                "field": "status",
+                "original": original.status,
+                "migrated": migrated.status,
+            }
+        )
 
     if not _values_semantically_equal(
         original.return_value,
         migrated.return_value,
     ):
-        differences["return_value"] = {
-            "original": original.return_value,
-            "migrated": migrated.return_value,
-            "semantic_difference": True,
-        }
 
-        semantic_differences["return_value"] = {
-            "original": original.return_value,
-            "migrated": migrated.return_value,
-        }
-
-    if original.return_type != migrated.return_type:
-        differences["return_type"] = {
-            "original": original.return_type,
-            "migrated": migrated.return_type,
-            "semantic_difference": False,
-        }
+        differences.append(
+            {
+                "field": "return_value",
+                "original": original.return_value,
+                "migrated": migrated.return_value,
+            }
+        )
 
     if original.stdout != migrated.stdout:
-        differences["stdout"] = {
-            "original": original.stdout,
-            "migrated": migrated.stdout,
-            "semantic_difference": True,
-        }
 
-        semantic_differences["stdout"] = {
-            "original": original.stdout,
-            "migrated": migrated.stdout,
-        }
+        differences.append(
+            {
+                "field": "stdout",
+                "original": original.stdout,
+                "migrated": migrated.stdout,
+            }
+        )
 
     if original.stderr != migrated.stderr:
-        differences["stderr"] = {
-            "original": original.stderr,
-            "migrated": migrated.stderr,
-            "semantic_difference": True,
-        }
 
-        semantic_differences["stderr"] = {
-            "original": original.stderr,
-            "migrated": migrated.stderr,
-        }
+        differences.append(
+            {
+                "field": "stderr",
+                "original": original.stderr,
+                "migrated": migrated.stderr,
+            }
+        )
 
-    if original.exception_type != migrated.exception_type:
-        differences["exception_type"] = {
-            "original": original.exception_type,
-            "migrated": migrated.exception_type,
-            "semantic_difference": True,
-        }
+    if (
+        original.exception_type
+        != migrated.exception_type
+    ):
 
-        semantic_differences["exception_type"] = {
-            "original": original.exception_type,
-            "migrated": migrated.exception_type,
-        }
+        differences.append(
+            {
+                "field": "exception_type",
+                "original": original.exception_type,
+                "migrated": migrated.exception_type,
+            }
+        )
 
     if (
         original.exception_message
         != migrated.exception_message
     ):
-        differences["exception_message"] = {
-            "original": original.exception_message,
-            "migrated": migrated.exception_message,
-            "semantic_difference": True,
-        }
 
-        semantic_differences["exception_message"] = {
-            "original": original.exception_message,
-            "migrated": migrated.exception_message,
-        }
+        differences.append(
+            {
+                "field": "exception_message",
+                "original": original.exception_message,
+                "migrated": migrated.exception_message,
+            }
+        )
 
-    if original.timed_out != migrated.timed_out:
-        differences["timed_out"] = {
-            "original": original.timed_out,
-            "migrated": migrated.timed_out,
-            "semantic_difference": True,
-        }
+    if (
+        original.timed_out
+        != migrated.timed_out
+    ):
 
-        semantic_differences["timed_out"] = {
-            "original": original.timed_out,
-            "migrated": migrated.timed_out,
-        }
+        differences.append(
+            {
+                "field": "timed_out",
+                "original": original.timed_out,
+                "migrated": migrated.timed_out,
+            }
+        )
 
     return {
-        "equivalent": (
-            len(semantic_differences) == 0
+        "equivalent": not differences,
+        "semantic_difference": bool(
+            differences
         ),
         "differences": differences,
-        "semantic_differences": (
-            semantic_differences
-        ),
     }
+
+
+def _serialize_execution_result(
+    result,
+):
+    """
+    Convert an execution result into a JSON-friendly
+    dictionary.
+    """
+
+    return {
+        "status": result.status,
+        "return_value": result.return_value,
+        "return_type": result.return_type,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "exception_type": result.exception_type,
+        "exception_message": result.exception_message,
+        "timed_out": result.timed_out,
+    }
+
+
+def _normalize_python_command(
+    python_executable
+):
+    """
+    Convert a configured Python command into the argument
+    list expected by subprocess.run().
+
+    Examples:
+
+        "py -2"
+            ->
+        ["py", "-2"]
+
+        "py -3"
+            ->
+        ["py", "-3"]
+
+        "python"
+            ->
+        ["python"]
+    """
+
+    if isinstance(
+        python_executable,
+        (list, tuple),
+    ):
+        return [
+            str(part)
+            for part in python_executable
+        ]
+
+    if not python_executable:
+        return [
+            "python"
+        ]
+
+    return shlex.split(
+        str(
+            python_executable
+        ),
+        posix=False,
+    )
+
+
+def _repository_test_command(
+    python_executable,
+):
+    """
+    Build a repository-independent unittest command.
+
+    The Python executable may be supplied as:
+
+        "py -2"
+
+    or:
+
+        "py -3"
+
+    and is normalized into separate subprocess arguments.
+    """
+
+    python_command = (
+        _normalize_python_command(
+            python_executable
+        )
+    )
+
+    return (
+        python_command
+        + [
+            "-m",
+            "unittest",
+            "discover",
+            "-v",
+            "-s",
+            "tests",
+            "-p",
+            "test*.py",
+        ]
+    )
 
 
 def _run_test_suite(
     repository_path,
     python_executable,
+    timeout=120,
 ):
     """
-    Discover and execute the repository's existing
-    unittest test suite.
+    Execute the repository's existing unittest suite.
     """
 
-    discovery = discover_test_suite(
+    repository_path = Path(
         repository_path
+    ).resolve()
+
+    tests_directory = (
+        repository_path
+        / "tests"
     )
 
-    test_files = discovery.get(
-        "test_files",
-        [],
+    if not tests_directory.exists():
+        return {
+            "status": "NO_TESTS_DIRECTORY",
+            "return_code": None,
+            "stdout": "",
+            "stderr": "",
+            "test_count": 0,
+        }
+
+    command = _repository_test_command(
+        python_executable
     )
-
-    if not test_files:
-        return RepositoryTestResult(
-            return_code=0,
-            stdout="",
-            stderr="",
-            timed_out=False,
-        )
-
-    command = [
-        python_executable,
-        "-m",
-        "unittest",
-        "discover",
-        "-s",
-        "tests",
-        "-p",
-        "test*.py",
-    ]
 
     try:
+
         completed = subprocess.run(
             command,
-            cwd=repository_path,
+            cwd=str(repository_path),
             capture_output=True,
             text=True,
-            timeout=120,
-        )
-
-        return RepositoryTestResult(
-            return_code=completed.returncode,
-            stdout=completed.stdout,
-            stderr=completed.stderr,
-            timed_out=False,
+            timeout=timeout,
         )
 
     except subprocess.TimeoutExpired as exc:
+
         stdout = (
             exc.stdout
             if exc.stdout is not None
@@ -349,602 +417,606 @@ def _run_test_suite(
             else ""
         )
 
-        if isinstance(stdout, bytes):
+        if isinstance(
+            stdout,
+            bytes,
+        ):
             stdout = stdout.decode(
                 errors="replace"
             )
 
-        if isinstance(stderr, bytes):
+        if isinstance(
+            stderr,
+            bytes,
+        ):
             stderr = stderr.decode(
                 errors="replace"
             )
 
-        return RepositoryTestResult(
-            return_code=-1,
-            stdout=stdout,
-            stderr=stderr,
-            timed_out=True,
-        )
+        return {
+            "status": "TIMEOUT",
+            "return_code": None,
+            "stdout": stdout,
+            "stderr": stderr,
+            "test_count": 0,
+        }
 
+    except FileNotFoundError as exc:
 
-def run_tests(
-    repository_path,
-    python_executable,
-):
-    """
-    Run the discovered repository test suite.
-    """
+        return {
+            "status": "EXECUTION_FAILED",
+            "return_code": None,
+            "stdout": "",
+            "stderr": str(exc),
+            "test_count": 0,
+        }
 
-    return _run_test_suite(
-        repository_path,
-        python_executable,
+    output = (
+        completed.stdout
+        + "\n"
+        + completed.stderr
     )
 
+    test_count = 0
 
-def run_repository_tests(
+    for line in output.splitlines():
+
+        stripped = line.strip()
+
+        if (
+            stripped.startswith(
+                "Ran "
+            )
+            and " tests" in stripped
+        ):
+
+            try:
+
+                test_count = int(
+                    stripped.split(
+                        "Ran ",
+                        1,
+                    )[1].split(
+                        " tests",
+                        1,
+                    )[0]
+                )
+
+            except Exception:
+                pass
+
+    if (
+        completed.returncode == 0
+        and test_count > 0
+    ):
+        status = "PASS"
+
+    elif (
+        completed.returncode == 0
+        and test_count == 0
+    ):
+        status = "NO_TESTS_RUN"
+
+    else:
+        status = "FAIL"
+
+    return {
+        "status": status,
+        "return_code": completed.returncode,
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+        "test_count": test_count,
+    }
+
+
+def _copy_existing_tests_to_migrated_repository(
     original_repository,
     migrated_repository,
-    original_python,
-    migrated_python,
 ):
     """
-    Run existing tests under Python 2 and Python 3.
+    Create a temporary migrated verification workspace.
+
+    Existing tests are copied from the original repository
+    into the migrated repository so the same tests execute
+    against both implementations.
+
+    The real migrated repository is never modified.
     """
 
-    original_result = run_tests(
-        original_repository,
-        original_python,
+    temporary_directory = tempfile.mkdtemp(
+        prefix="semantic_verification_"
     )
 
-    migrated_result = run_tests(
+    temporary_repository = (
+        Path(temporary_directory)
+        / "migrated"
+    )
+
+    shutil.copytree(
         migrated_repository,
-        migrated_python,
+        temporary_repository,
     )
 
-    comparison = compare_results(
-        original_result,
-        migrated_result,
+    original_tests = (
+        Path(original_repository)
+        / "tests"
+    )
+
+    migrated_tests = (
+        temporary_repository
+        / "tests"
+    )
+
+    if original_tests.exists():
+
+        if migrated_tests.exists():
+            shutil.rmtree(
+                migrated_tests
+            )
+
+        shutil.copytree(
+            original_tests,
+            migrated_tests,
+        )
+
+    return (
+        temporary_repository,
+        temporary_directory,
+    )
+
+
+def _run_existing_tests_differentially(
+    original_repository,
+    migrated_repository,
+    python2_executable,
+    python3_executable,
+):
+    """
+    Run the existing repository tests against both versions.
+
+    The exact same test files are used for both executions.
+
+    This prevents an empty migrated tests directory from
+    being incorrectly interpreted as a successful test run.
+    """
+
+    original_result = _run_test_suite(
+        repository_path=original_repository,
+        python_executable=python2_executable,
+    )
+
+    temporary_repository = None
+    temporary_directory = None
+
+    try:
+
+        (
+            temporary_repository,
+            temporary_directory,
+        ) = _copy_existing_tests_to_migrated_repository(
+            original_repository=original_repository,
+            migrated_repository=migrated_repository,
+        )
+
+        migrated_result = _run_test_suite(
+            repository_path=temporary_repository,
+            python_executable=python3_executable,
+        )
+
+    finally:
+
+        if temporary_directory is not None:
+
+            shutil.rmtree(
+                temporary_directory,
+                ignore_errors=True,
+            )
+
+    equivalent = (
+        original_result["status"] == "PASS"
+        and migrated_result["status"] == "PASS"
     )
 
     return {
+        "equivalent": equivalent,
         "original": original_result,
         "migrated": migrated_result,
-        "comparison": comparison,
+        "detailed": [
+            {
+                "test_suite": "existing_tests",
+                "equivalent": equivalent,
+                "original": original_result,
+                "migrated": migrated_result,
+            }
+        ],
+    }
+
+
+def _callable_metadata(
+    callable_info,
+):
+    """
+    Convert CallableInfo into a serializable dictionary.
+    """
+
+    if hasattr(
+        callable_info,
+        "to_dict",
+    ):
+        return callable_info.to_dict()
+
+    return {
+        "file": getattr(
+            callable_info,
+            "file_name",
+            None,
+        ),
+        "qualified_name": getattr(
+            callable_info,
+            "qualified_name",
+            None,
+        ),
+        "function_name": getattr(
+            callable_info,
+            "function_name",
+            None,
+        ),
+        "kind": getattr(
+            callable_info,
+            "kind",
+            "function",
+        ),
+        "class_name": getattr(
+            callable_info,
+            "class_name",
+            None,
+        ),
+        "line": getattr(
+            callable_info,
+            "line",
+            0,
+        ),
+        "parameters": getattr(
+            callable_info,
+            "parameters",
+            [],
+        ),
     }
 
 
 def run_differential_test(
     original_repository,
     migrated_repository,
-    module_path,
-    function_name,
-    inputs,
-    original_python=r"C:\Python27\python.exe",
-    migrated_python=r"py",
+    callable_info,
+    inputs=None,
+    constructor_inputs=None,
+    python2_executable="py -2",
+    python3_executable="py -3",
+    timeout=30,
 ):
     """
-    Execute one function in both repositories.
+    Execute one callable in both repositories and compare
+    the observed behavior.
 
-    module_path is the path to the migrated module.
+    This is the semantic source of truth.
 
-    The relative path of that module inside the migrated
-    repository is calculated and used to locate the
-    corresponding original Python 2 module.
-
-    Example:
-
-        migrated:
-            D:\\project\\migrated\\utils.py
-
-        original:
-            C:\\project\\original\\utils.py
+    No LLM output is trusted as a correctness result.
     """
 
-    original_repository = os.path.abspath(
-        original_repository
+    if inputs is None:
+        inputs = []
+
+    file_name = callable_info.file_name
+    function_name = callable_info.function_name
+    callable_kind = callable_info.kind
+    class_name = callable_info.class_name
+
+    original_module = (
+        Path(original_repository)
+        / file_name
     )
 
-    migrated_repository = os.path.abspath(
-        migrated_repository
+    migrated_module = (
+        Path(migrated_repository)
+        / file_name
     )
-
-    migrated_module_path = os.path.abspath(
-        module_path
-    )
-
-    try:
-        relative_module_path = os.path.relpath(
-            migrated_module_path,
-            migrated_repository,
-        )
-    except ValueError:
-        return {
-            "function": function_name,
-            "inputs": inputs,
-            "original": None,
-            "migrated": None,
-            "comparison": {
-                "equivalent": False,
-                "differences": {
-                    "module_path": {
-                        "original": original_repository,
-                        "migrated": migrated_repository,
-                        "semantic_difference": True,
-                    }
-                },
-                "semantic_differences": {
-                    "module_path": {
-                        "original": original_repository,
-                        "migrated": migrated_repository,
-                    }
-                },
-            },
-        }
-
-    original_module_path = os.path.abspath(
-        os.path.join(
-            original_repository,
-            relative_module_path,
-        )
-    )
-
-    if not os.path.isfile(
-        original_module_path
-    ):
-        original_result = execute_function(
-            repository_path=original_repository,
-            module_path=original_module_path,
-            function_name=function_name,
-            inputs=inputs,
-            python_executable=original_python,
-        )
-
-        migrated_result = execute_function(
-            repository_path=migrated_repository,
-            module_path=migrated_module_path,
-            function_name=function_name,
-            inputs=inputs,
-            python_executable=migrated_python,
-        )
-
-        comparison = compare_results(
-            original_result,
-            migrated_result,
-        )
-
-        return {
-            "function": function_name,
-            "inputs": inputs,
-            "original": original_result,
-            "migrated": migrated_result,
-            "comparison": comparison,
-        }
 
     original_result = execute_function(
-        repository_path=original_repository,
-        module_path=original_module_path,
+        repository_path=str(
+            original_repository
+        ),
+        module_path=str(
+            original_module
+        ),
         function_name=function_name,
         inputs=inputs,
-        python_executable=original_python,
+        python_executable=python2_executable,
+        timeout=timeout,
+        class_name=class_name,
+        callable_kind=callable_kind,
+        constructor_inputs=constructor_inputs,
     )
 
     migrated_result = execute_function(
-        repository_path=migrated_repository,
-        module_path=migrated_module_path,
+        repository_path=str(
+            migrated_repository
+        ),
+        module_path=str(
+            migrated_module
+        ),
         function_name=function_name,
         inputs=inputs,
-        python_executable=migrated_python,
+        python_executable=python3_executable,
+        timeout=timeout,
+        class_name=class_name,
+        callable_kind=callable_kind,
+        constructor_inputs=constructor_inputs,
     )
 
-    comparison = compare_results(
-        original_result,
-        migrated_result,
+    comparison = _compare_execution_results(
+        original=original_result,
+        migrated=migrated_result,
     )
 
     return {
-        "function": function_name,
+        "callable": _callable_metadata(
+            callable_info
+        ),
         "inputs": inputs,
-        "original": original_result,
-        "migrated": migrated_result,
+        "constructor_inputs": constructor_inputs,
+        "original": _serialize_execution_result(
+            original_result
+        ),
+        "migrated": _serialize_execution_result(
+            migrated_result
+        ),
         "comparison": comparison,
     }
 
 
-def _get_test_case_value(
-    test_case,
-    field_name,
-):
-    """
-    Read a field from either a TestCase dataclass
-    or a dictionary.
-    """
-
-    if isinstance(test_case, dict):
-        return test_case.get(
-            field_name
-        )
-
-    return getattr(
-        test_case,
-        field_name,
-        None,
-    )
-
-
-def run_differential_tests(
-    original_repository,
-    migrated_repository,
-    module_path,
-    function_name,
-    test_cases,
-    original_python=r"C:\Python27\python.exe",
-    migrated_python=r"py",
-):
-    """
-    Execute multiple behavioral test cases.
-    """
-
-    results = []
-
-    for test_case in test_cases:
-        case_function = (
-            _get_test_case_value(
-                test_case,
-                "function",
-            )
-        )
-
-        inputs = (
-            _get_test_case_value(
-                test_case,
-                "inputs",
-            )
-        )
-
-        if case_function is None:
-            case_function = function_name
-
-        results.append(
-            run_differential_test(
-                original_repository=(
-                    original_repository
-                ),
-                migrated_repository=(
-                    migrated_repository
-                ),
-                module_path=module_path,
-                function_name=case_function,
-                inputs=inputs or [],
-                original_python=original_python,
-                migrated_python=migrated_python,
-            )
-        )
-
-    return results
-
-
-def verify_existing_tests(
-    original_repository,
-    migrated_repository,
-    original_python,
-    migrated_python,
-):
-    """
-    Verify the repository's existing tests.
-    """
-
-    return run_repository_tests(
-        original_repository=(
-            original_repository
-        ),
-        migrated_repository=(
-            migrated_repository
-        ),
-        original_python=original_python,
-        migrated_python=migrated_python,
-    )
-
-
-def build_migration_scope(
+def _discover_verification_callables(
     verification_input,
 ):
     """
-    Build the set of files participating in
-    semantic verification.
+    Discover callable structure from migrated Python source.
+
+    This intentionally does not use the upstream symbol list
+    for invocation because the upstream graph does not encode
+    class ownership for methods.
     """
 
-    return list(
-        verification_input.migrated_files
+    return discover_callables(
+        repository_path=verification_input.migrated_repository,
+        file_names=verification_input.migrated_files,
     )
-
-
-def _get_python_file_functions(
-    verification_input,
-    file_name,
-):
-    """
-    Get top-level functions belonging to a migrated
-    Python file.
-
-    Class methods are excluded because the current
-    differential executor executes top-level functions.
-    """
-
-    symbols = (
-        verification_input.symbols.get(
-            file_name,
-            [],
-        )
-    )
-
-    functions = []
-
-    for symbol in symbols:
-        if symbol.get("type") != "function":
-            continue
-
-        function_name = symbol.get(
-            "name"
-        )
-
-        if not function_name:
-            continue
-
-        if function_name == "__init__":
-            continue
-
-        functions.append(
-            function_name
-        )
-
-    return functions
 
 
 def _run_generated_behavioral_tests(
     verification_input,
-    original_repository,
-    migrated_repository,
-    original_python,
-    migrated_python,
-    cases_per_function=3,
+    python2_executable="py -2",
+    python3_executable="py -3",
+    cases_per_callable=3,
 ):
     """
-    Generate behavioral cases for migrated top-level
-    functions and execute them differentially.
+    Generate and execute behavioral scenarios for every
+    discovered callable.
 
-    Gemini is used by the generator when available.
-    The generator falls back automatically when Gemini
-    is unavailable or quota-limited.
+    Existing repository tests are separate and are always
+    executed independently.
     """
 
-    all_results = {}
+    callables = (
+        _discover_verification_callables(
+            verification_input
+        )
+    )
 
-    for file_name in (
-        verification_input.migrated_files
-    ):
-        if not file_name.endswith(".py"):
-            continue
+    generated_cases = (
+        generate_cases_for_callables(
+            callables=callables,
+            count=cases_per_callable,
+            repository_path=verification_input.migrated_repository,
+        )
+    )
 
-        function_names = (
-            _get_python_file_functions(
-                verification_input,
-                file_name,
-            )
+    detailed_results = []
+
+    for callable_info in callables:
+
+        qualified_name = (
+            callable_info.qualified_name
         )
 
-        if not function_names:
-            continue
-
-        migrated_file_path = (
-            Path(migrated_repository)
-            / file_name
+        cases = generated_cases.get(
+            qualified_name,
+            [],
         )
 
-        if not migrated_file_path.exists():
-            all_results[file_name] = {
-                "status": "SOURCE_NOT_FOUND",
-                "functions": {},
-            }
-            continue
+        for index, case in enumerate(
+            cases,
+            start=1,
+        ):
 
-        try:
-            generated_cases = (
-                generate_llm_cases_for_functions(
-                    repository_path=(
-                        migrated_repository
-                    ),
-                    file_name=file_name,
-                    function_names=(
-                        function_names
-                    ),
-                    count=cases_per_function,
-                )
+            case_inputs = case.inputs
+
+            constructor_inputs = (
+                case.constructor_inputs
             )
 
-        except Exception as exc:
-            all_results[file_name] = {
-                "status": "GENERATION_FAILED",
-                "error": str(exc),
-                "functions": {},
-            }
-            continue
-
-        function_results = {}
-
-        for function_name in function_names:
-            cases = (
-                generated_cases.get(
-                    function_name,
-                    [],
-                )
-            )
-
-            if not cases:
-                function_results[
-                    function_name
-                ] = {
-                    "status": "NO_TEST_CASES",
-                    "cases": [],
-                    "results": [],
-                }
-                continue
-
-            results = run_differential_tests(
+            result = run_differential_test(
                 original_repository=(
-                    original_repository
+                    verification_input.original_repository
                 ),
                 migrated_repository=(
-                    migrated_repository
+                    verification_input.migrated_repository
                 ),
-                module_path=str(
-                    migrated_file_path
-                ),
-                function_name=function_name,
-                test_cases=cases,
-                original_python=original_python,
-                migrated_python=migrated_python,
+                callable_info=callable_info,
+                inputs=case_inputs,
+                constructor_inputs=constructor_inputs,
+                python2_executable=python2_executable,
+                python3_executable=python3_executable,
             )
 
-            function_results[
-                function_name
-            ] = {
-                "status": "COMPLETED",
-                "cases": [
-                    case.to_dict()
-                    for case in cases
-                ],
-                "results": results,
-            }
+            result[
+                "case_number"
+            ] = index
 
-        all_results[file_name] = {
-            "status": "COMPLETED",
-            "functions": function_results,
-        }
+            result[
+                "generation_metadata"
+            ] = case.metadata
 
-    return all_results
+            detailed_results.append(
+                result
+            )
 
+    equivalent_count = sum(
+        1
+        for result in detailed_results
+        if result["comparison"][
+            "equivalent"
+        ]
+    )
 
-def _count_behavioral_results(
-    behavioral_results,
-):
-    """
-    Count generated behavioral verification results.
-    """
-
-    total = 0
-    equivalent = 0
-    different = 0
-
-    for file_result in (
-        behavioral_results.values()
-    ):
-        functions = file_result.get(
-            "functions",
-            {},
-        )
-
-        for function_result in (
-            functions.values()
-        ):
-            for result in (
-                function_result.get(
-                    "results",
-                    [],
-                )
-            ):
-                total += 1
-
-                if result[
-                    "comparison"
-                ]["equivalent"]:
-                    equivalent += 1
-                else:
-                    different += 1
+    difference_count = sum(
+        1
+        for result in detailed_results
+        if result["comparison"][
+            "semantic_difference"
+        ]
+    )
 
     return {
-        "total": total,
-        "equivalent": equivalent,
-        "semantic_differences": different,
+        "callable_count": len(
+            callables
+        ),
+        "case_count": len(
+            detailed_results
+        ),
+        "equivalent": equivalent_count,
+        "semantic_differences": difference_count,
+        "detailed": detailed_results,
     }
+
+
+def _load_python_executables():
+    """
+    Read optional interpreter configuration.
+
+    Defaults match the local Python 2 -> Python 3 migration
+    environment.
+    """
+
+    python2 = os.environ.get(
+        "PYTHON2_EXECUTABLE",
+        "py -2",
+    )
+
+    python3 = os.environ.get(
+        "PYTHON3_EXECUTABLE",
+        "py -3",
+    )
+
+    return (
+        python2,
+        python3,
+    )
 
 
 def verify_semantics(
-    original_repository,
-    migrated_repository,
-    original_python,
-    migrated_python,
-    verification_input=None,
+    verification_input,
+    python2_executable=None,
+    python3_executable=None,
+    cases_per_callable=3,
 ):
     """
-    Run the complete semantic verification pipeline.
+    Run the complete semantic verification stage.
 
-    Existing tests are always executed.
+    Verification always includes:
 
-    Generated behavioral tests are executed when
-    verification_input is supplied.
+    1. Existing repository tests.
+    2. Generated behavioral tests.
+
+    Generated behavioral tests are differential:
+    the original Python 2 implementation and migrated
+    Python 3 implementation are both executed.
+
+    The LLM only proposes candidate scenarios.
     """
 
-    existing_tests = verify_existing_tests(
-        original_repository=(
-            original_repository
-        ),
-        migrated_repository=(
-            migrated_repository
-        ),
-        original_python=original_python,
-        migrated_python=migrated_python,
-    )
+    (
+        default_python2,
+        default_python3,
+    ) = _load_python_executables()
 
-    result = {
-        "existing_tests": existing_tests,
-        "behavioral_tests": {},
-        "behavioral_summary": {
-            "total": 0,
-            "equivalent": 0,
-            "semantic_differences": 0,
-        },
-    }
+    if python2_executable is None:
+        python2_executable = default_python2
 
-    if verification_input is None:
-        return result
+    if python3_executable is None:
+        python3_executable = default_python3
 
-    behavioral_results = (
-        _run_generated_behavioral_tests(
-            verification_input=(
-                verification_input
-            ),
+    existing_tests = (
+        _run_existing_tests_differentially(
             original_repository=(
-                original_repository
+                verification_input.original_repository
             ),
             migrated_repository=(
-                migrated_repository
+                verification_input.migrated_repository
             ),
-            original_python=original_python,
-            migrated_python=migrated_python,
+            python2_executable=python2_executable,
+            python3_executable=python3_executable,
         )
     )
 
-    result[
-        "behavioral_tests"
-    ] = behavioral_results
-
-    result[
-        "behavioral_summary"
-    ] = _count_behavioral_results(
-        behavioral_results
+    behavioral_tests = (
+        _run_generated_behavioral_tests(
+            verification_input=verification_input,
+            python2_executable=python2_executable,
+            python3_executable=python3_executable,
+            cases_per_callable=cases_per_callable,
+        )
     )
 
-    return result
+    return {
+        "status": (
+            "PASS"
+            if (
+                existing_tests["equivalent"]
+                and behavioral_tests[
+                    "semantic_differences"
+                ] == 0
+            )
+            else "FAIL"
+        ),
+        "existing_tests": existing_tests,
+        "behavioral_tests": behavioral_tests,
+        "summary": {
+            "existing_tests_equivalent": (
+                existing_tests["equivalent"]
+            ),
+            "behavioral_cases": behavioral_tests[
+                "case_count"
+            ],
+            "behavioral_equivalent": behavioral_tests[
+                "equivalent"
+            ],
+            "behavioral_semantic_differences": (
+                behavioral_tests[
+                    "semantic_differences"
+                ]
+            ),
+        },
+    }
 
 
 def verify_semantics_from_outputs(
     output_directory,
-    original_python=r"C:\Python27\python.exe",
-    migrated_python=r"py",
+    python2_executable=None,
+    python3_executable=None,
+    cases_per_callable=3,
 ):
     """
-    Load upstream migration outputs and run
-    semantic verification.
+    Load upstream migration outputs and execute semantic
+    verification.
     """
 
     verification_input = (
@@ -954,19 +1026,120 @@ def verify_semantics_from_outputs(
     )
 
     return verify_semantics(
-        original_repository=(
-            verification_input.original_repository
-        ),
-        migrated_repository=(
-            verification_input.migrated_repository
-        ),
-        original_python=original_python,
-        migrated_python=migrated_python,
         verification_input=verification_input,
+        python2_executable=python2_executable,
+        python3_executable=python3_executable,
+        cases_per_callable=cases_per_callable,
     )
 
 
+def save_verification_report(
+    report,
+    output_path,
+):
+    """
+    Save the verification report as JSON.
+    """
+
+    output_path = Path(
+        output_path
+    )
+
+    output_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with output_path.open(
+        "w",
+        encoding="utf-8",
+    ) as handle:
+
+        json.dump(
+            report,
+            handle,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+
 if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run semantic verification for a "
+            "Python 2 -> Python 3 migration."
+        )
+    )
+
+    parser.add_argument(
+        "output_directory",
+        help=(
+            "Directory containing the upstream "
+            "migration-analysis outputs."
+        ),
+    )
+
+    parser.add_argument(
+        "--cases-per-callable",
+        type=int,
+        default=3,
+        help=(
+            "Number of generated behavioral cases "
+            "per callable."
+        ),
+    )
+
+    parser.add_argument(
+        "--python2",
+        default=None,
+        help=(
+            "Python 2 executable. Defaults to "
+            "PYTHON2_EXECUTABLE or py -2."
+        ),
+    )
+
+    parser.add_argument(
+        "--python3",
+        default=None,
+        help=(
+            "Python 3 executable. Defaults to "
+            "PYTHON3_EXECUTABLE or py -3."
+        ),
+    )
+
+    parser.add_argument(
+        "--report",
+        default=None,
+        help=(
+            "Optional JSON output path."
+        ),
+    )
+
+    args = parser.parse_args()
+
+    report = verify_semantics_from_outputs(
+        output_directory=args.output_directory,
+        python2_executable=args.python2,
+        python3_executable=args.python3,
+        cases_per_callable=(
+            args.cases_per_callable
+        ),
+    )
+
+    if args.report:
+
+        save_verification_report(
+            report=report,
+            output_path=args.report,
+        )
+
     print(
-        "Semantic verification module loaded."
+        json.dumps(
+            report,
+            indent=2,
+            ensure_ascii=False,
+        )
     )

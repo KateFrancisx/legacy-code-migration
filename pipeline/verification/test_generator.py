@@ -1,788 +1,935 @@
-import ast
 import json
-from dataclasses import dataclass, asdict
+import os
+from dataclasses import dataclass, field
 from pathlib import Path
-
-from pipeline.llm.gemini_migrator import GeminiMigrator
 
 
 @dataclass
-class TestCase:
+class BehavioralTestCase:
     """
-    Represents one behavioral test case.
+    One generated behavioral scenario.
 
-    Gemini provides candidate inputs when available.
-    Deterministic fallback generation is used when
-    Gemini is unavailable.
+    For module-level functions:
 
-    The differential executor determines whether
-    original and migrated behavior actually match.
+        inputs = [...]
+        constructor_inputs = None
+
+    For class methods:
+
+        constructor_inputs = [...]
+        inputs = [...]
+
+    The structure is intentionally generic and does not
+    depend on any specific repository.
     """
 
-    name: str
-    function: str | None
-    inputs: list
-    expected_type: str | None = None
+    function: str
+    inputs: list = field(
+        default_factory=list
+    )
+    constructor_inputs: list = None
+    metadata: dict = field(
+        default_factory=dict
+    )
 
     def to_dict(self):
-        return asdict(self)
+        """
+        Convert the test case to a JSON-friendly dictionary.
+        """
 
-
-def normalize_parameter(parameter):
-    """
-    Normalize parameter information.
-    """
-
-    if isinstance(parameter, str):
         return {
-            "name": parameter,
-            "type": None,
-        }
-
-    if isinstance(parameter, dict):
-        return {
-            "name": parameter.get("name"),
-            "type": (
-                parameter.get("type")
-                or parameter.get("annotation")
-                or parameter.get("inferred_type")
+            "function": self.function,
+            "inputs": self.inputs,
+            "constructor_inputs": (
+                self.constructor_inputs
             ),
+            "metadata": self.metadata,
         }
+
+
+def _safe_json_value(value):
+    """
+    Normalize values produced by an LLM or JSON parser.
+
+    JSON null is converted to Python None automatically by
+    json.loads(). This function additionally handles nested
+    structures and common accidental string representations.
+    """
+
+    if isinstance(value, dict):
+
+        return {
+            key: _safe_json_value(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+
+        return [
+            _safe_json_value(item)
+            for item in value
+        ]
+
+    if isinstance(value, tuple):
+
+        return tuple(
+            _safe_json_value(item)
+            for item in value
+        )
+
+    if isinstance(value, str):
+
+        stripped = value.strip()
+
+        if stripped == "null":
+            return None
+
+        if stripped == "None":
+            return None
+
+    return value
+
+
+def _normalize_case(
+    function_name,
+    raw_case,
+    callable_info=None,
+):
+    """
+    Normalize one generated scenario.
+
+    The function accepts both:
+
+        {"inputs": [...]}
+
+    and:
+
+        {
+            "inputs": [...],
+            "constructor_inputs": [...]
+        }
+
+    The callable name comes from trusted callable metadata,
+    not from the generated text.
+    """
+
+    if isinstance(
+        raw_case,
+        dict,
+    ):
+
+        inputs = raw_case.get(
+            "inputs",
+            [],
+        )
+
+        constructor_inputs = raw_case.get(
+            "constructor_inputs"
+        )
+
+        metadata = raw_case.get(
+            "metadata",
+            {},
+        )
+
+    elif isinstance(
+        raw_case,
+        list,
+    ):
+
+        inputs = raw_case
+
+        constructor_inputs = None
+
+        metadata = {}
+
+    else:
+
+        inputs = [
+            raw_case
+        ]
+
+        constructor_inputs = None
+
+        metadata = {}
+
+    if inputs is None:
+        inputs = []
+
+    if constructor_inputs is not None:
+        constructor_inputs = _safe_json_value(
+            constructor_inputs
+        )
+
+    inputs = _safe_json_value(
+        inputs
+    )
+
+    if not isinstance(
+        inputs,
+        list,
+    ):
+        inputs = [
+            inputs
+        ]
+
+    if (
+        constructor_inputs is not None
+        and not isinstance(
+            constructor_inputs,
+            list,
+        )
+    ):
+        constructor_inputs = [
+            constructor_inputs
+        ]
+
+    return BehavioralTestCase(
+        function=function_name,
+        inputs=inputs,
+        constructor_inputs=constructor_inputs,
+        metadata=(
+            metadata
+            if isinstance(
+                metadata,
+                dict,
+            )
+            else {}
+        ),
+    )
+
+
+def _callable_description(
+    callable_info,
+):
+    """
+    Build a generic description of a callable for an LLM.
+
+    callable_info may be either a CallableInfo object or a
+    dictionary produced by CallableInfo.to_dict().
+    """
+
+    if callable_info is None:
+        return {}
+
+    if isinstance(
+        callable_info,
+        dict,
+    ):
+        return callable_info
+
+    if hasattr(
+        callable_info,
+        "to_dict",
+    ):
+        return callable_info.to_dict()
 
     return {
-        "name": None,
-        "type": None,
+        "qualified_name": getattr(
+            callable_info,
+            "qualified_name",
+            None,
+        ),
+        "function_name": getattr(
+            callable_info,
+            "function_name",
+            None,
+        ),
+        "kind": getattr(
+            callable_info,
+            "kind",
+            None,
+        ),
+        "class_name": getattr(
+            callable_info,
+            "class_name",
+            None,
+        ),
+        "parameters": getattr(
+            callable_info,
+            "parameters",
+            [],
+        ),
     }
 
 
-def normalize_type(type_name):
-    """
-    Normalize known parameter types.
-    """
-
-    if not type_name:
-        return "unknown"
-
-    value = str(type_name).lower().strip()
-
-    if value in {"int", "integer"}:
-        return "int"
-
-    if value in {"float", "double"}:
-        return "float"
-
-    if value in {"str", "string", "unicode"}:
-        return "str"
-
-    if value in {"bool", "boolean"}:
-        return "bool"
-
-    if value in {"list", "array"}:
-        return "list"
-
-    if value == "tuple":
-        return "tuple"
-
-    if value in {
-        "dict",
-        "dictionary",
-        "mapping",
-    }:
-        return "dict"
-
-    if value == "set":
-        return "set"
-
-    if value in {
-        "none",
-        "nonetype",
-        "null",
-    }:
-        return "none"
-
-    return "unknown"
-
-
-def candidate_values(type_name):
-    """
-    Conservative fallback values.
-
-    These values are used when Gemini is unavailable,
-    including API quota exhaustion.
-    """
-
-    parameter_type = normalize_type(
-        type_name
-    )
-
-    if parameter_type == "int":
-        return [
-            0,
-            1,
-            -1,
-            10,
-        ]
-
-    if parameter_type == "float":
-        return [
-            0.0,
-            1.0,
-            -1.0,
-            10.5,
-        ]
-
-    if parameter_type == "str":
-        return [
-            "",
-            "test",
-            "hello world",
-        ]
-
-    if parameter_type == "bool":
-        return [
-            True,
-            False,
-        ]
-
-    if parameter_type == "list":
-        return [
-            [],
-            [1],
-            [1, 2, 3],
-        ]
-
-    if parameter_type == "tuple":
-        return [
-            (),
-            (1,),
-            (1, 2, 3),
-        ]
-
-    if parameter_type == "dict":
-        return [
-            {},
-            {"key": "value"},
-        ]
-
-    if parameter_type == "set":
-        return [
-            set(),
-            {1},
-            {1, 2},
-        ]
-
-    if parameter_type == "none":
-        return [
-            None
-        ]
-
-    return [
-        None
-    ]
-
-
-def generate_no_argument_case(
-    function_name,
+def _build_llm_prompt(
+    callable_info,
+    count,
+    source_text=None,
 ):
     """
-    Generate a case for a function without parameters.
+    Build a repository-independent behavioral test
+    generation prompt.
+
+    The LLM proposes candidate inputs only.
+
+    Correctness is determined later by differential
+    execution against Python 2 and Python 3.
     """
 
-    return TestCase(
-        name="no_argument_case",
-        function=function_name,
-        inputs=[],
+    description = _callable_description(
+        callable_info
     )
 
-
-def generate_basic_cases(function_info):
-    """
-    Generate conservative deterministic fallback cases.
-    """
-
-    function_name = function_info.get(
-        "name"
+    qualified_name = description.get(
+        "qualified_name"
     )
 
-    parameters = function_info.get(
+    function_name = description.get(
+        "function_name"
+    )
+
+    callable_kind = description.get(
+        "kind",
+        "function",
+    )
+
+    class_name = description.get(
+        "class_name"
+    )
+
+    parameters = description.get(
         "parameters",
         [],
     )
 
-    if not parameters:
-        return [
-            generate_no_argument_case(
-                function_name
-            )
-        ]
-
-    normalized_parameters = [
-        normalize_parameter(parameter)
-        for parameter in parameters
-    ]
-
-    cases = []
-
-    default_inputs = []
-
-    for parameter in normalized_parameters:
-        values = candidate_values(
-            parameter["type"]
-        )
-
-        default_inputs.append(
-            values[0]
-        )
-
-    cases.append(
-        TestCase(
-            name="combined_default_case",
-            function=function_name,
-            inputs=default_inputs,
-        )
-    )
-
-    for parameter_index, parameter in enumerate(
-        normalized_parameters
-    ):
-        parameter_values = candidate_values(
-            parameter["type"]
-        )
-
-        for value_index, value in enumerate(
-            parameter_values
-        ):
-            inputs = []
-
-            for index, other_parameter in enumerate(
-                normalized_parameters
-            ):
-                other_values = candidate_values(
-                    other_parameter["type"]
-                )
-
-                if index == parameter_index:
-                    inputs.append(value)
-                else:
-                    inputs.append(
-                        other_values[0]
-                    )
-
-            parameter_name = (
-                parameter["name"]
-                or (
-                    f"parameter_"
-                    f"{parameter_index + 1}"
-                )
-            )
-
-            cases.append(
-                TestCase(
-                    name=(
-                        f"{parameter_name}_variation_"
-                        f"{value_index + 1}"
-                    ),
-                    function=function_name,
-                    inputs=inputs,
-                    expected_type=parameter["type"],
-                )
-            )
-
-    return cases
-
-
-def generate_cases_for_functions(
-    functions,
-):
-    """
-    Generate deterministic fallback behavioral cases
-    for multiple functions.
-    """
-
-    cases = []
-
-    for function_info in functions:
-        cases.extend(
-            generate_basic_cases(
-                function_info
-            )
-        )
-
-    return cases
-
-
-def deduplicate_cases(cases):
-    """
-    Remove duplicate cases.
-    """
-
-    seen = set()
-    unique = []
-
-    for case in cases:
-        key = (
-            case.function,
-            tuple(
-                repr(value)
-                for value in case.inputs
-            ),
-        )
-
-        if key in seen:
-            continue
-
-        seen.add(key)
-        unique.append(case)
-
-    return unique
-
-
-def extract_function_parameters(
-    source_code,
-    function_name,
-):
-    """
-    Extract the real parameter names from a Python
-    function using the AST.
-    """
-
-    tree = ast.parse(
-        source_code
-    )
-
-    for node in ast.walk(tree):
-        if isinstance(
-            node,
-            (
-                ast.FunctionDef,
-                ast.AsyncFunctionDef,
-            ),
-        ):
-            if node.name != function_name:
-                continue
-
-            parameters = []
-
-            positional_arguments = list(
-                getattr(
-                    node.args,
-                    "posonlyargs",
-                    [],
-                )
-            )
-
-            positional_arguments.extend(
-                node.args.args
-            )
-
-            for argument in positional_arguments:
-                parameters.append(
-                    argument.arg
-                )
-
-            if node.args.vararg:
-                parameters.append(
-                    node.args.vararg
-                )
-
-            for argument in node.args.kwonlyargs:
-                parameters.append(
-                    argument.arg
-                )
-
-            if node.args.kwarg:
-                parameters.append(
-                    node.args.kwarg
-                )
-
-            return parameters
-
-    raise ValueError(
-        f"Function '{function_name}' "
-        "was not found in source code."
-    )
-
-
-def extract_function_source(
-    source_code,
-    function_name,
-):
-    """
-    Extract the source of one function from
-    a Python source file.
-    """
-
-    tree = ast.parse(
-        source_code
-    )
-
-    lines = source_code.splitlines(
-        keepends=True
-    )
-
-    for node in ast.walk(tree):
-        if not isinstance(
-            node,
-            (
-                ast.FunctionDef,
-                ast.AsyncFunctionDef,
-            ),
-        ):
-            continue
-
-        if node.name != function_name:
-            continue
-
-        start_line = (
-            node.lineno - 1
-        )
-
-        end_line = getattr(
-            node,
-            "end_lineno",
-            None,
-        )
-
-        if end_line is None:
-            return source_code
-
-        return "".join(
-            lines[
-                start_line:end_line
-            ]
-        )
-
-    raise ValueError(
-        f"Function '{function_name}' "
-        "was not found in source code."
-    )
-
-
-def _build_fallback_cases(
-    source_code,
-    function_name,
-    parameter_names,
-):
-    """
-    Build deterministic behavioral cases when
-    Gemini cannot generate cases.
-    """
-
-    function_info = {
-        "name": function_name,
-        "parameters": [
-            {
-                "name": name,
-                "type": None,
-            }
-            for name in parameter_names
-        ],
-        "source": source_code,
-    }
-
-    return deduplicate_cases(
-        generate_basic_cases(
-            function_info
-        )
-    )
-
-
-def generate_llm_cases(
-    source_code,
-    function_name,
-    parameter_names=None,
-    count=5,
-):
-    """
-    Generate behavioral inputs using Gemini.
-
-    Gemini is preferred when available.
-
-    If Gemini fails because of quota, rate limits,
-    temporary API errors, invalid responses, or any
-    other generation failure, deterministic fallback
-    cases are returned instead.
-
-    The differential executor, not Gemini, determines
-    whether behavior is equivalent.
-    """
-
-    if parameter_names is None:
-        parameter_names = (
-            extract_function_parameters(
-                source_code,
-                function_name,
-            )
-        )
-
-    parameter_text = ", ".join(
-        parameter_names
-    )
+    if source_text is None:
+        source_text = ""
 
     prompt = f"""
-You are generating behavioral test inputs for a
-Python 2-to-Python 3 migration verification system.
+Generate {count} behavioral test scenarios for a Python
+callable.
+
+Callable:
+{qualified_name}
 
 Function name:
 {function_name}
 
+Callable kind:
+{callable_kind}
+
+Owning class:
+{class_name}
+
 Parameters:
-{parameter_text}
+{json.dumps(parameters)}
 
-Source code:
-{source_code}
+Relevant source:
+{source_text}
 
-Generate exactly {count} different behavioral
-test cases for THIS FUNCTION.
+Rules:
 
-The inputs array MUST contain exactly the arguments
-required by the function, in the same order as the
-parameters.
+1. Return ONLY valid JSON.
+2. Return a JSON array.
+3. Each item must be an object.
+4. Each item must contain "inputs".
+5. "inputs" must always be a JSON array.
+6. JSON null is allowed and represents Python None.
+7. Do not return Python expressions as strings.
+8. Do not return executable code.
+9. Use values appropriate for the callable's parameters.
+10. Include ordinary cases and useful boundary cases.
+11. Do not invent a function name.
+12. Do not include the callable name in the inputs.
 
-Return ONLY valid JSON.
+For class methods:
 
-The response MUST be a JSON array.
+- "constructor_inputs" must contain the arguments required
+  to construct the object.
+- "inputs" must contain the arguments passed to the method.
 
-Each item MUST have exactly these fields:
+For constructors:
 
-{{
-    "function": "{function_name}",
-    "inputs": []
-}}
+- "inputs" contains the constructor arguments.
+- "constructor_inputs" should be omitted or null.
 
-Example:
+For module-level functions:
+
+- "inputs" contains the function arguments.
+- "constructor_inputs" should be omitted or null.
+
+Example for a module function with parameters
+["value", "percentage"]:
 
 [
-    {{
-        "function": "{function_name}",
-        "inputs": [100, 10]
-    }}
+  {{
+    "inputs": [100, 10]
+  }},
+  {{
+    "inputs": [0, 50]
+  }}
 ]
 
-Important:
+Example for an instance method:
 
-- Use the actual function parameters.
-- Use values appropriate for the parameter's role.
-- Do not invent extra arguments.
-- Do not create UI tests.
-- Do not create API tests.
-- Do not create unrelated tests.
-- Do not include descriptions.
-- Do not include titles.
-- Do not include expected results.
-- Do not include explanations.
-- Do not include markdown.
-- Do not use code fences.
-- Do not include any fields other than
-  "function" and "inputs".
+[
+  {{
+    "constructor_inputs": ["example"],
+    "inputs": []
+  }}
+]
 """
 
+    return prompt
+
+
+def _extract_json_array(
+    text,
+):
+    """
+    Extract a JSON array from an LLM response.
+    """
+
+    if not text:
+        return []
+
+    text = text.strip()
+
     try:
-        response = GeminiMigrator().migrate(
-            source_code,
-            prompt,
+
+        value = json.loads(
+            text
         )
 
-        if not response.success:
-            raise RuntimeError(
-                str(response.error)
-            )
-
-        raw_response = (
-            response.raw_response.strip()
-        )
-
-        if raw_response.startswith("```"):
-            lines = raw_response.splitlines()
-
-            if lines:
-                lines = lines[1:]
-
-            if (
-                lines
-                and lines[-1].strip()
-                == "```"
-            ):
-                lines = lines[:-1]
-
-            raw_response = "\n".join(
-                lines
-            ).strip()
-
-        generated = json.loads(
-            raw_response
-        )
-
-        if not isinstance(
-            generated,
+        if isinstance(
+            value,
             list,
         ):
-            raise ValueError(
-                "Gemini response must be a JSON array."
+            return value
+
+    except Exception:
+        pass
+
+    start = text.find(
+        "["
+    )
+
+    end = text.rfind(
+        "]"
+    )
+
+    if (
+        start >= 0
+        and end > start
+    ):
+
+        candidate = text[
+            start:end + 1
+        ]
+
+        try:
+
+            value = json.loads(
+                candidate
             )
 
-        expected_parameter_count = len(
-            parameter_names
-        )
-
-        cases = []
-
-        for index, item in enumerate(
-            generated
-        ):
-            if not isinstance(
-                item,
-                dict,
-            ):
-                continue
-
-            if set(item.keys()) != {
-                "function",
-                "inputs",
-            }:
-                continue
-
-            if item["function"] != function_name:
-                continue
-
-            inputs = item["inputs"]
-
-            if not isinstance(
-                inputs,
+            if isinstance(
+                value,
                 list,
             ):
-                continue
+                return value
 
-            if len(inputs) != expected_parameter_count:
-                continue
+        except Exception:
+            pass
 
-            cases.append(
-                TestCase(
-                    name=(
-                        f"llm_case_{index + 1}"
-                    ),
-                    function=function_name,
-                    inputs=inputs,
-                )
-            )
+    return []
 
-        cases = deduplicate_cases(
-            cases
+
+def _load_source(
+    repository_path,
+    file_name,
+):
+    """
+    Load the migrated source for contextual generation.
+
+    Source loading is best-effort. Failure does not prevent
+    fallback case generation.
+    """
+
+    if not repository_path:
+        return ""
+
+    path = (
+        Path(repository_path)
+        / file_name
+    )
+
+    if not path.exists():
+        return ""
+
+    try:
+
+        return path.read_text(
+            encoding="utf-8"
         )
 
-        if cases:
-            return cases[:count]
+    except (
+        OSError,
+        UnicodeDecodeError,
+    ):
+        return ""
 
-        raise ValueError(
-            "Gemini returned no valid behavioral "
-            "test cases."
+
+def _generate_with_gemini(
+    prompt,
+):
+    """
+    Generate cases with Gemini when available.
+
+    This function intentionally keeps the LLM optional.
+    Differential execution remains the source of truth.
+    """
+
+    api_key = os.environ.get(
+        "GEMINI_API_KEY"
+    )
+
+    if not api_key:
+        return []
+
+    try:
+
+        from google import genai
+
+    except ImportError:
+        return []
+
+    try:
+
+        client = genai.Client(
+            api_key=api_key
+        )
+
+        response = (
+            client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt,
+            )
+        )
+
+        text = getattr(
+            response,
+            "text",
+            None,
+        )
+
+        return _extract_json_array(
+            text
         )
 
     except Exception:
-        # Gemini is a candidate-input generator only.
-        # Verification must continue even when the API
-        # is unavailable or its quota is exhausted.
-        fallback_cases = (
-            _build_fallback_cases(
-                source_code=source_code,
-                function_name=function_name,
-                parameter_names=parameter_names,
-            )
-        )
-
-        if not fallback_cases:
-            raise RuntimeError(
-                "Unable to generate behavioral "
-                f"cases for {function_name}."
-            )
-
-        return fallback_cases[:count]
+        return []
 
 
-def generate_llm_cases_from_file(
-    file_path,
-    function_name,
-    count=5,
+def _parameter_count(
+    callable_info,
 ):
     """
-    Read a source file, extract one function,
-    extract its real parameters, and generate
-    behavioral cases.
+    Determine the number of user-supplied parameters.
 
-    Gemini is used when available. Deterministic
-    fallback generation is used automatically when
-    Gemini is unavailable.
+    self and cls are excluded for methods.
     """
 
-    source_path = Path(
-        file_path
+    description = _callable_description(
+        callable_info
     )
 
-    if not source_path.exists():
-        raise FileNotFoundError(
-            f"Source file not found: "
-            f"{source_path}"
-        )
-
-    source_code = (
-        source_path.read_text(
-            encoding="utf-8"
+    parameters = list(
+        description.get(
+            "parameters",
+            [],
         )
     )
 
-    function_source = (
-        extract_function_source(
-            source_code,
-            function_name,
+    kind = description.get(
+        "kind",
+        "function",
+    )
+
+    if kind in (
+        "instance_method",
+        "constructor",
+        "classmethod",
+    ):
+
+        if parameters and parameters[0] in (
+            "self",
+            "cls",
+        ):
+            parameters = parameters[1:]
+
+    return len(parameters)
+
+
+def _fallback_value_for_parameter(
+    parameter_name,
+    position,
+):
+    """
+    Produce a conservative generic fallback value.
+
+    This is intentionally type-agnostic.
+
+    The fallback generator is not expected to understand
+    arbitrary domain objects. Its job is to provide basic
+    primitive candidates when an LLM is unavailable.
+    """
+
+    name = (
+        parameter_name
+        or ""
+    ).lower()
+
+    if any(
+        token in name
+        for token in (
+            "name",
+            "customer",
+            "user",
+            "title",
+            "label",
+            "text",
+        )
+    ):
+        return "example"
+
+    if any(
+        token in name
+        for token in (
+            "percent",
+            "percentage",
+            "rate",
+        )
+    ):
+        return 10
+
+    if any(
+        token in name
+        for token in (
+            "size",
+            "count",
+            "quantity",
+            "limit",
+            "index",
+        )
+    ):
+        return 2
+
+    if any(
+        token in name
+        for token in (
+            "items",
+            "values",
+            "data",
+            "records",
+            "entries",
+        )
+    ):
+        return []
+
+    if position == 0:
+        return 1
+
+    return 1
+
+
+def _fallback_inputs(
+    callable_info,
+):
+    """
+    Generate conservative inputs from parameter metadata.
+    """
+
+    description = _callable_description(
+        callable_info
+    )
+
+    parameters = list(
+        description.get(
+            "parameters",
+            [],
         )
     )
 
-    parameter_names = (
-        extract_function_parameters(
-            source_code,
-            function_name,
-        )
+    kind = description.get(
+        "kind",
+        "function",
     )
 
-    return generate_llm_cases(
-        source_code=function_source,
-        function_name=function_name,
-        parameter_names=parameter_names,
+    if kind in (
+        "instance_method",
+        "constructor",
+        "classmethod",
+    ):
+
+        if parameters and parameters[0] in (
+            "self",
+            "cls",
+        ):
+            parameters = parameters[1:]
+
+    return [
+        _fallback_value_for_parameter(
+            parameter_name,
+            position,
+        )
+        for position, parameter_name in enumerate(
+            parameters
+        )
+    ]
+
+
+def _fallback_constructor_inputs(
+    callable_info,
+):
+    """
+    Generate fallback constructor inputs for an instance
+    method.
+
+    The constructor metadata must be supplied by the caller
+    when available.
+    """
+
+    return _fallback_inputs(
+        callable_info
+    )
+
+
+def _normalize_generated_cases(
+    callable_info,
+    raw_cases,
+    count,
+):
+    """
+    Normalize and limit generated scenarios.
+    """
+
+    description = _callable_description(
+        callable_info
+    )
+
+    function_name = description.get(
+        "function_name"
+    )
+
+    kind = description.get(
+        "kind",
+        "function",
+    )
+
+    normalized = []
+
+    for raw_case in raw_cases:
+
+        case = _normalize_case(
+            function_name=function_name,
+            raw_case=raw_case,
+            callable_info=callable_info,
+        )
+
+        if kind == "instance_method":
+
+            if (
+                case.constructor_inputs
+                is None
+            ):
+                case.constructor_inputs = (
+                    _fallback_constructor_inputs(
+                        callable_info
+                    )
+                )
+
+        normalized.append(
+            case
+        )
+
+        if len(normalized) >= count:
+            break
+
+    return normalized
+
+
+def generate_cases_for_callable(
+    callable_info,
+    count=3,
+    repository_path=None,
+    source_text=None,
+):
+    """
+    Generate behavioral cases for one generic callable.
+
+    LLM generation is attempted first when available.
+
+    If the LLM is unavailable or returns invalid data,
+    deterministic fallback cases are generated.
+    """
+
+    if count <= 0:
+        return []
+
+    description = _callable_description(
+        callable_info
+    )
+
+    if source_text is None:
+
+        source_text = _load_source(
+            repository_path=repository_path,
+            file_name=description.get(
+                "file"
+            ),
+        )
+
+    prompt = _build_llm_prompt(
+        callable_info=callable_info,
+        count=count,
+        source_text=source_text,
+    )
+
+    raw_cases = _generate_with_gemini(
+        prompt
+    )
+
+    cases = _normalize_generated_cases(
+        callable_info=callable_info,
+        raw_cases=raw_cases,
         count=count,
     )
+
+    if len(cases) >= count:
+        return cases
+
+    fallback_inputs = _fallback_inputs(
+        callable_info
+    )
+
+    kind = description.get(
+        "kind",
+        "function",
+    )
+
+    while len(cases) < count:
+
+        if kind == "instance_method":
+
+            cases.append(
+                BehavioralTestCase(
+                    function=description.get(
+                        "function_name"
+                    ),
+                    inputs=[],
+                    constructor_inputs=(
+                        fallback_inputs
+                    ),
+                    metadata={
+                        "generation": "fallback"
+                    },
+                )
+            )
+
+        else:
+
+            cases.append(
+                BehavioralTestCase(
+                    function=description.get(
+                        "function_name"
+                    ),
+                    inputs=(
+                        list(
+                            fallback_inputs
+                        )
+                    ),
+                    constructor_inputs=None,
+                    metadata={
+                        "generation": "fallback"
+                    },
+                )
+            )
+
+    return cases
+
+
+def generate_cases_for_callables(
+    callables,
+    count=3,
+    repository_path=None,
+):
+    """
+    Generate behavioral cases for multiple CallableInfo
+    objects.
+
+    Returns:
+
+        {
+            "qualified.name": [BehavioralTestCase, ...]
+        }
+    """
+
+    results = {}
+
+    for callable_info in callables:
+
+        description = _callable_description(
+            callable_info
+        )
+
+        qualified_name = description.get(
+            "qualified_name"
+        )
+
+        results[
+            qualified_name
+        ] = generate_cases_for_callable(
+            callable_info=callable_info,
+            count=count,
+            repository_path=repository_path,
+        )
+
+    return results
 
 
 def generate_llm_cases_for_functions(
     repository_path,
     file_name,
     function_names,
-    count=5,
+    count=3,
 ):
     """
-    Generate behavioral cases for multiple
-    functions in one source file.
+    Backward-compatible interface used by the existing
+    semantic verifier.
 
-    Returns:
+    This interface remains available while the verifier is
+    migrated to the generic CallableInfo-based interface.
 
-        {
-            function_name: [TestCase, ...]
-        }
+    It generates cases for module-level functions only.
+
+    Class methods should use generate_cases_for_callable()
+    with CallableInfo metadata.
     """
-
-    file_path = (
-        Path(repository_path)
-        / file_name
-    )
 
     results = {}
 
     for function_name in function_names:
-        results[function_name] = (
-            generate_llm_cases_from_file(
-                file_path=file_path,
-                function_name=function_name,
-                count=count,
-            )
+
+        callable_info = {
+            "file": file_name,
+            "qualified_name": function_name,
+            "function_name": function_name,
+            "kind": "function",
+            "class_name": None,
+            "parameters": [],
+        }
+
+        cases = generate_cases_for_callable(
+            callable_info=callable_info,
+            count=count,
+            repository_path=repository_path,
         )
+
+        results[
+            function_name
+        ] = cases
 
     return results

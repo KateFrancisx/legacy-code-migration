@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -6,11 +7,7 @@ from pathlib import Path
 @dataclass
 class VerificationInput:
     """
-    Normalized input for the semantic verification stage.
-
-    Paths from upstream manifests are treated as metadata.
-    The actual repository locations are resolved from the
-    current verification workspace.
+    Normalized input for semantic verification.
     """
 
     original_repository: str
@@ -62,163 +59,80 @@ def _load_json(path):
     Load a JSON file.
     """
 
+    if path is None:
+        return {}
+
+    path = Path(path)
+
     if not path.exists():
         return {}
 
-    with path.open(
-        "r",
-        encoding="utf-8",
-    ) as handle:
-        return json.load(handle)
+    try:
+        with path.open(
+            "r",
+            encoding="utf-8",
+        ) as handle:
+            return json.load(handle)
+
+    except (
+        OSError,
+        ValueError,
+        json.JSONDecodeError,
+    ):
+        return {}
 
 
-def _find_repository_from_manifest(
-    manifest,
-    output_directory,
+def _find_json_file(
+    outputs_directory,
+    filename,
 ):
     """
-    Resolve the original repository using the current
-    workspace rather than trusting a machine-specific
-    path stored in the manifest.
-
-    Resolution order:
-
-    1. Explicit repository path supplied through the
-       output directory's parent workspace.
-    2. Manifest path if it still exists.
-    3. A sibling repository matching the migrated
-       repository name.
+    Find one known metadata file.
     """
 
-    manifest_path = Path(
-        manifest.get(
-            "original_repository",
-            "",
-        )
+    path = (
+        Path(outputs_directory)
+        / filename
     )
 
-    if manifest_path.exists():
-        return str(
-            manifest_path.resolve()
-        )
+    if path.exists():
+        return path
 
-    output_path = Path(
-        output_directory
-    ).resolve()
-
-    migrated_repository = Path(
-        manifest.get(
-            "output_repository",
-            "",
-        )
-    )
-
-    if migrated_repository.exists():
-        migrated_repository = (
-            migrated_repository.resolve()
-        )
-    else:
-        migrated_repository = (
-            output_path
-            / f"{output_path.name}_migrated"
-        )
-
-    # The test workspace used by the local migration
-    # pipeline has the original repository alongside
-    # the migrated output when both are available.
-    candidates = [
-        output_path.parent
-        / "python2_migration_test_repo",
-
-        output_path.parent
-        / output_path.name,
-
-        output_path.parent
-        / (
-            output_path.name
-            .replace(
-                "_migrated",
-                "",
-            )
-        ),
-    ]
-
-    for candidate in candidates:
-        candidate = candidate.resolve()
-
-        if candidate.exists() and candidate.is_dir():
-            return str(candidate)
-
-    # If the manifest path is stale, keep it as metadata
-    # rather than silently inventing a different location.
-    return str(
-        manifest_path
-    )
-
-
-def _resolve_migrated_repository(
-    manifest,
-    output_directory,
-):
-    """
-    Resolve the migrated repository.
-
-    Prefer the manifest path when it exists.
-
-    Otherwise, resolve the migrated repository relative
-    to the current output directory.
-    """
-
-    manifest_path = Path(
-        manifest.get(
-            "output_repository",
-            "",
-        )
-    )
-
-    if manifest_path.exists():
-        return str(
-            manifest_path.resolve()
-        )
-
-    output_path = Path(
-        output_directory
-    ).resolve()
-
-    candidates = [
-        output_path
-        / f"{output_path.name}_migrated",
-
-        output_path.parent
-        / f"{output_path.name}_migrated",
-    ]
-
-    for candidate in candidates:
-        candidate = candidate.resolve()
-
-        if candidate.exists() and candidate.is_dir():
-            return str(candidate)
-
-    return str(
-        manifest_path
-    )
+    return None
 
 
 def _extract_manifest_files(
-    manifest
+    manifest,
 ):
     """
-    Extract file decisions from the assembly manifest.
+    Extract MIGRATE, PRESERVE, and SKIP decisions.
     """
 
     migrated_files = []
     preserved_files = []
     skipped_files = []
 
+    if not isinstance(
+        manifest,
+        dict,
+    ):
+        return (
+            migrated_files,
+            preserved_files,
+            skipped_files,
+        )
+
     for item in manifest.get(
         "files",
         [],
     ):
+
+        if not isinstance(
+            item,
+            dict,
+        ):
+            continue
+
         file_name = item.get(
             "file"
         )
@@ -234,16 +148,19 @@ def _extract_manifest_files(
             continue
 
         if decision == "MIGRATE":
+
             migrated_files.append(
                 file_name
             )
 
         elif decision == "PRESERVE":
+
             preserved_files.append(
                 file_name
             )
 
         elif decision == "SKIP":
+
             skipped_files.append(
                 file_name
             )
@@ -256,11 +173,17 @@ def _extract_manifest_files(
 
 
 def _extract_symbols(
-    dependency_graph
+    dependency_graph,
 ):
     """
-    Extract symbol information from the dependency graph.
+    Extract symbols from dependency metadata.
     """
+
+    if not isinstance(
+        dependency_graph,
+        dict,
+    ):
+        return {}
 
     return dependency_graph.get(
         "symbols",
@@ -272,11 +195,17 @@ def _extract_symbols(
 
 
 def _extract_dependencies(
-    dependency_graph
+    dependency_graph,
 ):
     """
-    Extract dependency information from the dependency graph.
+    Extract dependency information.
     """
+
+    if not isinstance(
+        dependency_graph,
+        dict,
+    ):
+        return {}
 
     return dependency_graph.get(
         "dependencies",
@@ -289,98 +218,401 @@ def _extract_tests(
     skipped_files,
 ):
     """
-    Extract existing test information.
+    Extract existing test metadata.
+
+    Actual test execution is performed by the semantic
+    verifier.
     """
 
     tests = []
 
-    symbols = dependency_graph.get(
-        "symbols",
-        {},
+    symbols = _extract_symbols(
+        dependency_graph
+    )
+
+    skipped = set(
+        skipped_files
     )
 
     for file_name, file_symbols in symbols.items():
 
-        if file_name in skipped_files:
+        normalized_name = str(
+            file_name
+        ).replace(
+            "\\",
+            "/",
+        )
+
+        if file_name in skipped:
             continue
 
         if not (
-            file_name.startswith(
+            normalized_name.startswith(
                 "test"
             )
-            or "/tests/" in file_name.replace(
-                "\\",
-                "/",
-            )
-            or file_name.replace(
-                "\\",
-                "/",
-            ).startswith(
+            or normalized_name.startswith(
                 "tests/"
             )
+            or "/tests/" in normalized_name
+        ):
+            continue
+
+        if not isinstance(
+            file_symbols,
+            list,
         ):
             continue
 
         for symbol in file_symbols:
+
+            if not isinstance(
+                symbol,
+                dict,
+            ):
+                continue
+
             if symbol.get(
                 "type"
-            ) == "function":
-                tests.append(
-                    {
-                        "file": file_name,
-                        "name": symbol.get(
-                            "name"
-                        ),
-                        "line": symbol.get(
-                            "line"
-                        ),
-                    }
-                )
+            ) != "function":
+                continue
+
+            tests.append(
+                {
+                    "file": file_name,
+                    "name": symbol.get(
+                        "name"
+                    ),
+                    "line": symbol.get(
+                        "line"
+                    ),
+                }
+            )
 
     return tests
 
 
-def load_verification_input(
-    output_directory
+def _is_repository(
+    path,
 ):
     """
-    Load all upstream migration-analysis outputs.
+    Determine whether a path is a usable Python
+    repository.
 
-    The upstream outputs provide analysis metadata.
-
-    Repository paths are resolved for the current
-    machine/workspace instead of blindly trusting paths
-    recorded on another machine.
+    A repository must contain at least one Python file.
     """
 
-    output_path = Path(
+    if not path:
+        return False
+
+    path = Path(path)
+
+    if not path.exists():
+        return False
+
+    if not path.is_dir():
+        return False
+
+    return any(
+        path.rglob("*.py")
+    )
+
+
+def _resolve_original_repository(
+    manifest,
+    outputs_directory,
+):
+    """
+    Resolve the actual original repository.
+
+    The manifest can contain a machine-specific path.
+
+    Resolution order:
+
+    1. Explicit environment override.
+    2. Nested repository with the same name as the
+       manifest directory.
+    3. The manifest directory itself.
+    4. Common workspace candidates.
+    """
+
+    #
+    # Explicit environment override.
+    #
+
+    environment_path = os.environ.get(
+        "VERIFICATION_ORIGINAL_REPOSITORY"
+    )
+
+    if _is_repository(
+        environment_path
+    ):
+        return str(
+            Path(
+                environment_path
+            ).resolve()
+        )
+
+    #
+    # Manifest path.
+    #
+
+    manifest_value = str(
+        manifest.get(
+            "original_repository",
+            "",
+        )
+    )
+
+    manifest_path = Path(
+        manifest_value
+    )
+
+    repository_name = (
+        manifest_path.name
+    )
+
+    #
+    # IMPORTANT:
+    #
+    # The actual test repository is nested:
+    #
+    # python2_migration_test_repo\
+    #     python2_migration_test_repo\
+    #         billing.py
+    #
+    # Therefore check the nested directory BEFORE
+    # accepting the outer directory.
+    #
+
+    if manifest_path.exists():
+
+        nested_candidate = (
+            manifest_path
+            / repository_name
+        )
+
+        if _is_repository(
+            nested_candidate
+        ):
+            return str(
+                nested_candidate.resolve()
+            )
+
+    #
+    # If the manifest path itself is the repository,
+    # use it.
+    #
+
+    if _is_repository(
+        manifest_path
+    ):
+        return str(
+            manifest_path.resolve()
+        )
+
+    #
+    # Search common locations.
+    #
+
+    outputs_directory = Path(
+        outputs_directory
+    ).resolve()
+
+    candidates = []
+
+    if repository_name:
+
+        candidates.extend(
+            [
+                outputs_directory.parent
+                / repository_name,
+
+                outputs_directory.parent.parent
+                / repository_name,
+
+                Path.home()
+                / "Downloads"
+                / repository_name,
+
+                Path.home()
+                / "OneDrive"
+                / "Downloads"
+                / repository_name,
+
+                Path.home()
+                / "OneDrive"
+                / "Documents"
+                / repository_name,
+            ]
+        )
+
+    for candidate in candidates:
+
+        candidate = Path(
+            candidate
+        )
+
+        #
+        # Prefer nested same-name repository.
+        #
+
+        nested_candidate = (
+            candidate
+            / repository_name
+        )
+
+        if _is_repository(
+            nested_candidate
+        ):
+            return str(
+                nested_candidate.resolve()
+            )
+
+        #
+        # Otherwise use the candidate itself.
+        #
+
+        if _is_repository(
+            candidate
+        ):
+            return str(
+                candidate.resolve()
+            )
+
+    return ""
+
+
+def _resolve_migrated_repository(
+    manifest,
+    outputs_directory,
+):
+    """
+    Resolve the migrated Python 3 repository.
+
+    Resolution order:
+
+    1. Explicit environment override.
+    2. Existing manifest path.
+    3. Current project's outputs directory.
+    """
+
+    #
+    # Explicit environment override.
+    #
+
+    environment_path = os.environ.get(
+        "VERIFICATION_MIGRATED_REPOSITORY"
+    )
+
+    if _is_repository(
+        environment_path
+    ):
+        return str(
+            Path(
+                environment_path
+            ).resolve()
+        )
+
+    #
+    # Existing manifest path.
+    #
+
+    manifest_path = Path(
+        manifest.get(
+            "output_repository",
+            "",
+        )
+    )
+
+    if _is_repository(
+        manifest_path
+    ):
+        return str(
+            manifest_path.resolve()
+        )
+
+    #
+    # Current outputs directory.
+    #
+
+    outputs_directory = Path(
+        outputs_directory
+    ).resolve()
+
+    candidates = [
+        outputs_directory
+        / "python2_migration_test_repo_migrated",
+
+        outputs_directory.parent
+        / "python2_migration_test_repo_migrated",
+    ]
+
+    for candidate in candidates:
+
+        if _is_repository(
+            candidate
+        ):
+            return str(
+                Path(
+                    candidate
+                ).resolve()
+            )
+
+    return ""
+
+
+def load_verification_input(
+    output_directory,
+):
+    """
+    Load verification metadata from the project's outputs
+    directory.
+
+    Example:
+
+        outputs/
+            python2_migration_test_repo_assembly_manifest.json
+            python2_migration_test_repo_dependency_graph.json
+            ...
+            python2_migration_test_repo_migrated/
+    """
+
+    outputs_directory = Path(
         output_directory
     ).resolve()
 
-    manifest_path = (
-        output_path
-        / "python2_migration_test_repo_assembly_manifest.json"
+    #
+    # Metadata files live directly under outputs/.
+    #
+
+    manifest_path = _find_json_file(
+        outputs_directory,
+        "python2_migration_test_repo_assembly_manifest.json",
     )
 
-    dependency_graph_path = (
-        output_path
-        / "python2_migration_test_repo_dependency_graph.json"
+    dependency_graph_path = _find_json_file(
+        outputs_directory,
+        "python2_migration_test_repo_dependency_graph.json",
     )
 
-    syntax_path = (
-        output_path
-        / "python2_migration_test_repo_syntax_verification.json"
+    syntax_path = _find_json_file(
+        outputs_directory,
+        "python2_migration_test_repo_syntax_verification.json",
     )
 
-    dependency_verification_path = (
-        output_path
-        / "python2_migration_test_repo_dependency_verification.json"
+    dependency_verification_path = _find_json_file(
+        outputs_directory,
+        "python2_migration_test_repo_dependency_verification.json",
     )
 
-    migration_results_path = (
-        output_path
-        / "python2_migration_test_repo_migration_results.json"
+    migration_results_path = _find_json_file(
+        outputs_directory,
+        "python2_migration_test_repo_migration_results.json",
     )
+
+    #
+    # Load metadata independently.
+    #
 
     manifest = _load_json(
         manifest_path
@@ -401,6 +633,10 @@ def load_verification_input(
     migration_results = _load_json(
         migration_results_path
     )
+
+    #
+    # Extract migration metadata.
+    #
 
     (
         migrated_files,
@@ -423,17 +659,21 @@ def load_verification_input(
         skipped_files,
     )
 
+    #
+    # Resolve repositories.
+    #
+
     original_repository = (
-        _find_repository_from_manifest(
-            manifest,
-            output_path,
+        _resolve_original_repository(
+            manifest=manifest,
+            outputs_directory=outputs_directory,
         )
     )
 
     migrated_repository = (
         _resolve_migrated_repository(
-            manifest,
-            output_path,
+            manifest=manifest,
+            outputs_directory=outputs_directory,
         )
     )
 
