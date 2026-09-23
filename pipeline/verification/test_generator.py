@@ -18,9 +18,6 @@ class BehavioralTestCase:
 
         constructor_inputs = [...]
         inputs = [...]
-
-    The structure is intentionally generic and does not
-    depend on any specific repository.
     """
 
     function: str
@@ -33,10 +30,6 @@ class BehavioralTestCase:
     )
 
     def to_dict(self):
-        """
-        Convert the test case to a JSON-friendly dictionary.
-        """
-
         return {
             "function": self.function,
             "inputs": self.inputs,
@@ -48,37 +41,37 @@ class BehavioralTestCase:
 
 
 def _safe_json_value(value):
-    """
-    Normalize values produced by an LLM or JSON parser.
-
-    JSON null is converted to Python None automatically by
-    json.loads(). This function additionally handles nested
-    structures and common accidental string representations.
-    """
-
-    if isinstance(value, dict):
-
+    if isinstance(
+        value,
+        dict,
+    ):
         return {
             key: _safe_json_value(item)
             for key, item in value.items()
         }
 
-    if isinstance(value, list):
-
+    if isinstance(
+        value,
+        list,
+    ):
         return [
             _safe_json_value(item)
             for item in value
         ]
 
-    if isinstance(value, tuple):
-
+    if isinstance(
+        value,
+        tuple,
+    ):
         return tuple(
             _safe_json_value(item)
             for item in value
         )
 
-    if isinstance(value, str):
-
+    if isinstance(
+        value,
+        str,
+    ):
         stripped = value.strip()
 
         if stripped == "null":
@@ -95,29 +88,10 @@ def _normalize_case(
     raw_case,
     callable_info=None,
 ):
-    """
-    Normalize one generated scenario.
-
-    The function accepts both:
-
-        {"inputs": [...]}
-
-    and:
-
-        {
-            "inputs": [...],
-            "constructor_inputs": [...]
-        }
-
-    The callable name comes from trusted callable metadata,
-    not from the generated text.
-    """
-
     if isinstance(
         raw_case,
         dict,
     ):
-
         inputs = raw_case.get(
             "inputs",
             [],
@@ -136,21 +110,15 @@ def _normalize_case(
         raw_case,
         list,
     ):
-
         inputs = raw_case
-
         constructor_inputs = None
-
         metadata = {}
 
     else:
-
         inputs = [
             raw_case
         ]
-
         constructor_inputs = None
-
         metadata = {}
 
     if inputs is None:
@@ -202,13 +170,6 @@ def _normalize_case(
 def _callable_description(
     callable_info,
 ):
-    """
-    Build a generic description of a callable for an LLM.
-
-    callable_info may be either a CallableInfo object or a
-    dictionary produced by CallableInfo.to_dict().
-    """
-
     if callable_info is None:
         return {}
 
@@ -225,6 +186,11 @@ def _callable_description(
         return callable_info.to_dict()
 
     return {
+        "file": getattr(
+            callable_info,
+            "file_name",
+            None,
+        ),
         "qualified_name": getattr(
             callable_info,
             "qualified_name",
@@ -253,21 +219,51 @@ def _callable_description(
     }
 
 
+def _effective_parameters(
+    callable_info,
+):
+    """
+    Return parameters that the caller must actually provide.
+
+    Removes self/cls for methods and constructors.
+    """
+
+    description = _callable_description(
+        callable_info
+    )
+
+    parameters = list(
+        description.get(
+            "parameters",
+            [],
+        )
+    )
+
+    kind = description.get(
+        "kind",
+        "function",
+    )
+
+    if kind in (
+        "instance_method",
+        "constructor",
+        "classmethod",
+    ):
+        if parameters and parameters[0] in (
+            "self",
+            "cls",
+        ):
+            parameters = parameters[1:]
+
+    return parameters
+
+
 def _build_llm_prompt(
     callable_info,
     count,
     source_text=None,
+    constructor_info=None,
 ):
-    """
-    Build a repository-independent behavioral test
-    generation prompt.
-
-    The LLM proposes candidate inputs only.
-
-    Correctness is determined later by differential
-    execution against Python 2 and Python 3.
-    """
-
     description = _callable_description(
         callable_info
     )
@@ -294,6 +290,29 @@ def _build_llm_prompt(
         [],
     )
 
+    constructor_description = (
+        _callable_description(
+            constructor_info
+        )
+        if constructor_info is not None
+        else {}
+    )
+
+    constructor_parameters = (
+        constructor_description.get(
+            "parameters",
+            [],
+        )
+    )
+
+    constructor_name = (
+        constructor_description.get(
+            "qualified_name"
+        )
+        if constructor_description
+        else None
+    )
+
     if source_text is None:
         source_text = ""
 
@@ -316,6 +335,12 @@ Owning class:
 Parameters:
 {json.dumps(parameters)}
 
+Constructor:
+{constructor_name}
+
+Constructor parameters:
+{json.dumps(constructor_parameters)}
+
 Relevant source:
 {source_text}
 
@@ -334,21 +359,24 @@ Rules:
 11. Do not invent a function name.
 12. Do not include the callable name in the inputs.
 
-For class methods:
+For module-level functions:
 
-- "constructor_inputs" must contain the arguments required
-  to construct the object.
-- "inputs" must contain the arguments passed to the method.
+- "inputs" contains the function arguments.
+- "constructor_inputs" should be omitted or null.
 
 For constructors:
 
 - "inputs" contains the constructor arguments.
 - "constructor_inputs" should be omitted or null.
 
-For module-level functions:
+For instance methods:
 
-- "inputs" contains the function arguments.
-- "constructor_inputs" should be omitted or null.
+- The object must first be constructed.
+- "constructor_inputs" MUST contain valid arguments for the
+  discovered constructor.
+- "inputs" contains the arguments passed to the method.
+- Do not put constructor arguments inside "inputs".
+- The constructor parameters shown above must be respected.
 
 Example for a module function with parameters
 ["value", "percentage"]:
@@ -362,11 +390,12 @@ Example for a module function with parameters
   }}
 ]
 
-Example for an instance method:
+Example for an instance method whose constructor requires
+["name", "items"] and whose method takes no arguments:
 
 [
   {{
-    "constructor_inputs": ["example"],
+    "constructor_inputs": ["example", []],
     "inputs": []
   }}
 ]
@@ -378,17 +407,12 @@ Example for an instance method:
 def _extract_json_array(
     text,
 ):
-    """
-    Extract a JSON array from an LLM response.
-    """
-
     if not text:
         return []
 
     text = text.strip()
 
     try:
-
         value = json.loads(
             text
         )
@@ -414,13 +438,11 @@ def _extract_json_array(
         start >= 0
         and end > start
     ):
-
         candidate = text[
             start:end + 1
         ]
 
         try:
-
             value = json.loads(
                 candidate
             )
@@ -441,14 +463,10 @@ def _load_source(
     repository_path,
     file_name,
 ):
-    """
-    Load the migrated source for contextual generation.
-
-    Source loading is best-effort. Failure does not prevent
-    fallback case generation.
-    """
-
     if not repository_path:
+        return ""
+
+    if not file_name:
         return ""
 
     path = (
@@ -460,7 +478,6 @@ def _load_source(
         return ""
 
     try:
-
         return path.read_text(
             encoding="utf-8"
         )
@@ -475,29 +492,32 @@ def _load_source(
 def _generate_with_gemini(
     prompt,
 ):
-    """
-    Generate cases with Gemini when available.
-
-    This function intentionally keeps the LLM optional.
-    Differential execution remains the source of truth.
-    """
-
     api_key = os.environ.get(
         "GEMINI_API_KEY"
     )
 
     if not api_key:
+        try:
+            from dotenv import load_dotenv
+
+            load_dotenv()
+
+            api_key = os.environ.get(
+                "GEMINI_API_KEY"
+            )
+
+        except ImportError:
+            pass
+
+    if not api_key:
         return []
 
     try:
-
         from google import genai
-
     except ImportError:
         return []
 
     try:
-
         client = genai.Client(
             api_key=api_key
         )
@@ -526,57 +546,17 @@ def _generate_with_gemini(
 def _parameter_count(
     callable_info,
 ):
-    """
-    Determine the number of user-supplied parameters.
-
-    self and cls are excluded for methods.
-    """
-
-    description = _callable_description(
-        callable_info
-    )
-
-    parameters = list(
-        description.get(
-            "parameters",
-            [],
+    return len(
+        _effective_parameters(
+            callable_info
         )
     )
-
-    kind = description.get(
-        "kind",
-        "function",
-    )
-
-    if kind in (
-        "instance_method",
-        "constructor",
-        "classmethod",
-    ):
-
-        if parameters and parameters[0] in (
-            "self",
-            "cls",
-        ):
-            parameters = parameters[1:]
-
-    return len(parameters)
 
 
 def _fallback_value_for_parameter(
     parameter_name,
     position,
 ):
-    """
-    Produce a conservative generic fallback value.
-
-    This is intentionally type-agnostic.
-
-    The fallback generator is not expected to understand
-    arbitrary domain objects. Its job is to provide basic
-    primitive candidates when an LLM is unavailable.
-    """
-
     name = (
         parameter_name
         or ""
@@ -638,37 +618,9 @@ def _fallback_value_for_parameter(
 def _fallback_inputs(
     callable_info,
 ):
-    """
-    Generate conservative inputs from parameter metadata.
-    """
-
-    description = _callable_description(
+    parameters = _effective_parameters(
         callable_info
     )
-
-    parameters = list(
-        description.get(
-            "parameters",
-            [],
-        )
-    )
-
-    kind = description.get(
-        "kind",
-        "function",
-    )
-
-    if kind in (
-        "instance_method",
-        "constructor",
-        "classmethod",
-    ):
-
-        if parameters and parameters[0] in (
-            "self",
-            "cls",
-        ):
-            parameters = parameters[1:]
 
     return [
         _fallback_value_for_parameter(
@@ -683,29 +635,72 @@ def _fallback_inputs(
 
 def _fallback_constructor_inputs(
     callable_info,
+    constructor_info=None,
 ):
     """
-    Generate fallback constructor inputs for an instance
-    method.
+    Build constructor arguments from the actual discovered
+    constructor.
 
-    The constructor metadata must be supplied by the caller
-    when available.
+    This is deliberately repository-independent.
     """
 
+    if constructor_info is None:
+        return []
+
     return _fallback_inputs(
-        callable_info
+        constructor_info
     )
+
+
+def _normalize_constructor_inputs(
+    case,
+    constructor_info,
+):
+    """
+    Ensure an instance-method case has enough constructor
+    arguments to instantiate the discovered class.
+
+    LLM-generated constructor inputs are preserved when they
+    are complete. Missing or empty constructor inputs fall
+    back to values derived from the constructor signature.
+    """
+
+    if constructor_info is None:
+        if case.constructor_inputs is None:
+            case.constructor_inputs = []
+
+        return case
+
+    fallback = _fallback_constructor_inputs(
+        callable_info=None,
+        constructor_info=constructor_info,
+    )
+
+    if case.constructor_inputs is None:
+        case.constructor_inputs = fallback
+        return case
+
+    if not isinstance(
+        case.constructor_inputs,
+        list,
+    ):
+        case.constructor_inputs = fallback
+        return case
+
+    if len(case.constructor_inputs) < len(
+        fallback
+    ):
+        case.constructor_inputs = fallback
+
+    return case
 
 
 def _normalize_generated_cases(
     callable_info,
     raw_cases,
     count,
+    constructor_info=None,
 ):
-    """
-    Normalize and limit generated scenarios.
-    """
-
     description = _callable_description(
         callable_info
     )
@@ -730,16 +725,10 @@ def _normalize_generated_cases(
         )
 
         if kind == "instance_method":
-
-            if (
-                case.constructor_inputs
-                is None
-            ):
-                case.constructor_inputs = (
-                    _fallback_constructor_inputs(
-                        callable_info
-                    )
-                )
+            case = _normalize_constructor_inputs(
+                case=case,
+                constructor_info=constructor_info,
+            )
 
         normalized.append(
             case
@@ -756,16 +745,8 @@ def generate_cases_for_callable(
     count=3,
     repository_path=None,
     source_text=None,
+    constructor_info=None,
 ):
-    """
-    Generate behavioral cases for one generic callable.
-
-    LLM generation is attempted first when available.
-
-    If the LLM is unavailable or returns invalid data,
-    deterministic fallback cases are generated.
-    """
-
     if count <= 0:
         return []
 
@@ -774,7 +755,6 @@ def generate_cases_for_callable(
     )
 
     if source_text is None:
-
         source_text = _load_source(
             repository_path=repository_path,
             file_name=description.get(
@@ -786,6 +766,7 @@ def generate_cases_for_callable(
         callable_info=callable_info,
         count=count,
         source_text=source_text,
+        constructor_info=constructor_info,
     )
 
     raw_cases = _generate_with_gemini(
@@ -796,6 +777,7 @@ def generate_cases_for_callable(
         callable_info=callable_info,
         raw_cases=raw_cases,
         count=count,
+        constructor_info=constructor_info,
     )
 
     if len(cases) >= count:
@@ -814,6 +796,13 @@ def generate_cases_for_callable(
 
         if kind == "instance_method":
 
+            constructor_inputs = (
+                _fallback_constructor_inputs(
+                    callable_info=callable_info,
+                    constructor_info=constructor_info,
+                )
+            )
+
             cases.append(
                 BehavioralTestCase(
                     function=description.get(
@@ -821,10 +810,14 @@ def generate_cases_for_callable(
                     ),
                     inputs=[],
                     constructor_inputs=(
-                        fallback_inputs
+                        constructor_inputs
                     ),
                     metadata={
-                        "generation": "fallback"
+                        "generation": "fallback",
+                        "constructor_discovered": (
+                            constructor_info
+                            is not None
+                        ),
                     },
                 )
             )
@@ -857,17 +850,39 @@ def generate_cases_for_callables(
     repository_path=None,
 ):
     """
-    Generate behavioral cases for multiple CallableInfo
-    objects.
+    Generate behavioral cases for every discovered callable.
 
-    Returns:
-
-        {
-            "qualified.name": [BehavioralTestCase, ...]
-        }
+    Instance methods are automatically associated with the
+    constructor belonging to the same file and class.
     """
 
     results = {}
+
+    constructors = {}
+
+    for callable_info in callables:
+
+        description = _callable_description(
+            callable_info
+        )
+
+        if description.get(
+            "kind"
+        ) != "constructor":
+            continue
+
+        key = (
+            description.get(
+                "file"
+            ),
+            description.get(
+                "class_name"
+            ),
+        )
+
+        constructors[
+            key
+        ] = callable_info
 
     for callable_info in callables:
 
@@ -879,12 +894,32 @@ def generate_cases_for_callables(
             "qualified_name"
         )
 
+        constructor_info = None
+
+        if description.get(
+            "kind"
+        ) == "instance_method":
+
+            key = (
+                description.get(
+                    "file"
+                ),
+                description.get(
+                    "class_name"
+                ),
+            )
+
+            constructor_info = constructors.get(
+                key
+            )
+
         results[
             qualified_name
         ] = generate_cases_for_callable(
             callable_info=callable_info,
             count=count,
             repository_path=repository_path,
+            constructor_info=constructor_info,
         )
 
     return results
@@ -896,19 +931,6 @@ def generate_llm_cases_for_functions(
     function_names,
     count=3,
 ):
-    """
-    Backward-compatible interface used by the existing
-    semantic verifier.
-
-    This interface remains available while the verifier is
-    migrated to the generic CallableInfo-based interface.
-
-    It generates cases for module-level functions only.
-
-    Class methods should use generate_cases_for_callable()
-    with CallableInfo metadata.
-    """
-
     results = {}
 
     for function_name in function_names:
