@@ -1,0 +1,2457 @@
+{
+  "status": "FAIL",
+  "existing_tests": {
+    "equivalent": true,
+    "original": {
+      "status": "PASS",
+      "return_code": 0,
+      "stdout": "",
+      "stderr": "test_customer_name_is_normalized (test_billing.BillingTests) ... ok\ntest_empty_invoice_is_rejected (test_billing.BillingTests) ... ok\ntest_invoice_total (test_billing.BillingTests) ... ok\ntest_item_count (test_billing.BillingTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+      "test_count": 4
+    },
+    "migrated": {
+      "status": "PASS",
+      "return_code": 0,
+      "stdout": "",
+      "stderr": "test_customer_name_is_normalized (test_billing.BillingTests.test_customer_name_is_normalized) ... ok\ntest_empty_invoice_is_rejected (test_billing.BillingTests.test_empty_invoice_is_rejected) ... ok\ntest_invoice_total (test_billing.BillingTests.test_invoice_total) ... ok\ntest_item_count (test_billing.BillingTests.test_item_count) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+      "test_count": 4
+    },
+    "detailed": [
+      {
+        "test_suite": "existing_tests",
+        "equivalent": true,
+        "original": {
+          "status": "PASS",
+          "return_code": 0,
+          "stdout": "",
+          "stderr": "test_customer_name_is_normalized (test_billing.BillingTests) ... ok\ntest_empty_invoice_is_rejected (test_billing.BillingTests) ... ok\ntest_invoice_total (test_billing.BillingTests) ... ok\ntest_item_count (test_billing.BillingTests) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+          "test_count": 4
+        },
+        "migrated": {
+          "status": "PASS",
+          "return_code": 0,
+          "stdout": "",
+          "stderr": "test_customer_name_is_normalized (test_billing.BillingTests.test_customer_name_is_normalized) ... ok\ntest_empty_invoice_is_rejected (test_billing.BillingTests.test_empty_invoice_is_rejected) ... ok\ntest_invoice_total (test_billing.BillingTests.test_invoice_total) ... ok\ntest_item_count (test_billing.BillingTests.test_item_count) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+          "test_count": 4
+        }
+      }
+    ]
+  },
+  "behavioral_tests": {
+    "callable_count": 13,
+    "case_count": 39,
+    "equivalent": 36,
+    "semantic_differences": 3,
+    "detailed": [
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.__init__",
+          "function_name": "__init__",
+          "kind": "constructor",
+          "class_name": "Invoice",
+          "line": 10,
+          "parameters": [
+            "self",
+            "customer_name",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.__init__",
+          "function_name": "__init__",
+          "kind": "constructor",
+          "class_name": "Invoice",
+          "line": 10,
+          "parameters": [
+            "self",
+            "customer_name",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.__init__",
+          "function_name": "__init__",
+          "kind": "constructor",
+          "class_name": "Invoice",
+          "line": 10,
+          "parameters": [
+            "self",
+            "customer_name",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "example"
+                ],
+                [
+                  "items",
+                  []
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.subtotal",
+          "function_name": "subtotal",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 14,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.subtotal",
+          "function_name": "subtotal",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 14,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.subtotal",
+          "function_name": "subtotal",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 14,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.discount",
+          "function_name": "discount",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 20,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.discount",
+          "function_name": "discount",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 20,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.discount",
+          "function_name": "discount",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 20,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.tax",
+          "function_name": "tax",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 31,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.tax",
+          "function_name": "tax",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 31,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.tax",
+          "function_name": "tax",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 31,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.total",
+          "function_name": "total",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 36,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.total",
+          "function_name": "total",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 36,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.total",
+          "function_name": "total",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 36,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.0,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.summary",
+          "function_name": "summary",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 39,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.summary",
+          "function_name": "summary",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 39,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.summary",
+          "function_name": "summary",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 39,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.item_count",
+          "function_name": "item_count",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 46,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.item_count",
+          "function_name": "item_count",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 46,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "Invoice.item_count",
+          "function_name": "item_count",
+          "kind": "instance_method",
+          "class_name": "Invoice",
+          "line": 46,
+          "parameters": [
+            "self"
+          ]
+        },
+        "inputs": [],
+        "constructor_inputs": [
+          "example",
+          []
+        ],
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback",
+          "constructor_discovered": true
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "build_invoice",
+          "function_name": "build_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 50,
+          "parameters": [
+            "customer",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "build_invoice",
+          "function_name": "build_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 50,
+          "parameters": [
+            "customer",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "billing.py",
+          "qualified_name": "build_invoice",
+          "function_name": "build_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 50,
+          "parameters": [
+            "customer",
+            "items"
+          ]
+        },
+        "inputs": [
+          "example",
+          []
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "EXCEPTION",
+          "return_value": null,
+          "return_type": null,
+          "stdout": "",
+          "stderr": "",
+          "exception_type": "ValueError",
+          "exception_message": "Invoice must contain at least one item",
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "main.py",
+          "qualified_name": "create_demo_invoice",
+          "function_name": "create_demo_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 8,
+          "parameters": []
+        },
+        "inputs": [],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "main.py",
+          "qualified_name": "create_demo_invoice",
+          "function_name": "create_demo_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 8,
+          "parameters": []
+        },
+        "inputs": [],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "main.py",
+          "qualified_name": "create_demo_invoice",
+          "function_name": "create_demo_invoice",
+          "kind": "function",
+          "class_name": null,
+          "line": 8,
+          "parameters": []
+        },
+        "inputs": [],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "alice"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Keyboard"
+                        ],
+                        [
+                          "price",
+                          1200
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "Mouse"
+                        ],
+                        [
+                          "price",
+                          500
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "name",
+                          "USB Cable"
+                        ],
+                        [
+                          "price",
+                          150
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
+          "stdout": "=== Legacy Billing Demo ===\nCustomer: alice\nSubtotal: INR 2650.00\nDiscount: INR 265.00\nTax: INR 429.30\nTotal: INR 2814.30\nNumber of item batches: 2\n",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "normalize_name",
+          "function_name": "normalize_name",
+          "kind": "function",
+          "class_name": null,
+          "line": 3,
+          "parameters": [
+            "name"
+          ]
+        },
+        "inputs": [
+          "example"
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "normalize_name",
+          "function_name": "normalize_name",
+          "kind": "function",
+          "class_name": null,
+          "line": 3,
+          "parameters": [
+            "name"
+          ]
+        },
+        "inputs": [
+          "example"
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "normalize_name",
+          "function_name": "normalize_name",
+          "kind": "function",
+          "class_name": null,
+          "line": 3,
+          "parameters": [
+            "name"
+          ]
+        },
+        "inputs": [
+          "example"
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "example",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "calculate_percentage",
+          "function_name": "calculate_percentage",
+          "kind": "function",
+          "class_name": null,
+          "line": 20,
+          "parameters": [
+            "value",
+            "percentage"
+          ]
+        },
+        "inputs": [
+          1,
+          10
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.1,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": false,
+          "semantic_difference": true,
+          "differences": [
+            {
+              "field": "return_value",
+              "original": 0,
+              "migrated": 0.1
+            }
+          ]
+        },
+        "analysis": {
+          "difference_count": 1,
+          "details": [
+            {
+              "category": "numeric_value_change",
+              "message": "Return value changed numerically.",
+              "original_value": 0,
+              "migrated_value": 0.1,
+              "original_type": "int",
+              "migrated_type": "float",
+              "delta": 0.1
+            }
+          ]
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "calculate_percentage",
+          "function_name": "calculate_percentage",
+          "kind": "function",
+          "class_name": null,
+          "line": 20,
+          "parameters": [
+            "value",
+            "percentage"
+          ]
+        },
+        "inputs": [
+          1,
+          10
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.1,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": false,
+          "semantic_difference": true,
+          "differences": [
+            {
+              "field": "return_value",
+              "original": 0,
+              "migrated": 0.1
+            }
+          ]
+        },
+        "analysis": {
+          "difference_count": 1,
+          "details": [
+            {
+              "category": "numeric_value_change",
+              "message": "Return value changed numerically.",
+              "original_value": 0,
+              "migrated_value": 0.1,
+              "original_type": "int",
+              "migrated_type": "float",
+              "delta": 0.1
+            }
+          ]
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "calculate_percentage",
+          "function_name": "calculate_percentage",
+          "kind": "function",
+          "class_name": null,
+          "line": 20,
+          "parameters": [
+            "value",
+            "percentage"
+          ]
+        },
+        "inputs": [
+          1,
+          10
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": 0,
+          "return_type": "int",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": 0.1,
+          "return_type": "float",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": false,
+          "semantic_difference": true,
+          "differences": [
+            {
+              "field": "return_value",
+              "original": 0,
+              "migrated": 0.1
+            }
+          ]
+        },
+        "analysis": {
+          "difference_count": 1,
+          "details": [
+            {
+              "category": "numeric_value_change",
+              "message": "Return value changed numerically.",
+              "original_value": 0,
+              "migrated_value": 0.1,
+              "original_type": "int",
+              "migrated_type": "float",
+              "delta": 0.1
+            }
+          ]
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "format_money",
+          "function_name": "format_money",
+          "kind": "function",
+          "class_name": null,
+          "line": 27,
+          "parameters": [
+            "amount",
+            "currency"
+          ]
+        },
+        "inputs": [
+          1,
+          1
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "format_money",
+          "function_name": "format_money",
+          "kind": "function",
+          "class_name": null,
+          "line": 27,
+          "parameters": [
+            "amount",
+            "currency"
+          ]
+        },
+        "inputs": [
+          1,
+          1
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "format_money",
+          "function_name": "format_money",
+          "kind": "function",
+          "class_name": null,
+          "line": 27,
+          "parameters": [
+            "amount",
+            "currency"
+          ]
+        },
+        "inputs": [
+          1,
+          1
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": "1 1.00",
+          "return_type": "str",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "chunk_items",
+          "function_name": "chunk_items",
+          "kind": "function",
+          "class_name": null,
+          "line": 32,
+          "parameters": [
+            "items",
+            "size"
+          ]
+        },
+        "inputs": [
+          [],
+          2
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 1,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "chunk_items",
+          "function_name": "chunk_items",
+          "kind": "function",
+          "class_name": null,
+          "line": 32,
+          "parameters": [
+            "items",
+            "size"
+          ]
+        },
+        "inputs": [
+          [],
+          2
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 2,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      },
+      {
+        "callable": {
+          "file": "utils.py",
+          "qualified_name": "chunk_items",
+          "function_name": "chunk_items",
+          "kind": "function",
+          "class_name": null,
+          "line": 32,
+          "parameters": [
+            "items",
+            "size"
+          ]
+        },
+        "inputs": [
+          [],
+          2
+        ],
+        "constructor_inputs": null,
+        "original": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "migrated": {
+          "status": "SUCCESS",
+          "return_value": [],
+          "return_type": "list",
+          "stdout": "",
+          "stderr": "",
+          "exception_type": null,
+          "exception_message": null,
+          "timed_out": false
+        },
+        "comparison": {
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
+        },
+        "case_number": 3,
+        "generation_metadata": {
+          "generation": "fallback"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "existing_tests_equivalent": true,
+    "behavioral_cases": 39,
+    "behavioral_equivalent": 36,
+    "behavioral_semantic_differences": 3
+  }
+}

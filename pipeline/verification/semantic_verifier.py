@@ -7,6 +7,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from pipeline.verification.semantic_difference_analyzer import (
+    analyze_behavioral_result,
+)
+
 from pipeline.verification.callable_discovery import (
     discover_callables,
 )
@@ -58,6 +62,7 @@ def _values_semantically_equal(
     ):
 
         try:
+
             if (
                 isinstance(left, float)
                 and math.isnan(left)
@@ -758,7 +763,7 @@ def run_differential_test(
         migrated=migrated_result,
     )
 
-    return {
+    result = {
         "callable": _callable_metadata(
             callable_info
         ),
@@ -772,6 +777,12 @@ def run_differential_test(
         ),
         "comparison": comparison,
     }
+
+    # The comparison above remains the source of truth.
+    # The analyzer only explains detected differences.
+    return analyze_behavioral_result(
+        result
+    )
 
 
 def _discover_verification_callables(

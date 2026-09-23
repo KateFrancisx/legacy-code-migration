@@ -4,6 +4,7 @@ import shlex
 import subprocess
 import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -78,70 +79,144 @@ PAYLOAD = json.loads(
 )
 
 
-def _json_safe(value):
+def _json_safe(value, seen=None):
+    if seen is None:
+        seen = set()
+
     if value is None:
         return None
 
-    if isinstance(
-        value,
-        (str, int, float, bool),
-    ):
+    if isinstance(value, bool):
         return value
 
-    if isinstance(
-        value,
-        list,
-    ):
-        return [
-            _json_safe(item)
-            for item in value
-        ]
+    try:
+        string_types = (basestring,)
+    except NameError:
+        string_types = (str,)
 
-    if isinstance(
-        value,
-        tuple,
-    ):
+    if isinstance(value, string_types):
+        return value
+
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, float):
+        return value
+
+    if isinstance(value, bytearray):
+        try:
+            return {
+                "__type__": "bytearray",
+                "value": bytes(value).decode("utf-8"),
+            }
+        except Exception:
+            return {
+                "__type__": "bytearray",
+            }
+
+    value_id = id(value)
+
+    if value_id in seen:
         return {
-            "__type__": "tuple",
-            "items": [
-                _json_safe(item)
-                for item in value
-            ],
+            "__type__": type(value).__name__,
+            "__recursive__": True,
         }
 
-    if isinstance(
-        value,
-        dict,
-    ):
-        result = {}
+    seen.add(value_id)
 
-        for key, item in value.items():
-            result[str(key)] = _json_safe(
-                item
+    try:
+
+        if isinstance(value, list):
+            return [
+                _json_safe(
+                    item,
+                    seen,
+                )
+                for item in value
+            ]
+
+        if isinstance(value, tuple):
+            return {
+                "__type__": "tuple",
+                "items": [
+                    _json_safe(
+                        item,
+                        seen,
+                    )
+                    for item in value
+                ],
+            }
+
+        if isinstance(value, dict):
+            normalized_items = []
+
+            for key, item in value.items():
+                normalized_items.append(
+                    [
+                        _json_safe(
+                            key,
+                            seen,
+                        ),
+                        _json_safe(
+                            item,
+                            seen,
+                        ),
+                    ]
+                )
+
+            normalized_items.sort(
+                key=lambda pair: json.dumps(
+                    pair[0],
+                    sort_keys=True,
+                    default=str,
+                )
             )
 
-        return result
+            return {
+                "__type__": "dict",
+                "items": normalized_items,
+            }
 
-    if isinstance(
-        value,
-        set,
-    ):
-        return {
-            "__type__": "set",
-            "items": [
-                _json_safe(item)
+        if isinstance(value, set):
+            items = [
+                _json_safe(
+                    item,
+                    seen,
+                )
                 for item in value
-            ],
+            ]
+
+            items.sort(
+                key=lambda item: json.dumps(
+                    item,
+                    sort_keys=True,
+                    default=str,
+                )
+            )
+
+            return {
+                "__type__": "set",
+                "items": items,
+            }
+
+        if hasattr(
+            value,
+            "__dict__",
+        ):
+            return {
+                "__type__": type(value).__name__,
+                "attributes": _json_safe(
+                    value.__dict__,
+                    seen,
+                ),
+            }
+
+        return {
+            "__type__": type(value).__name__,
         }
 
-    return {
-        "__type__": type(
-            value
-        ).__name__,
-        "repr": repr(
-            value
-        ),
-    }
+    finally:
+        seen.discard(value_id)
 
 
 def _load_module():
@@ -179,10 +254,6 @@ def _load_module():
         )
     )[0]
 
-    #
-    # Python 3.
-    #
-
     if sys.version_info[0] >= 3:
 
         import importlib.util
@@ -215,10 +286,6 @@ def _load_module():
         )
 
         return module
-
-    #
-    # Python 2.
-    #
 
     import imp
 
@@ -403,13 +470,6 @@ if __name__ == "__main__":
     main()
 '''
 
-    #
-    # IMPORTANT:
-    #
-    # json.dumps() gives us a JSON string.
-    # repr() makes that string a valid Python string
-    # literal inside both Python 2 and Python 3.
-    #
     payload_literal = repr(
         payload_json
     )
@@ -423,73 +483,93 @@ if __name__ == "__main__":
 def _parse_runner_output(
     stdout,
     stderr,
+    return_code,
 ):
-    if not stdout:
-
-        return FunctionExecutionResult(
-            status="EXECUTION_FAILED",
-            stdout=stdout,
-            stderr=stderr,
-            exception_type="RunnerError",
-            exception_message=(
-                "Runner produced no output."
-            ),
-        )
-
     lines = stdout.splitlines()
 
     result_line = None
+    result_index = None
 
-    for line in reversed(
-        lines
+    for index in range(
+        len(lines) - 1,
+        -1,
+        -1,
     ):
+        candidate = lines[index].strip()
 
-        line = line.strip()
-
-        if not line:
+        if not candidate:
             continue
 
         try:
-
             parsed = json.loads(
-                line
+                candidate
             )
 
-            if isinstance(
-                parsed,
-                dict,
+            if (
+                isinstance(
+                    parsed,
+                    dict,
+                )
+                and "status" in parsed
             ):
-
                 result_line = parsed
+                result_index = index
                 break
 
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+        ):
             continue
 
     if result_line is None:
-
         return FunctionExecutionResult(
             status="EXECUTION_FAILED",
             stdout=stdout,
             stderr=stderr,
             exception_type="RunnerError",
             exception_message=(
-                "Runner output was not valid JSON."
+                "Runner did not produce a valid result."
             ),
         )
 
+    actual_stdout_lines = (
+        lines[:result_index]
+        + lines[result_index + 1:]
+    )
+
+    actual_stdout = "\n".join(
+        actual_stdout_lines
+    )
+
+    if actual_stdout:
+        actual_stdout += "\n"
+
+    status = result_line.get(
+        "status"
+    )
+
+    if status == "SUCCESS":
+        return FunctionExecutionResult(
+            status="SUCCESS",
+            return_value=result_line.get(
+                "return_value"
+            ),
+            return_type=result_line.get(
+                "return_type"
+            ),
+            stdout=actual_stdout,
+            stderr=stderr,
+            exception_type=None,
+            exception_message=None,
+            timed_out=False,
+        )
+
     return FunctionExecutionResult(
-        status=result_line.get(
-            "status",
-            "EXECUTION_FAILED",
-        ),
-        return_value=result_line.get(
-            "return_value"
-        ),
-        return_type=result_line.get(
-            "return_type"
-        ),
-        stdout=stdout,
+        status="EXCEPTION",
+        return_value=None,
+        return_type=None,
+        stdout=actual_stdout,
         stderr=stderr,
         exception_type=result_line.get(
             "exception_type"
@@ -595,14 +675,16 @@ def execute_function(
         completed = subprocess.run(
             command,
             cwd=repository_path,
-            capture_output=True,
-            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
             timeout=timeout,
         )
 
         return _parse_runner_output(
             stdout=completed.stdout,
             stderr=completed.stderr,
+            return_code=completed.returncode,
         )
 
     except subprocess.TimeoutExpired as exc:
@@ -700,3 +782,81 @@ def execute_function(
                 )
             except OSError:
                 pass
+
+
+def run_repository_tests(
+    repository_path,
+    python_command,
+    timeout=120,
+):
+    """
+    Run the repository's existing unittest suite.
+    """
+
+    repository_path = Path(
+        repository_path
+    ).resolve()
+
+    command = (
+        _normalize_python_command(
+            python_command
+        )
+        + [
+            "-m",
+            "unittest",
+            "discover",
+        ]
+    )
+
+    try:
+
+        completed = subprocess.run(
+            command,
+            cwd=str(
+                repository_path
+            ),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            timeout=timeout,
+        )
+
+        status = (
+            "PASS"
+            if completed.returncode == 0
+            else "FAIL"
+        )
+
+        return {
+            "status": status,
+            "return_code": completed.returncode,
+            "stdout": completed.stdout,
+            "stderr": completed.stderr,
+        }
+
+    except subprocess.TimeoutExpired as exc:
+
+        return {
+            "status": "TIMEOUT",
+            "return_code": None,
+            "stdout": exc.stdout or "",
+            "stderr": exc.stderr or "",
+        }
+
+    except FileNotFoundError as exc:
+
+        return {
+            "status": "EXECUTION_FAILED",
+            "return_code": None,
+            "stdout": "",
+            "stderr": str(exc),
+        }
+
+    except OSError as exc:
+
+        return {
+            "status": "EXECUTION_FAILED",
+            "return_code": None,
+            "stdout": "",
+            "stderr": str(exc),
+        }
