@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
@@ -25,6 +26,10 @@ class GeminiMigrator(MigrationLLM):
 
     DEFAULT_MODEL = "gemini-3.6-flash"
 
+    # Retry configuration
+    MAX_RETRIES = 4
+    INITIAL_RETRY_DELAY = 2
+
     def __init__(
         self,
         model: Optional[str] = None,
@@ -33,17 +38,13 @@ class GeminiMigrator(MigrationLLM):
 
         self.model = (
             model
-            or os.getenv(
-                "GEMINI_MODEL"
-            )
+            or os.getenv("GEMINI_MODEL")
             or self.DEFAULT_MODEL
         )
 
         self.api_key = (
             api_key
-            or os.getenv(
-                "GEMINI_API_KEY"
-            )
+            or os.getenv("GEMINI_API_KEY")
         )
 
         if not self.api_key:
@@ -78,60 +79,117 @@ class GeminiMigrator(MigrationLLM):
                 error="Source code is empty.",
             )
 
-        try:
+        last_error = None
 
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-            )
+        for attempt in range(
+            1,
+            self.MAX_RETRIES + 1,
+        ):
 
-            raw_text = (
-                getattr(
-                    response,
-                    "text",
-                    None,
+            try:
+
+                print(
+                    f"  [Gemini] Attempt "
+                    f"{attempt}/{self.MAX_RETRIES}"
                 )
-                or ""
-            )
 
-            migrated_code = (
-                self._extract_code(
-                    raw_text
+                response = (
+                    self.client.models.generate_content(
+                        model=self.model,
+                        contents=prompt,
+                    )
                 )
-            )
 
-            explanation = (
-                self._extract_explanation(
-                    raw_text
+                raw_text = (
+                    getattr(
+                        response,
+                        "text",
+                        None,
+                    )
+                    or ""
                 )
-            )
 
-            return MigrationResult(
-                success=bool(
-                    migrated_code.strip()
-                ),
-                source_code=source_code,
-                migrated_code=migrated_code,
-                provider="Gemini",
-                model=self.model,
-                explanation=explanation,
-                raw_response=raw_text,
-                metadata={
-                    "repository_context_provided":
-                        repository_context
-                        is not None,
-                },
-            )
+                migrated_code = (
+                    self._extract_code(
+                        raw_text
+                    )
+                )
 
-        except Exception as exc:
+                explanation = (
+                    self._extract_explanation(
+                        raw_text
+                    )
+                )
 
-            return MigrationResult(
-                success=False,
-                source_code=source_code,
-                provider="Gemini",
-                model=self.model,
-                error=str(exc),
-            )
+                return MigrationResult(
+                    success=bool(
+                        migrated_code.strip()
+                    ),
+                    source_code=source_code,
+                    migrated_code=migrated_code,
+                    provider="Gemini",
+                    model=self.model,
+                    explanation=explanation,
+                    raw_response=raw_text,
+                    metadata={
+                        "repository_context_provided":
+                            repository_context
+                            is not None,
+                        "attempts": attempt,
+                    },
+                )
+
+            except Exception as exc:
+
+                last_error = exc
+                error_text = str(exc)
+
+                # Temporary Gemini/API availability errors
+                retryable = (
+                    "503" in error_text
+                    or "UNAVAILABLE" in error_text
+                    or "429" in error_text
+                    or "RESOURCE_EXHAUSTED"
+                    in error_text
+                    or "500" in error_text
+                    or "INTERNAL"
+                    in error_text
+                )
+
+                if (
+                    retryable
+                    and attempt < self.MAX_RETRIES
+                ):
+
+                    delay = (
+                        self.INITIAL_RETRY_DELAY
+                        * (2 ** (attempt - 1))
+                    )
+
+                    print(
+                        f"  [Gemini] Temporary API error: "
+                        f"{error_text}"
+                    )
+
+                    print(
+                        f"  [Gemini] Retrying in "
+                        f"{delay} seconds..."
+                    )
+
+                    time.sleep(delay)
+
+                    continue
+
+                # Non-retryable error, or all retries exhausted
+                break
+
+        return MigrationResult(
+            success=False,
+            source_code=source_code,
+            provider="Gemini",
+            model=self.model,
+            error=str(last_error),
+        )
 
     # =====================================================
     # Code extraction

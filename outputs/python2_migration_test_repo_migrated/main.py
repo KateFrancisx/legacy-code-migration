@@ -1,4 +1,4 @@
-# Python 2 legacy application entry point
+# Python 3 application entry point
 # Depends on billing.py
 
 from billing import build_invoice

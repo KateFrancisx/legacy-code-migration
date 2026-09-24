@@ -1,4 +1,4 @@
-# Python 3 billing module
+# Python 3 legacy billing module
 # Depends on config.py and utils.py
 
 from config import get_config
@@ -6,7 +6,6 @@ from utils import normalize_name, calculate_percentage, format_money
 
 
 class Invoice(object):
-
     def __init__(self, customer_name, items):
         self.customer_name = normalize_name(customer_name)
         self.items = items

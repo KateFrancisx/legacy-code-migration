@@ -10,27 +10,53 @@ from typing import Any, Dict, List
 # PROJECT ROOT
 # ============================================================
 
-PROJECT_ROOT = Path(
-    __file__
-).resolve().parents[1]
+PROJECT_ROOT = (
+    Path(__file__)
+    .resolve()
+    .parents[1]
+)
 
 if str(PROJECT_ROOT) not in sys.path:
+
     sys.path.insert(
         0,
         str(PROJECT_ROOT),
     )
 
 
-from pipeline.llm.gemini_migrator import (
-    GeminiMigrator,
+# ============================================================
+# GROQ LLM
+# ============================================================
+
+from pipeline.llm.groq_migrator import (
+    GroqMigrator,
 )
+
+
+# ============================================================
+# MIGRATION SERVICE
+# ============================================================
 
 from pipeline.llm.migration_service import (
     MigrationService,
 )
 
+
+# ============================================================
+# REPOSITORY ASSEMBLY
+# ============================================================
+
 from pipeline.assembly.repository_assembler import (
     RepositoryAssembler,
+)
+
+
+# ============================================================
+# SEMANTIC EQUIVALENCE
+# ============================================================
+
+from pipeline.semantic_equivalence.predictor import (
+    predict_semantic_equivalence,
 )
 
 
@@ -94,15 +120,16 @@ def main() -> None:
 
         print(
             "Usage:\n"
-            "  python scripts\\run_llm_migration.py "
+            "  python scripts\\run_llm_migration_with_assembly.py "
             "<repository_path>"
         )
 
         sys.exit(1)
 
-    repository_path = Path(
-        sys.argv[1]
-    ).resolve()
+    repository_path = (
+        Path(sys.argv[1])
+        .resolve()
+    )
 
     if not repository_path.exists():
 
@@ -121,7 +148,7 @@ def main() -> None:
     )
 
     # ========================================================
-    # Load pre-LLM outputs
+    # LOAD PRE-LLM OUTPUTS
     # ========================================================
 
     prompt_file = (
@@ -182,6 +209,9 @@ def main() -> None:
         features_file
     )
 
+    # Keep the existing pipeline contract.
+    _ = features
+
     if not isinstance(
         prompts,
         list,
@@ -192,7 +222,7 @@ def main() -> None:
         )
 
     # ========================================================
-    # Initialize LLM
+    # INITIALIZE GROQ
     # ========================================================
 
     print_stage(
@@ -210,21 +240,20 @@ def main() -> None:
 
     print()
     print(
-        "Provider: Gemini"
+        "Provider: Groq"
     )
 
-    # Model can be controlled using GEMINI_MODEL.
-    migrator = GeminiMigrator()
+    migrator = GroqMigrator()
 
     service = MigrationService(
         llm=migrator
     )
 
     # ========================================================
-    # Migrate files
+    # MIGRATION
     # ========================================================
 
-    results = []
+    results: List[Dict[str, Any]] = []
 
     for index, item in enumerate(
         prompts,
@@ -235,6 +264,7 @@ def main() -> None:
             item,
             dict,
         ):
+
             continue
 
         target_file = (
@@ -266,7 +296,7 @@ def main() -> None:
             continue
 
         # ----------------------------------------------------
-        # Find context
+        # FIND REPOSITORY CONTEXT
         # ----------------------------------------------------
 
         context = next(
@@ -280,13 +310,16 @@ def main() -> None:
                 and ctx.get(
                     "target",
                     {},
-                ).get("file")
+                ).get(
+                    "file"
+                )
                 == target_file
             ),
             None,
         )
 
         if context is None:
+
             context = {}
 
         source_code = (
@@ -302,7 +335,7 @@ def main() -> None:
         )
 
         # ----------------------------------------------------
-        # Fallback: read source directly
+        # FALLBACK TO SOURCE FILE
         # ----------------------------------------------------
 
         if not source_code:
@@ -329,13 +362,49 @@ def main() -> None:
 
         try:
 
-            result = service.migrate_unit(
-                source_code=source_code,
-                prompt=prompt,
-                repository_context=context,
+            result = (
+                service.migrate_unit(
+                    source_code=source_code,
+                    prompt=prompt,
+                    repository_context=context,
+                )
             )
 
-            result_dict = result.to_dict()
+            result_dict = (
+                result.to_dict()
+            )
+
+            # =================================================
+            # CODEBERT SEMANTIC EQUIVALENCE
+            # =================================================
+
+            if (
+                result.success
+                and result.migrated_code
+            ):
+
+                semantic_result = (
+                    predict_semantic_equivalence(
+                        original_code=source_code,
+                        migrated_code=result.migrated_code,
+                    )
+                )
+
+                result_dict[
+                    "semantic_equivalence"
+                ] = semantic_result
+
+                print(
+                    "  Semantic Equivalence:"
+                    f"\n    Prediction : "
+                    f"{semantic_result['prediction'].upper()}"
+                    f"\n    Confidence : "
+                    f"{semantic_result['confidence']:.2%}"
+                )
+
+            # =================================================
+            # METADATA
+            # =================================================
 
             result_dict[
                 "file"
@@ -343,11 +412,13 @@ def main() -> None:
 
             result_dict[
                 "migration_order"
-            ] = item.get(
-                "migration_unit",
-                {},
-            ).get(
-                "order"
+            ] = (
+                item.get(
+                    "migration_unit",
+                    {},
+                ).get(
+                    "order"
+                )
             )
 
             results.append(
@@ -387,7 +458,7 @@ def main() -> None:
             )
 
     # ========================================================
-    # Save results
+    # SAVE MIGRATION RESULTS
     # ========================================================
 
     results_file = (
@@ -401,10 +472,7 @@ def main() -> None:
     )
 
     # ========================================================
-    # SAVE LLM-GENERATED FILES
-    #
-    # These are intermediate outputs only.
-    # The final migrated repository is assembled below.
+    # SAVE GENERATED FILES
     # ========================================================
 
     llm_generated_dir = (
@@ -424,6 +492,7 @@ def main() -> None:
         if not result.get(
             "success"
         ):
+
             continue
 
         migrated_code = (
@@ -440,7 +509,11 @@ def main() -> None:
             or ""
         )
 
-        if not migrated_code or not target_file:
+        if (
+            not migrated_code
+            or not target_file
+        ):
+
             continue
 
         output_path = (
@@ -466,15 +539,6 @@ def main() -> None:
 
     # ========================================================
     # REPOSITORY ASSEMBLY
-    #
-    # The migration plan now controls the final repository:
-    #
-    #   MIGRATE  -> use LLM-generated file
-    #   PRESERVE -> copy original file
-    #   SKIP     -> exclude from production migrated repo
-    #
-    # Any other original repository file is automatically
-    # preserved by RepositoryAssembler.
     # ========================================================
 
     print_stage(
@@ -493,7 +557,9 @@ def main() -> None:
         output_dir=migrated_dir,
     )
 
-    assembly_manifest = assembler.assemble()
+    assembly_manifest = (
+        assembler.assemble()
+    )
 
     assembly_manifest_file = (
         output_dir
@@ -562,6 +628,7 @@ def main() -> None:
         )
 
         for file_name in missing_llm_outputs:
+
             print(
                 f"  - {file_name}"
             )
@@ -598,7 +665,7 @@ def main() -> None:
         )
 
     # ========================================================
-    # FINAL SUMMARY
+    # SUMMARY
     # ========================================================
 
     print_stage(
@@ -641,12 +708,21 @@ def main() -> None:
     )
 
     print()
-    if assembly_manifest.get("status") == "SUCCESS":
+
+    if (
+        assembly_manifest.get(
+            "status"
+        )
+        == "SUCCESS"
+    ):
+
         print(
             "COMPLETE MIGRATED REPOSITORY READY "
             "FOR VERIFICATION"
         )
+
     else:
+
         print(
             "MIGRATION/ASSEMBLY FAILED — "
             "DO NOT PROCEED TO VERIFICATION"

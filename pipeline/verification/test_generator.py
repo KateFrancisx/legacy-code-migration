@@ -4,6 +4,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
+# Behavioral test scenario generation uses Groq.
+# Differential execution remains responsible for deciding whether
+# the generated scenarios reveal behavioral differences.
+
+
 @dataclass
 class BehavioralTestCase:
     """
@@ -489,11 +494,27 @@ def _load_source(
         return ""
 
 
-def _generate_with_gemini(
+def _generate_with_groq(
     prompt,
 ):
+    """
+    Generate behavioral test scenarios using Groq.
+
+    Configuration:
+        GROQ_API_KEY  - required API key
+        GROQ_MODEL    - optional model name
+
+    Default model:
+        openai/gpt-oss-120b
+
+    The LLM is used only to propose behavioral scenarios.
+    The generated scenarios are normalized and validated by
+    the existing code below; correctness is established later
+    by the differential executor.
+    """
+
     api_key = os.environ.get(
-        "GEMINI_API_KEY"
+        "GROQ_API_KEY"
     )
 
     if not api_key:
@@ -503,7 +524,7 @@ def _generate_with_gemini(
             load_dotenv()
 
             api_key = os.environ.get(
-                "GEMINI_API_KEY"
+                "GROQ_API_KEY"
             )
 
         except ImportError:
@@ -513,30 +534,48 @@ def _generate_with_gemini(
         return []
 
     try:
-        from google import genai
+        from groq import Groq
     except ImportError:
         return []
 
+    model = os.environ.get(
+        "GROQ_MODEL",
+        "openai/gpt-oss-120b",
+    )
+
     try:
-        client = genai.Client(
+        client = Groq(
             api_key=api_key
         )
 
-        response = (
-            client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=prompt,
-            )
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You generate behavioral test scenarios "
+                        "for Python callables. "
+                        "Return ONLY valid JSON. "
+                        "Do not return markdown or explanations."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            temperature=0.1,
         )
 
-        text = getattr(
-            response,
-            "text",
+        response_text = getattr(
+            response.choices[0].message,
+            "content",
             None,
         )
 
         return _extract_json_array(
-            text
+            response_text
         )
 
     except Exception:
@@ -769,7 +808,7 @@ def generate_cases_for_callable(
         constructor_info=constructor_info,
     )
 
-    raw_cases = _generate_with_gemini(
+    raw_cases = _generate_with_groq(
         prompt
     )
 

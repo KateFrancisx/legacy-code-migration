@@ -33,13 +33,304 @@ The LLM receives:
     - dependent information
     - related tests
     - repository structure
-    - historical migration examples
+    - selected historical migration examples
     - strict output requirements
+
+RAG context policy:
+    Retrieval may return many candidates, especially when a file
+    contains many functions.
+
+    The prompt builder therefore:
+        1. removes duplicate migration pairs
+        2. ranks examples by relevance
+        3. prefers primary Python 2 -> Python 3 examples
+        4. limits the number of examples
+        5. limits the total RAG context size
+
+This prevents large files from creating oversized LLM requests.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+)
+
+
+# ==============================================================
+# RAG CONTEXT BUDGET
+# ==============================================================
+
+# These limits apply ONLY to the examples inserted into the
+# final LLM prompt.
+#
+# Retrieval itself is unchanged.
+#
+# The current Groq deployment has an 8,000 TPM limit, so we
+# deliberately keep the historical-example section compact.
+MAX_RAG_EXAMPLES = 10
+
+MAX_RAG_CONTEXT_CHARS = 9000
+
+
+def _safe_float(
+    value: Any,
+    default: float = 0.0,
+) -> float:
+    """
+    Safely convert a value to float.
+    """
+
+    try:
+        return float(value)
+    except (
+        TypeError,
+        ValueError,
+    ):
+        return default
+
+
+def _prepare_rag_examples(
+    retrieved_migrations: Optional[
+        List[Dict[str, Any]]
+    ],
+) -> List[Dict[str, Any]]:
+    """
+    Select a compact set of high-quality RAG examples.
+
+    Important:
+        This does NOT change retrieval.
+
+    The retrieval layer may return many candidates.
+    This function controls only which candidates are included
+    in the final LLM prompt.
+
+    Selection policy:
+        1. Ignore empty examples.
+        2. Remove duplicate original/migrated pairs.
+        3. Prefer primary Python 2 -> Python 3 examples.
+        4. Rank by final relevance score.
+        5. Use semantic similarity as a secondary signal.
+        6. Keep complete examples.
+        7. Respect MAX_RAG_EXAMPLES.
+        8. Respect MAX_RAG_CONTEXT_CHARS.
+    """
+
+    if not retrieved_migrations:
+        return []
+
+    # ----------------------------------------------------------
+    # 1. Remove empty and duplicate examples
+    # ----------------------------------------------------------
+
+    unique_examples: List[
+        Dict[str, Any]
+    ] = []
+
+    seen_pairs = set()
+
+    for example in retrieved_migrations:
+
+        if not isinstance(
+            example,
+            dict,
+        ):
+            continue
+
+        original = str(
+            example.get(
+                "original_code",
+                "",
+            )
+            or ""
+        ).strip()
+
+        migrated = str(
+            example.get(
+                "migrated_code",
+                "",
+            )
+            or ""
+        ).strip()
+
+        # Ignore unusable records.
+        if not original and not migrated:
+            continue
+
+        pair_key = (
+            original,
+            migrated,
+        )
+
+        if pair_key in seen_pairs:
+            continue
+
+        seen_pairs.add(
+            pair_key
+        )
+
+        unique_examples.append(
+            example
+        )
+
+    if not unique_examples:
+        return []
+
+    # ----------------------------------------------------------
+    # 2. Rank examples
+    # ----------------------------------------------------------
+
+    def ranking_key(
+        example: Dict[str, Any],
+    ) -> Tuple[
+        int,
+        float,
+        float,
+    ]:
+        """
+        Ranking order:
+
+            primary migration example
+                >
+            secondary/generic example
+
+        Then:
+
+            final_score
+                >
+            semantic similarity
+        """
+
+        retrieval_source = str(
+            example.get(
+                "retrieval_source",
+                "",
+            )
+            or ""
+        ).lower()
+
+        primary_bonus = (
+            1
+            if retrieval_source == "primary"
+            else 0
+        )
+
+        final_score = _safe_float(
+            example.get(
+                "final_score",
+                0.0,
+            )
+        )
+
+        similarity = _safe_float(
+            example.get(
+                "similarity",
+                0.0,
+            )
+        )
+
+        return (
+            primary_bonus,
+            final_score,
+            similarity,
+        )
+
+    unique_examples.sort(
+        key=ranking_key,
+        reverse=True,
+    )
+
+    # ----------------------------------------------------------
+    # 3. Select examples within the RAG budget
+    # ----------------------------------------------------------
+
+    selected: List[
+        Dict[str, Any]
+    ] = []
+
+    current_chars = 0
+
+    for example in unique_examples:
+
+        if (
+            len(selected)
+            >= MAX_RAG_EXAMPLES
+        ):
+            break
+
+        original = str(
+            example.get(
+                "original_code",
+                "",
+            )
+            or ""
+        )
+
+        migrated = str(
+            example.get(
+                "migrated_code",
+                "",
+            )
+            or ""
+        )
+
+        function_name = str(
+            example.get(
+                "function_name",
+                "",
+            )
+            or ""
+        )
+
+        retrieval_source = str(
+            example.get(
+                "retrieval_source",
+                "",
+            )
+            or ""
+        )
+
+        # Estimate the actual prompt footprint.
+        #
+        # The fixed overhead includes:
+        # - headings
+        # - scores
+        # - labels
+        # - code fences
+        # - metadata
+        estimated_chars = (
+            850
+            + len(original)
+            + len(migrated)
+            + len(function_name)
+            + len(retrieval_source)
+        )
+
+        if (
+            current_chars
+            + estimated_chars
+            > MAX_RAG_CONTEXT_CHARS
+        ):
+            continue
+
+        selected.append(
+            example
+        )
+
+        current_chars += (
+            estimated_chars
+        )
+
+    return selected
+
+
+# ==============================================================
+# MAIN PROMPT BUILDER
+# ==============================================================
 
 
 def build_migration_prompt(
@@ -61,18 +352,14 @@ def build_migration_prompt(
     source_code:
         Legacy source code to migrate.
 
-        Kept as a separate parameter for backwards compatibility.
-        If repository_context contains target.source_code,
-        that source takes precedence.
-
     retrieved_migrations:
         Historical migration examples returned by the RAG layer.
 
     source_language:
-        Source programming language.
+        Source programming language/version.
 
     target_language:
-        Target programming language.
+        Target programming language/version.
 
     repository_context:
         Structured context produced by RepositoryContextBuilder.
@@ -81,156 +368,215 @@ def build_migration_prompt(
     -------
     str
         Complete prompt for the migration LLM.
-
-    Design principle
-    ----------------
-    The prompt is repository-aware but focused.
-
-    The LLM should understand:
-        - what file it is migrating
-        - where that file sits in the migration order
-        - what it depends on
-        - what depends on it
-        - what tests are relevant
-        - what Python 2 issues were detected
-        - what historical examples are relevant
-
-    The LLM should NOT receive:
-        - raw CodeBERT embeddings
-        - the entire repository unnecessarily
-        - unrelated historical examples as instructions
     """
 
     parts: List[str] = []
 
-    # ==============================================================
+    # ==========================================================
     # Resolve source code
-    # ==============================================================
+    # ==========================================================
 
-    context = repository_context or {}
-
-    target_context = context.get(
-        "target",
-        {}
+    context = (
+        repository_context
+        or {}
     )
 
-    context_source_code = target_context.get(
-        "source_code"
+    target_context = (
+        context.get(
+            "target",
+            {},
+        )
+        or {}
+    )
+
+    context_source_code = (
+        target_context.get(
+            "source_code"
+        )
     )
 
     if context_source_code:
-        source_code = context_source_code
+        source_code = (
+            context_source_code
+        )
 
     if source_code is None:
         source_code = ""
 
-    # ==============================================================
+    # ==========================================================
     # Resolve migration information
-    # ==============================================================
+    # ==========================================================
 
-    migration = context.get(
-        "migration",
-        {}
+    migration = (
+        context.get(
+            "migration",
+            {},
+        )
+        or {}
     )
 
-    effective_source_language = migration.get(
-        "source",
-        source_language,
+    effective_source_language = (
+        migration.get(
+            "source",
+            source_language,
+        )
     )
 
-    effective_target_language = migration.get(
-        "target",
-        target_language,
+    effective_target_language = (
+        migration.get(
+            "target",
+            target_language,
+        )
     )
 
-    # ==============================================================
+    # ==========================================================
     # Resolve target information
-    # ==============================================================
+    # ==========================================================
 
-    target_file = target_context.get(
-        "file",
-        "unknown",
+    target_file = (
+        target_context.get(
+            "file",
+            "unknown",
+        )
     )
 
-    target_version = target_context.get(
-        "version",
-        effective_source_language,
+    target_version = (
+        target_context.get(
+            "version",
+            effective_source_language,
+        )
     )
 
-    target_symbols = target_context.get(
-        "symbols",
-        [],
+    target_symbols = (
+        target_context.get(
+            "symbols",
+            [],
+        )
+        or []
     )
 
-    # ==============================================================
+    # ==========================================================
     # Resolve migration state
-    # ==============================================================
+    # ==========================================================
 
-    migration_state = migration.get(
-        "state",
-        {}
+    migration_state = (
+        migration.get(
+            "state",
+            {},
+        )
+        or {}
     )
 
-    migration_order = migration.get(
-        "migration_order",
-        [],
+    migration_order = (
+        migration.get(
+            "migration_order",
+            [],
+        )
+        or []
     )
 
-    migration_position = migration_state.get(
-        "position"
+    migration_position = (
+        migration_state.get(
+            "position"
+        )
     )
 
-    migration_total = migration_state.get(
-        "total"
+    migration_total = (
+        migration_state.get(
+            "total"
+        )
     )
 
-    previous_files = migration_state.get(
-        "previous",
-        [],
+    previous_files = (
+        migration_state.get(
+            "previous",
+            [],
+        )
+        or []
     )
 
-    next_files = migration_state.get(
-        "next",
-        [],
+    next_files = (
+        migration_state.get(
+            "next",
+            [],
+        )
+        or []
     )
 
-    # ==============================================================
+    # ==========================================================
     # Resolve dependencies / dependents
-    # ==============================================================
+    # ==========================================================
 
-    dependencies = context.get(
-        "dependencies",
-        []
+    dependencies = (
+        context.get(
+            "dependencies",
+            [],
+        )
+        or []
     )
 
-    dependents = context.get(
-        "dependents",
-        []
+    dependents = (
+        context.get(
+            "dependents",
+            [],
+        )
+        or []
     )
 
-    relevant_source = context.get(
-        "relevant_source",
-        []
+    relevant_source = (
+        context.get(
+            "relevant_source",
+            [],
+        )
+        or []
     )
 
-    dependent_source = context.get(
-        "dependent_source",
-        []
+    dependent_source = (
+        context.get(
+            "dependent_source",
+            [],
+        )
+        or []
     )
 
-    related_tests = context.get(
-        "related_tests",
-        []
+    related_tests = (
+        context.get(
+            "related_tests",
+            [],
+        )
+        or []
     )
 
-    repository_structure = context.get(
-        "repository_structure",
-        []
+    repository_structure = (
+        context.get(
+            "repository_structure",
+            [],
+        )
+        or []
     )
 
-    # ==============================================================
+    # ==========================================================
+    # PREPARE RAG EXAMPLES
+    # ==========================================================
+
+    selected_rag_examples = (
+        _prepare_rag_examples(
+            retrieved_migrations
+        )
+    )
+
+    if retrieved_migrations:
+        print(
+            f"  [RAG PROMPT] "
+            f"{len(retrieved_migrations)} candidates "
+            f"-> "
+            f"{len(selected_rag_examples)} examples "
+            f"sent to LLM"
+        )
+
+    # ==========================================================
     # 1. ROLE
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "===== ROLE =====\n"
@@ -252,9 +598,9 @@ def build_migration_prompt(
         "and make only the changes required for the migration.\n"
     )
 
-    # ==============================================================
+    # ==========================================================
     # 2. MIGRATION OBJECTIVE
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -282,9 +628,9 @@ def build_migration_prompt(
         "existing behavior and interfaces.\n"
     )
 
-    # ==============================================================
+    # ==========================================================
     # 3. MIGRATION PLAN
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -362,18 +708,21 @@ def build_migration_prompt(
                 f"- {file_name}\n"
             )
 
-    # ==============================================================
+    # ==========================================================
     # 4. MIGRATION RISK / DETECTED ISSUES
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
         "===== DETECTED MIGRATION ISSUES =====\n"
     )
 
-    reasons = migration.get(
-        "reasons",
-        []
+    reasons = (
+        migration.get(
+            "reasons",
+            [],
+        )
+        or []
     )
 
     risk = migration.get(
@@ -384,9 +733,12 @@ def build_migration_prompt(
         "risk_score"
     )
 
-    migration_notes = migration.get(
-        "migration_notes",
-        []
+    migration_notes = (
+        migration.get(
+            "migration_notes",
+            [],
+        )
+        or []
     )
 
     if reasons:
@@ -432,9 +784,9 @@ def build_migration_prompt(
                 f"- {note}\n"
             )
 
-    # ==============================================================
+    # ==========================================================
     # 5. TARGET SYMBOLS
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -444,6 +796,12 @@ def build_migration_prompt(
     if target_symbols:
 
         for symbol in target_symbols:
+
+            if not isinstance(
+                symbol,
+                dict,
+            ):
+                continue
 
             symbol_type = symbol.get(
                 "type",
@@ -493,9 +851,9 @@ def build_migration_prompt(
             "No target symbols were extracted.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 6. DEPENDENCY CONTEXT
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -511,6 +869,12 @@ def build_migration_prompt(
 
         for dependency in dependencies:
 
+            if not isinstance(
+                dependency,
+                dict,
+            ):
+                continue
+
             file_name = dependency.get(
                 "file",
                 "unknown",
@@ -521,9 +885,12 @@ def build_migration_prompt(
                 False,
             )
 
-            referenced_symbols = dependency.get(
-                "referenced_symbols",
-                [],
+            referenced_symbols = (
+                dependency.get(
+                    "referenced_symbols",
+                    [],
+                )
+                or []
             )
 
             parts.append(
@@ -540,7 +907,8 @@ def build_migration_prompt(
                 parts.append(
                     "  Referenced symbols: "
                     + ", ".join(
-                        referenced_symbols
+                        str(symbol)
+                        for symbol in referenced_symbols
                     )
                     + "\n"
                 )
@@ -552,9 +920,9 @@ def build_migration_prompt(
             "were identified.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 7. RELEVANT DEPENDENCY SOURCE
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -575,19 +943,31 @@ def build_migration_prompt(
 
         for dependency in relevant_source:
 
+            if not isinstance(
+                dependency,
+                dict,
+            ):
+                continue
+
             file_name = dependency.get(
                 "file",
                 "unknown",
             )
 
-            referenced_symbols = dependency.get(
-                "referenced_symbols",
-                [],
+            referenced_symbols = (
+                dependency.get(
+                    "referenced_symbols",
+                    [],
+                )
+                or []
             )
 
-            dependency_source = dependency.get(
-                "source_code",
-                "",
+            dependency_source = (
+                dependency.get(
+                    "source_code",
+                    "",
+                )
+                or ""
             )
 
             parts.append(
@@ -599,7 +979,8 @@ def build_migration_prompt(
                 parts.append(
                     "Relevant symbols: "
                     + ", ".join(
-                        referenced_symbols
+                        str(symbol)
+                        for symbol in referenced_symbols
                     )
                     + "\n"
                 )
@@ -623,9 +1004,9 @@ def build_migration_prompt(
             "provided.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 8. DEPENDENTS
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -642,14 +1023,23 @@ def build_migration_prompt(
 
         for dependent in dependents:
 
+            if not isinstance(
+                dependent,
+                dict,
+            ):
+                continue
+
             file_name = dependent.get(
                 "file",
                 "unknown",
             )
 
-            referenced_symbols = dependent.get(
-                "referenced_symbols",
-                [],
+            referenced_symbols = (
+                dependent.get(
+                    "referenced_symbols",
+                    [],
+                )
+                or []
             )
 
             parts.append(
@@ -661,7 +1051,8 @@ def build_migration_prompt(
                 parts.append(
                     "  Referenced symbols: "
                     + ", ".join(
-                        referenced_symbols
+                        str(symbol)
+                        for symbol in referenced_symbols
                     )
                     + "\n"
                 )
@@ -672,9 +1063,9 @@ def build_migration_prompt(
             "No repository dependents were identified.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 9. DEPENDENT SOURCE
-    # ==============================================================
+    # ==========================================================
 
     if dependent_source:
 
@@ -690,19 +1081,31 @@ def build_migration_prompt(
 
         for dependent in dependent_source:
 
+            if not isinstance(
+                dependent,
+                dict,
+            ):
+                continue
+
             file_name = dependent.get(
                 "file",
                 "unknown",
             )
 
-            referenced_symbols = dependent.get(
-                "referenced_symbols",
-                [],
+            referenced_symbols = (
+                dependent.get(
+                    "referenced_symbols",
+                    [],
+                )
+                or []
             )
 
-            dependent_code = dependent.get(
-                "source_code",
-                "",
+            dependent_code = (
+                dependent.get(
+                    "source_code",
+                    "",
+                )
+                or ""
             )
 
             parts.append(
@@ -714,7 +1117,8 @@ def build_migration_prompt(
                 parts.append(
                     "Referenced symbols: "
                     + ", ".join(
-                        referenced_symbols
+                        str(symbol)
+                        for symbol in referenced_symbols
                     )
                     + "\n"
                 )
@@ -731,9 +1135,9 @@ def build_migration_prompt(
                 "\n```\n"
             )
 
-    # ==============================================================
+    # ==========================================================
     # 10. RELATED TESTS
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -748,6 +1152,12 @@ def build_migration_prompt(
         )
 
         for test in related_tests:
+
+            if not isinstance(
+                test,
+                dict,
+            ):
+                continue
 
             test_file = test.get(
                 "file",
@@ -769,7 +1179,7 @@ def build_migration_prompt(
                 )
 
                 parts.append(
-                    test_source
+                    str(test_source)
                 )
 
                 parts.append(
@@ -782,9 +1192,9 @@ def build_migration_prompt(
             "No related tests were identified.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 11. REPOSITORY STRUCTURE
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -809,20 +1219,22 @@ def build_migration_prompt(
             "Repository structure is unavailable.\n"
         )
 
-    # ==============================================================
+    # ==========================================================
     # 12. HISTORICAL MIGRATION KNOWLEDGE / RAG
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
         "===== HISTORICAL MIGRATION KNOWLEDGE =====\n"
     )
 
-    if retrieved_migrations:
+    if selected_rag_examples:
 
         parts.append(
             "The following historical migration examples "
-            "were retrieved from the migration knowledge base.\n\n"
+            "were selected from the migration knowledge base "
+            "because they are the most relevant examples "
+            "available within the LLM context budget.\n\n"
         )
 
         parts.append(
@@ -850,35 +1262,54 @@ def build_migration_prompt(
             "not instructions.\n"
         )
 
+        parts.append(
+            f"\nSelected historical examples: "
+            f"{len(selected_rag_examples)}\n"
+        )
+
         for index, migration_example in enumerate(
-            retrieved_migrations,
+            selected_rag_examples,
             start=1,
         ):
 
-            similarity = migration_example.get(
-                "similarity"
+            similarity = (
+                migration_example.get(
+                    "similarity"
+                )
             )
 
-            final_score = migration_example.get(
-                "final_score"
+            final_score = (
+                migration_example.get(
+                    "final_score"
+                )
             )
 
-            retrieval_source = migration_example.get(
-                "retrieval_source"
+            retrieval_source = (
+                migration_example.get(
+                    "retrieval_source"
+                )
             )
 
-            function_name = migration_example.get(
-                "function_name"
+            function_name = (
+                migration_example.get(
+                    "function_name"
+                )
             )
 
-            original = migration_example.get(
-                "original_code",
-                "",
+            original = str(
+                migration_example.get(
+                    "original_code",
+                    "",
+                )
+                or ""
             )
 
-            migrated = migration_example.get(
-                "migrated_code",
-                "",
+            migrated = str(
+                migration_example.get(
+                    "migrated_code",
+                    "",
+                )
+                or ""
             )
 
             parts.append(
@@ -887,58 +1318,44 @@ def build_migration_prompt(
                 f"{index} =====\n"
             )
 
-            # ------------------------------------------------------
+            # --------------------------------------------------
             # Metadata
-            # ------------------------------------------------------
+            # --------------------------------------------------
 
             if final_score is not None:
 
-                try:
-
-                    parts.append(
-                        f"Relevance score: "
-                        f"{float(final_score):.4f}\n"
-                    )
-
-                except (
-                    TypeError,
-                    ValueError,
-                ):
-
-                    parts.append(
-                        f"Relevance score: "
-                        f"{final_score}\n"
-                    )
+                parts.append(
+                    f"Relevance score: "
+                    f"{_safe_float(final_score):.4f}\n"
+                )
 
             if similarity is not None:
 
-                try:
-
-                    parts.append(
-                        f"Semantic similarity: "
-                        f"{float(similarity):.4f}\n"
-                    )
-
-                except (
-                    TypeError,
-                    ValueError,
-                ):
-
-                    parts.append(
-                        f"Semantic similarity: "
-                        f"{similarity}\n"
-                    )
+                parts.append(
+                    f"Semantic similarity: "
+                    f"{_safe_float(similarity):.4f}\n"
+                )
 
             if retrieval_source:
 
-                if retrieval_source == "primary":
+                if (
+                    str(
+                        retrieval_source
+                    ).lower()
+                    == "primary"
+                ):
 
                     parts.append(
                         "Knowledge pool: "
                         "PRIMARY — Python 2 → Python 3\n"
                     )
 
-                elif retrieval_source == "secondary":
+                elif (
+                    str(
+                        retrieval_source
+                    ).lower()
+                    == "secondary"
+                ):
 
                     parts.append(
                         "Knowledge pool: "
@@ -959,9 +1376,9 @@ def build_migration_prompt(
                     f"{function_name}\n"
                 )
 
-            # ------------------------------------------------------
+            # --------------------------------------------------
             # Legacy version
-            # ------------------------------------------------------
+            # --------------------------------------------------
 
             parts.append(
                 "\nLEGACY VERSION:\n"
@@ -979,9 +1396,9 @@ def build_migration_prompt(
                 "\n```\n"
             )
 
-            # ------------------------------------------------------
+            # --------------------------------------------------
             # Migrated version
-            # ------------------------------------------------------
+            # --------------------------------------------------
 
             parts.append(
                 "\nMIGRATED VERSION:\n"
@@ -1019,9 +1436,9 @@ def build_migration_prompt(
         "===== END HISTORICAL MIGRATION KNOWLEDGE =====\n"
     )
 
-    # ==============================================================
+    # ==========================================================
     # 13. CODE TO MIGRATE
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -1053,9 +1470,9 @@ def build_migration_prompt(
         "===== END CODE TO MIGRATE =====\n"
     )
 
-    # ==============================================================
+    # ==========================================================
     # 14. FINAL MIGRATION REQUIREMENTS
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
@@ -1136,9 +1553,9 @@ def build_migration_prompt(
         "===== END MIGRATION REQUIREMENTS =====\n"
     )
 
-    # ==============================================================
+    # ==========================================================
     # 15. FINAL OUTPUT CONTRACT
-    # ==============================================================
+    # ==========================================================
 
     parts.append(
         "\n\n"
