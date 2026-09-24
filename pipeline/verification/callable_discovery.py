@@ -417,9 +417,15 @@ def discover_callables(
     and execute the corresponding callable in the original
     repository under Python 2.
 
+    Existing test files are intentionally excluded from
+    behavioral callable discovery. Existing tests are
+    verified separately by the existing-test verification
+    stage.
+
     If file_names is supplied, only those files are analyzed.
 
-    If file_names is omitted, all Python files are analyzed.
+    If file_names is omitted, all Python files are analyzed
+    except files inside a tests directory.
     """
 
     repository_path = Path(
@@ -429,9 +435,13 @@ def discover_callables(
     if file_names is None:
 
         paths = sorted(
-            repository_path.rglob(
+            path
+            for path in repository_path.rglob(
                 "*.py"
             )
+            if "tests" not in path.relative_to(
+                repository_path
+            ).parts
         )
 
     else:
