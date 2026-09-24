@@ -4,79 +4,54 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-# Behavioral test scenario generation uses Groq.
-# Differential execution remains responsible for deciding whether
-# the generated scenarios reveal behavioral differences.
-
-
 @dataclass
 class BehavioralTestCase:
     """
-    One generated behavioral scenario.
+    One LLM-generated behavioral scenario.
 
     For module-level functions:
-
         inputs = [...]
         constructor_inputs = None
 
     For class methods:
-
         constructor_inputs = [...]
         inputs = [...]
     """
 
     function: str
-    inputs: list = field(
-        default_factory=list
-    )
+    inputs: list = field(default_factory=list)
     constructor_inputs: list = None
-    metadata: dict = field(
-        default_factory=dict
-    )
+    metadata: dict = field(default_factory=dict)
 
     def to_dict(self):
         return {
             "function": self.function,
             "inputs": self.inputs,
-            "constructor_inputs": (
-                self.constructor_inputs
-            ),
+            "constructor_inputs": self.constructor_inputs,
             "metadata": self.metadata,
         }
 
 
 def _safe_json_value(value):
-    if isinstance(
-        value,
-        dict,
-    ):
+    if isinstance(value, dict):
         return {
             key: _safe_json_value(item)
             for key, item in value.items()
         }
 
-    if isinstance(
-        value,
-        list,
-    ):
+    if isinstance(value, list):
         return [
             _safe_json_value(item)
             for item in value
         ]
 
-    if isinstance(
-        value,
-        tuple,
-    ):
+    if isinstance(value, tuple):
         return tuple(
             _safe_json_value(item)
             for item in value
         )
 
-    if isinstance(
-        value,
-        str,
-    ):
+    if isinstance(value, str):
         stripped = value.strip()
 
         if stripped == "null":
@@ -93,36 +68,18 @@ def _normalize_case(
     raw_case,
     callable_info=None,
 ):
-    if isinstance(
-        raw_case,
-        dict,
-    ):
-        inputs = raw_case.get(
-            "inputs",
-            [],
-        )
+    if isinstance(raw_case, dict):
+        inputs = raw_case.get("inputs", [])
+        constructor_inputs = raw_case.get("constructor_inputs")
+        metadata = raw_case.get("metadata", {})
 
-        constructor_inputs = raw_case.get(
-            "constructor_inputs"
-        )
-
-        metadata = raw_case.get(
-            "metadata",
-            {},
-        )
-
-    elif isinstance(
-        raw_case,
-        list,
-    ):
+    elif isinstance(raw_case, list):
         inputs = raw_case
         constructor_inputs = None
         metadata = {}
 
     else:
-        inputs = [
-            raw_case
-        ]
+        inputs = [raw_case]
         constructor_inputs = None
         metadata = {}
 
@@ -134,28 +91,16 @@ def _normalize_case(
             constructor_inputs
         )
 
-    inputs = _safe_json_value(
-        inputs
-    )
+    inputs = _safe_json_value(inputs)
 
-    if not isinstance(
-        inputs,
-        list,
-    ):
-        inputs = [
-            inputs
-        ]
+    if not isinstance(inputs, list):
+        inputs = [inputs]
 
     if (
         constructor_inputs is not None
-        and not isinstance(
-            constructor_inputs,
-            list,
-        )
+        and not isinstance(constructor_inputs, list)
     ):
-        constructor_inputs = [
-            constructor_inputs
-        ]
+        constructor_inputs = [constructor_inputs]
 
     return BehavioralTestCase(
         function=function_name,
@@ -163,31 +108,20 @@ def _normalize_case(
         constructor_inputs=constructor_inputs,
         metadata=(
             metadata
-            if isinstance(
-                metadata,
-                dict,
-            )
+            if isinstance(metadata, dict)
             else {}
         ),
     )
 
 
-def _callable_description(
-    callable_info,
-):
+def _callable_description(callable_info):
     if callable_info is None:
         return {}
 
-    if isinstance(
-        callable_info,
-        dict,
-    ):
+    if isinstance(callable_info, dict):
         return callable_info
 
-    if hasattr(
-        callable_info,
-        "to_dict",
-    ):
+    if hasattr(callable_info, "to_dict"):
         return callable_info.to_dict()
 
     return {
@@ -224,15 +158,7 @@ def _callable_description(
     }
 
 
-def _effective_parameters(
-    callable_info,
-):
-    """
-    Return parameters that the caller must actually provide.
-
-    Removes self/cls for methods and constructors.
-    """
-
+def _effective_parameters(callable_info):
     description = _callable_description(
         callable_info
     )
@@ -295,12 +221,8 @@ def _build_llm_prompt(
         [],
     )
 
-    constructor_description = (
-        _callable_description(
-            constructor_info
-        )
-        if constructor_info is not None
-        else {}
+    constructor_description = _callable_description(
+        constructor_info
     )
 
     constructor_parameters = (
@@ -308,13 +230,15 @@ def _build_llm_prompt(
             "parameters",
             [],
         )
+        if constructor_info is not None
+        else []
     )
 
     constructor_name = (
         constructor_description.get(
             "qualified_name"
         )
-        if constructor_description
+        if constructor_info is not None
         else None
     )
 
@@ -322,8 +246,8 @@ def _build_llm_prompt(
         source_text = ""
 
     prompt = f"""
-Generate {count} behavioral test scenarios for a Python
-callable.
+Generate exactly {count} behavioral test scenarios
+for this Python callable.
 
 Callable:
 {qualified_name}
@@ -353,16 +277,19 @@ Rules:
 
 1. Return ONLY valid JSON.
 2. Return a JSON array.
-3. Each item must be an object.
-4. Each item must contain "inputs".
-5. "inputs" must always be a JSON array.
-6. JSON null is allowed and represents Python None.
-7. Do not return Python expressions as strings.
-8. Do not return executable code.
-9. Use values appropriate for the callable's parameters.
-10. Include ordinary cases and useful boundary cases.
-11. Do not invent a function name.
-12. Do not include the callable name in the inputs.
+3. Return exactly {count} items.
+4. Every item must be an object.
+5. Every item must contain "inputs".
+6. "inputs" must always be a JSON array.
+7. JSON null represents Python None.
+8. Do not return Python expressions as strings.
+9. Do not return executable code.
+10. Use values appropriate for the callable parameters.
+11. Include ordinary cases and useful boundary cases.
+12. Do not invent a function name.
+13. Do not include the callable name inside inputs.
+14. Do not include markdown.
+15. Do not include explanations.
 
 For module-level functions:
 
@@ -371,91 +298,52 @@ For module-level functions:
 
 For constructors:
 
-- "inputs" contains the constructor arguments.
+- "inputs" contains constructor arguments.
 - "constructor_inputs" should be omitted or null.
 
 For instance methods:
 
-- The object must first be constructed.
-- "constructor_inputs" MUST contain valid arguments for the
-  discovered constructor.
-- "inputs" contains the arguments passed to the method.
+- "constructor_inputs" MUST contain valid constructor arguments.
+- "inputs" contains only the method arguments.
 - Do not put constructor arguments inside "inputs".
-- The constructor parameters shown above must be respected.
 
-Example for a module function with parameters
-["value", "percentage"]:
+Example:
 
 [
-  {{
-    "inputs": [100, 10]
-  }},
-  {{
-    "inputs": [0, 50]
-  }}
-]
-
-Example for an instance method whose constructor requires
-["name", "items"] and whose method takes no arguments:
-
-[
-  {{
-    "constructor_inputs": ["example", []],
-    "inputs": []
-  }}
+  {{"inputs": [100, 10]}},
+  {{"inputs": [0, 50]}},
+  {{"inputs": [-20, 150]}}
 ]
 """
 
     return prompt
 
 
-def _extract_json_array(
-    text,
-):
+def _extract_json_array(text):
     if not text:
         return []
 
     text = text.strip()
 
     try:
-        value = json.loads(
-            text
-        )
+        value = json.loads(text)
 
-        if isinstance(
-            value,
-            list,
-        ):
+        if isinstance(value, list):
             return value
 
     except Exception:
         pass
 
-    start = text.find(
-        "["
-    )
+    start = text.find("[")
+    end = text.rfind("]")
 
-    end = text.rfind(
-        "]"
-    )
-
-    if (
-        start >= 0
-        and end > start
-    ):
-        candidate = text[
-            start:end + 1
-        ]
+    if start >= 0 and end > start:
+        candidate = text[start:end + 1]
 
         try:
-            value = json.loads(
-                candidate
-            )
+            value = json.loads(candidate)
 
-            if isinstance(
-                value,
-                list,
-            ):
+            if isinstance(value, list):
                 return value
 
         except Exception:
@@ -474,10 +362,7 @@ def _load_source(
     if not file_name:
         return ""
 
-    path = (
-        Path(repository_path)
-        / file_name
-    )
+    path = Path(repository_path) / file_name
 
     if not path.exists():
         return ""
@@ -486,7 +371,6 @@ def _load_source(
         return path.read_text(
             encoding="utf-8"
         )
-
     except (
         OSError,
         UnicodeDecodeError,
@@ -494,23 +378,14 @@ def _load_source(
         return ""
 
 
-def _generate_with_groq(
-    prompt,
-):
+def _generate_with_groq(prompt):
     """
-    Generate behavioral test scenarios using Groq.
+    Generate behavioral scenarios using Groq.
 
-    Configuration:
-        GROQ_API_KEY  - required API key
-        GROQ_MODEL    - optional model name
+    IMPORTANT:
+    This function does NOT use fallback generation.
 
-    Default model:
-        openai/gpt-oss-120b
-
-    The LLM is used only to propose behavioral scenarios.
-    The generated scenarios are normalized and validated by
-    the existing code below; correctness is established later
-    by the differential executor.
+    If Groq fails, the exception is reported and raised.
     """
 
     api_key = os.environ.get(
@@ -531,17 +406,30 @@ def _generate_with_groq(
             pass
 
     if not api_key:
-        return []
+        raise RuntimeError(
+            "GROQ_API_KEY is not configured."
+        )
 
     try:
         from groq import Groq
-    except ImportError:
-        return []
+    except ImportError as exc:
+        raise RuntimeError(
+            "The groq package is not installed."
+        ) from exc
 
     model = os.environ.get(
         "GROQ_MODEL",
         "openai/gpt-oss-120b",
     )
+
+    print()
+    print("=" * 70)
+    print("GROQ REQUEST")
+    print("=" * 70)
+    print("Model:", model)
+    print()
+    print(prompt)
+    print("=" * 70)
 
     try:
         client = Groq(
@@ -554,10 +442,11 @@ def _generate_with_groq(
                 {
                     "role": "system",
                     "content": (
-                        "You generate behavioral test scenarios "
-                        "for Python callables. "
+                        "You generate behavioral test "
+                        "scenarios for Python callables. "
                         "Return ONLY valid JSON. "
-                        "Do not return markdown or explanations."
+                        "Do not return markdown. "
+                        "Do not return explanations."
                     ),
                 },
                 {
@@ -568,170 +457,50 @@ def _generate_with_groq(
             temperature=0.1,
         )
 
-        response_text = getattr(
-            response.choices[0].message,
-            "content",
-            None,
+    except Exception as exc:
+        print()
+        print("=" * 70)
+        print("GROQ API ERROR")
+        print("=" * 70)
+        print(
+            type(exc).__name__,
+            ":",
+            str(exc),
         )
+        print("=" * 70)
 
-        return _extract_json_array(
-            response_text
-        )
+        raise
 
-    except Exception:
-        return []
-
-
-def _parameter_count(
-    callable_info,
-):
-    return len(
-        _effective_parameters(
-            callable_info
-        )
+    response_text = getattr(
+        response.choices[0].message,
+        "content",
+        None,
     )
 
+    print()
+    print("=" * 70)
+    print("GROQ RAW RESPONSE")
+    print("=" * 70)
+    print(response_text)
+    print("=" * 70)
 
-def _fallback_value_for_parameter(
-    parameter_name,
-    position,
-):
-    name = (
-        parameter_name
-        or ""
-    ).lower()
-
-    if any(
-        token in name
-        for token in (
-            "name",
-            "customer",
-            "user",
-            "title",
-            "label",
-            "text",
-        )
-    ):
-        return "example"
-
-    if any(
-        token in name
-        for token in (
-            "percent",
-            "percentage",
-            "rate",
-        )
-    ):
-        return 10
-
-    if any(
-        token in name
-        for token in (
-            "size",
-            "count",
-            "quantity",
-            "limit",
-            "index",
-        )
-    ):
-        return 2
-
-    if any(
-        token in name
-        for token in (
-            "items",
-            "values",
-            "data",
-            "records",
-            "entries",
-        )
-    ):
-        return []
-
-    if position == 0:
-        return 1
-
-    return 1
-
-
-def _fallback_inputs(
-    callable_info,
-):
-    parameters = _effective_parameters(
-        callable_info
+    cases = _extract_json_array(
+        response_text
     )
 
-    return [
-        _fallback_value_for_parameter(
-            parameter_name,
-            position,
-        )
-        for position, parameter_name in enumerate(
-            parameters
-        )
-    ]
-
-
-def _fallback_constructor_inputs(
-    callable_info,
-    constructor_info=None,
-):
-    """
-    Build constructor arguments from the actual discovered
-    constructor.
-
-    This is deliberately repository-independent.
-    """
-
-    if constructor_info is None:
-        return []
-
-    return _fallback_inputs(
-        constructor_info
+    print()
+    print(
+        "GROQ PARSED CASE COUNT:",
+        len(cases),
     )
 
+    if not cases:
+        raise RuntimeError(
+            "Groq returned a response, but it "
+            "could not be parsed as a JSON array."
+        )
 
-def _normalize_constructor_inputs(
-    case,
-    constructor_info,
-):
-    """
-    Ensure an instance-method case has enough constructor
-    arguments to instantiate the discovered class.
-
-    LLM-generated constructor inputs are preserved when they
-    are complete. Missing or empty constructor inputs fall
-    back to values derived from the constructor signature.
-    """
-
-    if constructor_info is None:
-        if case.constructor_inputs is None:
-            case.constructor_inputs = []
-
-        return case
-
-    fallback = _fallback_constructor_inputs(
-        callable_info=None,
-        constructor_info=constructor_info,
-    )
-
-    if case.constructor_inputs is None:
-        case.constructor_inputs = fallback
-        return case
-
-    if not isinstance(
-        case.constructor_inputs,
-        list,
-    ):
-        case.constructor_inputs = fallback
-        return case
-
-    if len(case.constructor_inputs) < len(
-        fallback
-    ):
-        case.constructor_inputs = fallback
-
-    return case
+    return cases
 
 
 def _normalize_generated_cases(
@@ -756,7 +525,6 @@ def _normalize_generated_cases(
     normalized = []
 
     for raw_case in raw_cases:
-
         case = _normalize_case(
             function_name=function_name,
             raw_case=raw_case,
@@ -764,17 +532,32 @@ def _normalize_generated_cases(
         )
 
         if kind == "instance_method":
-            case = _normalize_constructor_inputs(
-                case=case,
-                constructor_info=constructor_info,
-            )
+            if constructor_info is None:
+                raise RuntimeError(
+                    "Instance method has no discovered constructor."
+                )
 
-        normalized.append(
-            case
+            if (
+                case.constructor_inputs is None
+                or not isinstance(
+                    case.constructor_inputs,
+                    list,
+                )
+            ):
+                raise RuntimeError(
+                    "Groq did not provide valid "
+                    "constructor_inputs for "
+                    f"{description.get('qualified_name')}."
+                )
+
+        normalized.append(case)
+
+    if len(normalized) != count:
+        raise RuntimeError(
+            f"Groq generated {len(normalized)} cases "
+            f"but exactly {count} were required for "
+            f"{description.get('qualified_name')}."
         )
-
-        if len(normalized) >= count:
-            break
 
     return normalized
 
@@ -819,66 +602,15 @@ def generate_cases_for_callable(
         constructor_info=constructor_info,
     )
 
-    if len(cases) >= count:
-        return cases
-
-    fallback_inputs = _fallback_inputs(
-        callable_info
-    )
-
-    kind = description.get(
-        "kind",
-        "function",
-    )
-
-    while len(cases) < count:
-
-        if kind == "instance_method":
-
-            constructor_inputs = (
-                _fallback_constructor_inputs(
-                    callable_info=callable_info,
-                    constructor_info=constructor_info,
-                )
-            )
-
-            cases.append(
-                BehavioralTestCase(
-                    function=description.get(
-                        "function_name"
-                    ),
-                    inputs=[],
-                    constructor_inputs=(
-                        constructor_inputs
-                    ),
-                    metadata={
-                        "generation": "fallback",
-                        "constructor_discovered": (
-                            constructor_info
-                            is not None
-                        ),
-                    },
-                )
-            )
-
-        else:
-
-            cases.append(
-                BehavioralTestCase(
-                    function=description.get(
-                        "function_name"
-                    ),
-                    inputs=(
-                        list(
-                            fallback_inputs
-                        )
-                    ),
-                    constructor_inputs=None,
-                    metadata={
-                        "generation": "fallback"
-                    },
-                )
-            )
+    for case in cases:
+        case.metadata = {
+            **case.metadata,
+            "generation": "groq",
+            "model": os.environ.get(
+                "GROQ_MODEL",
+                "openai/gpt-oss-120b",
+            ),
+        }
 
     return cases
 
@@ -888,43 +620,26 @@ def generate_cases_for_callables(
     count=3,
     repository_path=None,
 ):
-    """
-    Generate behavioral cases for every discovered callable.
-
-    Instance methods are automatically associated with the
-    constructor belonging to the same file and class.
-    """
-
     results = {}
 
     constructors = {}
 
     for callable_info in callables:
-
         description = _callable_description(
             callable_info
         )
 
-        if description.get(
-            "kind"
-        ) != "constructor":
+        if description.get("kind") != "constructor":
             continue
 
         key = (
-            description.get(
-                "file"
-            ),
-            description.get(
-                "class_name"
-            ),
+            description.get("file"),
+            description.get("class_name"),
         )
 
-        constructors[
-            key
-        ] = callable_info
+        constructors[key] = callable_info
 
     for callable_info in callables:
-
         description = _callable_description(
             callable_info
         )
@@ -935,26 +650,21 @@ def generate_cases_for_callables(
 
         constructor_info = None
 
-        if description.get(
-            "kind"
-        ) == "instance_method":
-
+        if description.get("kind") == "instance_method":
             key = (
-                description.get(
-                    "file"
-                ),
-                description.get(
-                    "class_name"
-                ),
+                description.get("file"),
+                description.get("class_name"),
             )
 
-            constructor_info = constructors.get(
-                key
-            )
+            constructor_info = constructors.get(key)
 
-        results[
-            qualified_name
-        ] = generate_cases_for_callable(
+        print()
+        print(
+            "Generating Groq cases for:",
+            qualified_name,
+        )
+
+        results[qualified_name] = generate_cases_for_callable(
             callable_info=callable_info,
             count=count,
             repository_path=repository_path,
@@ -973,7 +683,6 @@ def generate_llm_cases_for_functions(
     results = {}
 
     for function_name in function_names:
-
         callable_info = {
             "file": file_name,
             "qualified_name": function_name,
@@ -989,8 +698,6 @@ def generate_llm_cases_for_functions(
             repository_path=repository_path,
         )
 
-        results[
-            function_name
-        ] = cases
+        results[function_name] = cases
 
     return results
