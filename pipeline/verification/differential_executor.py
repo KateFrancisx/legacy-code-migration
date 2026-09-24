@@ -68,7 +68,7 @@ def _build_runner_script(
         ensure_ascii=False,
     )
 
-    runner_template = r'''
+    runner_template = r'''# -*- coding: utf-8 -*-
 import json
 import os
 import sys
