@@ -1,5 +1,5 @@
 {
-  "status": "FAIL",
+  "status": "PASS",
   "existing_tests": {
     "equivalent": true,
     "original": {
@@ -40,8 +40,8 @@
   "behavioral_tests": {
     "callable_count": 13,
     "case_count": 39,
-    "equivalent": 36,
-    "semantic_differences": 3,
+    "equivalent": 39,
+    "semantic_differences": 0,
     "detailed": [
       {
         "callable": {
@@ -50,7 +50,7 @@
           "function_name": "__init__",
           "kind": "constructor",
           "class_name": "Invoice",
-          "line": 10,
+          "line": 9,
           "parameters": [
             "self",
             "customer_name",
@@ -58,8 +58,17 @@
           ]
         },
         "inputs": [
-          "example",
-          []
+          "Acme Corp",
+          [
+            {
+              "price": 19.99,
+              "quantity": 3
+            },
+            {
+              "price": 5.0,
+              "quantity": 10
+            }
+          ]
         ],
         "constructor_inputs": null,
         "original": {
@@ -69,11 +78,38 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "acme corp"
                 ],
                 [
                   "items",
-                  []
+                  [
+                    {
+                      "items": [
+                        [
+                          "price",
+                          19.99
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "price",
+                          5.0
+                        ],
+                        [
+                          "quantity",
+                          10
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
                 ]
               ],
               "__type__": "dict"
@@ -96,11 +132,38 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "acme corp"
                 ],
                 [
                   "items",
-                  []
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          19.99
+                        ],
+                        [
+                          "quantity",
+                          3
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          5.0
+                        ],
+                        [
+                          "quantity",
+                          10
+                        ]
+                      ]
+                    }
+                  ]
                 ]
               ]
             }
@@ -119,7 +182,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -129,7 +193,7 @@
           "function_name": "__init__",
           "kind": "constructor",
           "class_name": "Invoice",
-          "line": 10,
+          "line": 9,
           "parameters": [
             "self",
             "customer_name",
@@ -137,8 +201,13 @@
           ]
         },
         "inputs": [
-          "example",
-          []
+          "  John Doe  ",
+          [
+            {
+              "price": 100.0,
+              "quantity": 1
+            }
+          ]
         ],
         "constructor_inputs": null,
         "original": {
@@ -148,11 +217,25 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "john doe"
                 ],
                 [
                   "items",
-                  []
+                  [
+                    {
+                      "items": [
+                        [
+                          "price",
+                          100.0
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
                 ]
               ],
               "__type__": "dict"
@@ -175,11 +258,25 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "john doe"
                 ],
                 [
                   "items",
-                  []
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          100.0
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ]
+                    }
+                  ]
                 ]
               ]
             }
@@ -198,7 +295,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -208,7 +306,7 @@
           "function_name": "__init__",
           "kind": "constructor",
           "class_name": "Invoice",
-          "line": 10,
+          "line": 9,
           "parameters": [
             "self",
             "customer_name",
@@ -216,7 +314,7 @@
           ]
         },
         "inputs": [
-          "example",
+          "BigCo",
           []
         ],
         "constructor_inputs": null,
@@ -227,7 +325,7 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "bigco"
                 ],
                 [
                   "items",
@@ -254,7 +352,7 @@
               "items": [
                 [
                   "customer_name",
-                  "example"
+                  "bigco"
                 ],
                 [
                   "items",
@@ -277,7 +375,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -287,20 +386,29 @@
           "function_name": "subtotal",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 14,
+          "line": 13,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "John Doe",
+          [
+            {
+              "price": 19.99,
+              "quantity": 3
+            },
+            {
+              "price": 5.0,
+              "quantity": 2
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 69.97,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -309,8 +417,8 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 69.97,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -324,8 +432,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -335,20 +443,25 @@
           "function_name": "subtotal",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 14,
+          "line": 13,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "EmptyQty",
+          [
+            {
+              "price": 100.0,
+              "quantity": 0
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 0.0,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -357,8 +470,8 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 0.0,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -372,8 +485,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -383,20 +496,25 @@
           "function_name": "subtotal",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 14,
+          "line": 13,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "BigCorp",
+          [
+            {
+              "price": 9999.99,
+              "quantity": 1000
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 9999990.0,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -405,8 +523,8 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0,
-          "return_type": "int",
+          "return_value": 9999990.0,
+          "return_type": "float",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -420,8 +538,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -431,15 +549,20 @@
           "function_name": "discount",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 20,
+          "line": 19,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Bob",
+          [
+            {
+              "price": 20,
+              "quantity": 2
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
@@ -468,8 +591,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -479,15 +602,20 @@
           "function_name": "discount",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 20,
+          "line": 19,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Carol",
+          [
+            {
+              "price": 50,
+              "quantity": 2
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
@@ -516,8 +644,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -527,15 +655,20 @@
           "function_name": "discount",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 20,
+          "line": 19,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Dave",
+          [
+            {
+              "price": 30,
+              "quantity": 5
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
@@ -564,8 +697,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -575,19 +708,24 @@
           "function_name": "tax",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 31,
+          "line": 30,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Bob",
+          [
+            {
+              "price": 20,
+              "quantity": 1
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 3.6,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -597,7 +735,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 3.6,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -612,8 +750,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -623,19 +761,28 @@
           "function_name": "tax",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 31,
+          "line": 30,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Carol",
+          [
+            {
+              "price": 50,
+              "quantity": 2
+            },
+            {
+              "price": 30,
+              "quantity": 1
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 23.4,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -645,7 +792,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 23.4,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -660,8 +807,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -671,19 +818,24 @@
           "function_name": "tax",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 31,
+          "line": 30,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Dave",
+          [
+            {
+              "price": 25,
+              "quantity": 4
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 18.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -693,7 +845,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 18.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -708,8 +860,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -719,19 +871,24 @@
           "function_name": "total",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 36,
+          "line": 35,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Bob",
+          [
+            {
+              "price": 25,
+              "quantity": 2
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 59.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -741,7 +898,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 59.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -756,8 +913,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -767,19 +924,24 @@
           "function_name": "total",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 36,
+          "line": 35,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Carol",
+          [
+            {
+              "price": 20,
+              "quantity": 5
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 118.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -789,7 +951,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 118.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -804,8 +966,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -815,19 +977,28 @@
           "function_name": "total",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 36,
+          "line": 35,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Dave",
+          [
+            {
+              "price": 30,
+              "quantity": 5
+            },
+            {
+              "price": 10,
+              "quantity": 3
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 212.4,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -837,7 +1008,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.0,
+          "return_value": 212.4,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -852,8 +1023,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -863,21 +1034,30 @@
           "function_name": "summary",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 39,
+          "line": 38,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Alice",
+          [
+            {
+              "price": 10.0,
+              "quantity": 2
+            },
+            {
+              "price": 5.5,
+              "quantity": 1
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: alice\nSubtotal: INR 25.50\nDiscount: INR 0.00\nTax: INR 4.59\nTotal: INR 30.09\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -887,7 +1067,7 @@
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: alice\nSubtotal: INR 25.50\nDiscount: INR 0.00\nTax: INR 4.59\nTotal: INR 30.09\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -900,8 +1080,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -911,21 +1091,26 @@
           "function_name": "summary",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 39,
+          "line": 38,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "  Bob   ",
+          [
+            {
+              "price": 0,
+              "quantity": 5
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: bob\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -935,7 +1120,7 @@
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: bob\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -948,8 +1133,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -959,21 +1144,26 @@
           "function_name": "summary",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 39,
+          "line": 38,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Charlie",
+          [
+            {
+              "price": 9999.99,
+              "quantity": 1000
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: charlie\nSubtotal: INR 9999990.00\nDiscount: INR 999999.00\nTax: INR 1619998.38\nTotal: INR 10619989.38\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -983,7 +1173,7 @@
           "status": "SUCCESS",
           "return_value": null,
           "return_type": null,
-          "stdout": "Customer: example\nSubtotal: INR 0.00\nDiscount: INR 0.00\nTax: INR 0.00\nTotal: INR 0.00\n",
+          "stdout": "Customer: charlie\nSubtotal: INR 9999990.00\nDiscount: INR 999999.00\nTax: INR 1619998.38\nTotal: INR 10619989.38\n",
           "stderr": "",
           "exception_type": null,
           "exception_message": null,
@@ -996,8 +1186,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1007,19 +1197,28 @@
           "function_name": "item_count",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 46,
+          "line": 45,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Alice",
+          [
+            {
+              "price": 10.0,
+              "quantity": 2
+            },
+            {
+              "price": 5.0,
+              "quantity": 3
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
+          "return_value": 5,
           "return_type": "int",
           "stdout": "",
           "stderr": "",
@@ -1029,7 +1228,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0,
+          "return_value": 5,
           "return_type": "int",
           "stdout": "",
           "stderr": "",
@@ -1044,8 +1243,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1055,15 +1254,20 @@
           "function_name": "item_count",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 46,
+          "line": 45,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
-          []
+          "Bob",
+          [
+            {
+              "price": 20.0,
+              "quantity": 0
+            }
+          ]
         ],
         "original": {
           "status": "SUCCESS",
@@ -1092,8 +1296,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1103,14 +1307,14 @@
           "function_name": "item_count",
           "kind": "instance_method",
           "class_name": "Invoice",
-          "line": 46,
+          "line": 45,
           "parameters": [
             "self"
           ]
         },
         "inputs": [],
         "constructor_inputs": [
-          "example",
+          "Charlie",
           []
         ],
         "original": {
@@ -1140,8 +1344,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback",
-          "constructor_discovered": true
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1151,35 +1355,128 @@
           "function_name": "build_invoice",
           "kind": "function",
           "class_name": null,
-          "line": 50,
+          "line": 49,
           "parameters": [
             "customer",
             "items"
           ]
         },
         "inputs": [
-          "example",
-          []
+          "Acme Corp",
+          [
+            {
+              "price": 100.0,
+              "quantity": 2
+            },
+            {
+              "price": 50.0,
+              "quantity": 1
+            }
+          ]
         ],
         "constructor_inputs": null,
         "original": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "acme corp"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "price",
+                          100.0
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ],
+                      "__type__": "dict"
+                    },
+                    {
+                      "items": [
+                        [
+                          "price",
+                          50.0
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "migrated": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "acme corp"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          100.0
+                        ],
+                        [
+                          "quantity",
+                          2
+                        ]
+                      ]
+                    },
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          50.0
+                        ],
+                        [
+                          "quantity",
+                          1
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "comparison": {
@@ -1189,7 +1486,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1199,35 +1497,98 @@
           "function_name": "build_invoice",
           "kind": "function",
           "class_name": null,
-          "line": 50,
+          "line": 49,
           "parameters": [
             "customer",
             "items"
           ]
         },
         "inputs": [
-          "example",
-          []
+          "Solo Customer",
+          [
+            {
+              "price": 0.0,
+              "quantity": 5
+            }
+          ]
         ],
         "constructor_inputs": null,
         "original": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "solo customer"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "price",
+                          0.0
+                        ],
+                        [
+                          "quantity",
+                          5
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "migrated": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "solo customer"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          0.0
+                        ],
+                        [
+                          "quantity",
+                          5
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "comparison": {
@@ -1237,7 +1598,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1247,35 +1609,98 @@
           "function_name": "build_invoice",
           "kind": "function",
           "class_name": null,
-          "line": 50,
+          "line": 49,
           "parameters": [
             "customer",
             "items"
           ]
         },
         "inputs": [
-          "example",
-          []
+          "BigCo",
+          [
+            {
+              "price": 9999.99,
+              "quantity": 1000
+            }
+          ]
         ],
         "constructor_inputs": null,
         "original": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "attributes": {
+              "items": [
+                [
+                  "customer_name",
+                  "bigco"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "items": [
+                        [
+                          "price",
+                          9999.99
+                        ],
+                        [
+                          "quantity",
+                          1000
+                        ]
+                      ],
+                      "__type__": "dict"
+                    }
+                  ]
+                ]
+              ],
+              "__type__": "dict"
+            },
+            "__type__": "Invoice"
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "migrated": {
-          "status": "EXCEPTION",
-          "return_value": null,
-          "return_type": null,
+          "status": "SUCCESS",
+          "return_value": {
+            "__type__": "Invoice",
+            "attributes": {
+              "__type__": "dict",
+              "items": [
+                [
+                  "customer_name",
+                  "bigco"
+                ],
+                [
+                  "items",
+                  [
+                    {
+                      "__type__": "dict",
+                      "items": [
+                        [
+                          "price",
+                          9999.99
+                        ],
+                        [
+                          "quantity",
+                          1000
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              ]
+            }
+          },
+          "return_type": "Invoice",
           "stdout": "",
           "stderr": "",
-          "exception_type": "ValueError",
-          "exception_message": "Invoice must contain at least one item",
+          "exception_type": null,
+          "exception_message": null,
           "timed_out": false
         },
         "comparison": {
@@ -1285,7 +1710,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1461,7 +1887,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1637,7 +2064,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1813,7 +2241,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1829,12 +2258,12 @@
           ]
         },
         "inputs": [
-          "example"
+          "  John Doe  "
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "john doe",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1844,7 +2273,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "john doe",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1859,7 +2288,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1875,12 +2305,12 @@
           ]
         },
         "inputs": [
-          "example"
+          ""
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1890,7 +2320,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1905,7 +2335,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1921,12 +2352,12 @@
           ]
         },
         "inputs": [
-          "example"
+          "   "
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1936,7 +2367,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "example",
+          "return_value": "",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -1951,7 +2382,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -1961,20 +2393,20 @@
           "function_name": "calculate_percentage",
           "kind": "function",
           "class_name": null,
-          "line": 20,
+          "line": 9,
           "parameters": [
             "value",
             "percentage"
           ]
         },
         "inputs": [
-          1,
-          10
+          200,
+          15
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
+          "return_value": 30,
           "return_type": "int",
           "stdout": "",
           "stderr": "",
@@ -1984,7 +2416,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.1,
+          "return_value": 30.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -1993,33 +2425,14 @@
           "timed_out": false
         },
         "comparison": {
-          "equivalent": false,
-          "semantic_difference": true,
-          "differences": [
-            {
-              "field": "return_value",
-              "original": 0,
-              "migrated": 0.1
-            }
-          ]
-        },
-        "analysis": {
-          "difference_count": 1,
-          "details": [
-            {
-              "category": "numeric_value_change",
-              "message": "Return value changed numerically.",
-              "original_value": 0,
-              "migrated_value": 0.1,
-              "original_type": "int",
-              "migrated_type": "float",
-              "delta": 0.1
-            }
-          ]
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2029,15 +2442,15 @@
           "function_name": "calculate_percentage",
           "kind": "function",
           "class_name": null,
-          "line": 20,
+          "line": 9,
           "parameters": [
             "value",
             "percentage"
           ]
         },
         "inputs": [
-          1,
-          10
+          0,
+          50
         ],
         "constructor_inputs": null,
         "original": {
@@ -2052,7 +2465,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.1,
+          "return_value": 0.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -2061,33 +2474,14 @@
           "timed_out": false
         },
         "comparison": {
-          "equivalent": false,
-          "semantic_difference": true,
-          "differences": [
-            {
-              "field": "return_value",
-              "original": 0,
-              "migrated": 0.1
-            }
-          ]
-        },
-        "analysis": {
-          "difference_count": 1,
-          "details": [
-            {
-              "category": "numeric_value_change",
-              "message": "Return value changed numerically.",
-              "original_value": 0,
-              "migrated_value": 0.1,
-              "original_type": "int",
-              "migrated_type": "float",
-              "delta": 0.1
-            }
-          ]
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2097,20 +2491,20 @@
           "function_name": "calculate_percentage",
           "kind": "function",
           "class_name": null,
-          "line": 20,
+          "line": 9,
           "parameters": [
             "value",
             "percentage"
           ]
         },
         "inputs": [
-          1,
-          10
+          -10,
+          150
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": 0,
+          "return_value": -15,
           "return_type": "int",
           "stdout": "",
           "stderr": "",
@@ -2120,7 +2514,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": 0.1,
+          "return_value": -15.0,
           "return_type": "float",
           "stdout": "",
           "stderr": "",
@@ -2129,33 +2523,14 @@
           "timed_out": false
         },
         "comparison": {
-          "equivalent": false,
-          "semantic_difference": true,
-          "differences": [
-            {
-              "field": "return_value",
-              "original": 0,
-              "migrated": 0.1
-            }
-          ]
-        },
-        "analysis": {
-          "difference_count": 1,
-          "details": [
-            {
-              "category": "numeric_value_change",
-              "message": "Return value changed numerically.",
-              "original_value": 0,
-              "migrated_value": 0.1,
-              "original_type": "int",
-              "migrated_type": "float",
-              "delta": 0.1
-            }
-          ]
+          "equivalent": true,
+          "semantic_difference": false,
+          "differences": []
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2165,21 +2540,21 @@
           "function_name": "format_money",
           "kind": "function",
           "class_name": null,
-          "line": 27,
+          "line": 13,
           "parameters": [
             "amount",
             "currency"
           ]
         },
         "inputs": [
-          1,
-          1
+          1234.5,
+          "USD"
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
-          "return_type": "str",
+          "return_value": "USD 1234.50",
+          "return_type": "unicode",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -2188,7 +2563,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
+          "return_value": "USD 1234.50",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -2203,7 +2578,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2213,20 +2589,19 @@
           "function_name": "format_money",
           "kind": "function",
           "class_name": null,
-          "line": 27,
+          "line": 13,
           "parameters": [
             "amount",
             "currency"
           ]
         },
         "inputs": [
-          1,
-          1
+          0
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
+          "return_value": "INR 0.00",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -2236,7 +2611,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
+          "return_value": "INR 0.00",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -2251,7 +2626,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2261,21 +2637,21 @@
           "function_name": "format_money",
           "kind": "function",
           "class_name": null,
-          "line": 27,
+          "line": 13,
           "parameters": [
             "amount",
             "currency"
           ]
         },
         "inputs": [
-          1,
-          1
+          -99.99,
+          "EUR"
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
-          "return_type": "str",
+          "return_value": "EUR -99.99",
+          "return_type": "unicode",
           "stdout": "",
           "stderr": "",
           "exception_type": null,
@@ -2284,7 +2660,7 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": "1 1.00",
+          "return_value": "EUR -99.99",
           "return_type": "str",
           "stdout": "",
           "stderr": "",
@@ -2299,7 +2675,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2309,20 +2686,46 @@
           "function_name": "chunk_items",
           "kind": "function",
           "class_name": null,
-          "line": 32,
+          "line": 17,
           "parameters": [
             "items",
             "size"
           ]
         },
         "inputs": [
-          [],
-          2
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          3
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": [],
+          "return_value": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              4,
+              5,
+              6
+            ],
+            [
+              7,
+              8,
+              9
+            ]
+          ],
           "return_type": "list",
           "stdout": "",
           "stderr": "",
@@ -2332,7 +2735,23 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": [],
+          "return_value": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              4,
+              5,
+              6
+            ],
+            [
+              7,
+              8,
+              9
+            ]
+          ],
           "return_type": "list",
           "stdout": "",
           "stderr": "",
@@ -2347,7 +2766,8 @@
         },
         "case_number": 1,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2357,7 +2777,7 @@
           "function_name": "chunk_items",
           "kind": "function",
           "class_name": null,
-          "line": 32,
+          "line": 17,
           "parameters": [
             "items",
             "size"
@@ -2365,7 +2785,7 @@
         },
         "inputs": [
           [],
-          2
+          5
         ],
         "constructor_inputs": null,
         "original": {
@@ -2395,7 +2815,8 @@
         },
         "case_number": 2,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       },
       {
@@ -2405,20 +2826,28 @@
           "function_name": "chunk_items",
           "kind": "function",
           "class_name": null,
-          "line": 32,
+          "line": 17,
           "parameters": [
             "items",
             "size"
           ]
         },
         "inputs": [
-          [],
-          2
+          [
+            "a",
+            "b"
+          ],
+          10
         ],
         "constructor_inputs": null,
         "original": {
           "status": "SUCCESS",
-          "return_value": [],
+          "return_value": [
+            [
+              "a",
+              "b"
+            ]
+          ],
           "return_type": "list",
           "stdout": "",
           "stderr": "",
@@ -2428,7 +2857,12 @@
         },
         "migrated": {
           "status": "SUCCESS",
-          "return_value": [],
+          "return_value": [
+            [
+              "a",
+              "b"
+            ]
+          ],
           "return_type": "list",
           "stdout": "",
           "stderr": "",
@@ -2443,7 +2877,8 @@
         },
         "case_number": 3,
         "generation_metadata": {
-          "generation": "fallback"
+          "generation": "groq",
+          "model": "openai/gpt-oss-120b"
         }
       }
     ]
@@ -2451,7 +2886,7 @@
   "summary": {
     "existing_tests_equivalent": true,
     "behavioral_cases": 39,
-    "behavioral_equivalent": 36,
-    "behavioral_semantic_differences": 3
+    "behavioral_equivalent": 39,
+    "behavioral_semantic_differences": 0
   }
 }

@@ -1,12 +1,12 @@
 {
-  "directory": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated",
+  "directory": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated",
   "files_checked": 4,
   "valid_files": 4,
   "invalid_files": 0,
   "overall_status": "PASS",
   "results": [
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\billing.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\billing.py",
       "syntax_valid": true,
       "error": null,
       "error_type": null,
@@ -14,7 +14,7 @@
       "column": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\config.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\config.py",
       "syntax_valid": true,
       "error": null,
       "error_type": null,
@@ -22,7 +22,7 @@
       "column": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\main.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\main.py",
       "syntax_valid": true,
       "error": null,
       "error_type": null,
@@ -30,7 +30,7 @@
       "column": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\utils.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\utils.py",
       "syntax_valid": true,
       "error": null,
       "error_type": null,

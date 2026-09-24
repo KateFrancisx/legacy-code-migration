@@ -1,7 +1,7 @@
 [
   {
     "repository": {
-      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
+      "path": "C:\\Users\\RIYA\\OneDrive\\Downloads\\python2_migration_test_repo\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
@@ -226,20 +226,26 @@
     ],
     "repository_structure": [
       "billing.py",
+      "billing.pyc",
       "config.py",
+      "config.pyc",
       "data/sample_items.json",
       "frontend/summary.js",
       "main.py",
+      "main.pyc",
       "README.md",
       "requirements.txt",
       "tests/__init__.py",
+      "tests/__init__.pyc",
       "tests/test_billing.py",
-      "utils.py"
+      "tests/test_billing.pyc",
+      "utils.py",
+      "utils.pyc"
     ]
   },
   {
     "repository": {
-      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
+      "path": "C:\\Users\\RIYA\\OneDrive\\Downloads\\python2_migration_test_repo\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
@@ -549,20 +555,26 @@
     ],
     "repository_structure": [
       "billing.py",
+      "billing.pyc",
       "config.py",
+      "config.pyc",
       "data/sample_items.json",
       "frontend/summary.js",
       "main.py",
+      "main.pyc",
       "README.md",
       "requirements.txt",
       "tests/__init__.py",
+      "tests/__init__.pyc",
       "tests/test_billing.py",
-      "utils.py"
+      "tests/test_billing.pyc",
+      "utils.py",
+      "utils.pyc"
     ]
   },
   {
     "repository": {
-      "path": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
+      "path": "C:\\Users\\RIYA\\OneDrive\\Downloads\\python2_migration_test_repo\\python2_migration_test_repo",
       "name": "python2_migration_test_repo"
     },
     "target": {
@@ -696,15 +708,21 @@
     "dependent_source": [],
     "repository_structure": [
       "billing.py",
+      "billing.pyc",
       "config.py",
+      "config.pyc",
       "data/sample_items.json",
       "frontend/summary.js",
       "main.py",
+      "main.pyc",
       "README.md",
       "requirements.txt",
       "tests/__init__.py",
+      "tests/__init__.pyc",
       "tests/test_billing.py",
-      "utils.py"
+      "tests/test_billing.pyc",
+      "utils.py",
+      "utils.pyc"
     ]
   }
 ]

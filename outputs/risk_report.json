@@ -15,7 +15,7 @@
   "files": {
     "billing.py": {
       "risk": "LOW",
-      "anomaly_score": 0.10545398197755823,
+      "anomaly_score": 0.025888115386018262,
       "anomaly_prediction": 1,
       "features": {
         "function_count": 8,
@@ -34,7 +34,7 @@
     },
     "main.py": {
       "risk": "LOW",
-      "anomaly_score": 0.15026430936660767,
+      "anomaly_score": 0.12316444684966721,
       "anomaly_prediction": 1,
       "features": {
         "function_count": 1,
@@ -52,91 +52,22 @@
       ]
     },
     "utils.py": {
-      "risk": "MEDIUM",
-      "anomaly_score": 0.08927585459563336,
+      "risk": "LOW",
+      "anomaly_score": 0.18278395837928474,
       "anomaly_prediction": 1,
       "features": {
         "function_count": 4,
         "class_count": 0,
         "dependent_count": 0,
         "behavioral_cases": 12,
-        "semantic_differences": 3,
-        "unique_semantic_differences": 1,
-        "semantic_difference_rate": 0.25,
+        "semantic_differences": 0,
+        "unique_semantic_differences": 0,
+        "semantic_difference_rate": 0.0,
         "existing_test_failed": 0,
-        "difference_cases": [
-          {
-            "callable": {
-              "file": "utils.py",
-              "qualified_name": "calculate_percentage",
-              "function_name": "calculate_percentage",
-              "kind": "function",
-              "class_name": null,
-              "line": 20,
-              "parameters": [
-                "value",
-                "percentage"
-              ]
-            },
-            "inputs": [
-              1,
-              10
-            ],
-            "constructor_inputs": null,
-            "original": {
-              "status": "SUCCESS",
-              "return_value": 0,
-              "return_type": "int",
-              "stdout": "",
-              "stderr": "",
-              "exception_type": null,
-              "exception_message": null,
-              "timed_out": false
-            },
-            "migrated": {
-              "status": "SUCCESS",
-              "return_value": 0.1,
-              "return_type": "float",
-              "stdout": "",
-              "stderr": "",
-              "exception_type": null,
-              "exception_message": null,
-              "timed_out": false
-            },
-            "comparison": {
-              "equivalent": false,
-              "semantic_difference": true,
-              "differences": [
-                {
-                  "field": "return_value",
-                  "original": 0,
-                  "migrated": 0.1
-                }
-              ]
-            },
-            "analysis": {
-              "difference_count": 1,
-              "details": [
-                {
-                  "category": "numeric_value_change",
-                  "message": "Return value changed numerically.",
-                  "original_value": 0,
-                  "migrated_value": 0.1,
-                  "original_type": "int",
-                  "migrated_type": "float",
-                  "delta": 0.1
-                }
-              ]
-            },
-            "case_number": 1,
-            "generation_metadata": {
-              "generation": "fallback"
-            }
-          }
-        ]
+        "difference_cases": []
       },
       "reasons": [
-        "Semantic differences detected"
+        "No major verification issues detected"
       ]
     }
   }

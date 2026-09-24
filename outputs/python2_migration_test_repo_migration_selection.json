@@ -8,7 +8,7 @@
   "counts": {
     "targets": 3,
     "needs_review": 0,
-    "skipped": 8
+    "skipped": 14
   },
   "targets": [
     {
@@ -72,6 +72,15 @@
       "skip_reason": "not_code"
     },
     {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "billing.pyc",
+      "size_bytes": 3260,
+      "skip_reason": "not_code"
+    },
+    {
       "language": "Python",
       "category": "code",
       "detection_method": "extension",
@@ -85,6 +94,24 @@
         "signals": []
       },
       "skip_reason": "version_unknown_excluded"
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "config.pyc",
+      "size_bytes": 633,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "main.pyc",
+      "size_bytes": 944,
+      "skip_reason": "not_code"
     },
     {
       "language": "Documentation",
@@ -102,6 +129,15 @@
       "confidence": "high",
       "path": "requirements.txt",
       "size_bytes": 17,
+      "skip_reason": "not_code"
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "utils.pyc",
+      "size_bytes": 1350,
       "skip_reason": "not_code"
     },
     {
@@ -138,6 +174,15 @@
       "skip_reason": "version_unknown_excluded"
     },
     {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "tests/test_billing.pyc",
+      "size_bytes": 2359,
+      "skip_reason": "not_code"
+    },
+    {
       "language": "Python",
       "category": "code",
       "detection_method": "extension",
@@ -151,6 +196,15 @@
         "signals": []
       },
       "skip_reason": "version_unknown_excluded"
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "tests/__init__.pyc",
+      "size_bytes": 193,
+      "skip_reason": "not_code"
     }
   ]
 }

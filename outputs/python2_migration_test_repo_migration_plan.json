@@ -1,5 +1,5 @@
 {
-  "repository": "C:\\Users\\KATE\\Downloads\\python2_migration_test_repo",
+  "repository": "C:\\Users\\RIYA\\OneDrive\\Downloads\\python2_migration_test_repo\\python2_migration_test_repo",
   "source_language": "Python 2",
   "target_language": "Python 3",
   "strategy": "dependency_first",

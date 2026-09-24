@@ -1,12 +1,12 @@
 {
-  "directory": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated",
+  "directory": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated",
   "files_checked": 4,
   "valid_files": 4,
   "invalid_files": 0,
   "overall_status": "PASS",
   "results": [
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\billing.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\billing.py",
       "imports": [
         "config",
         "utils"
@@ -21,7 +21,7 @@
       "error": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\config.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\config.py",
       "imports": [],
       "local_dependencies": [],
       "missing_local_dependencies": [],
@@ -30,7 +30,7 @@
       "error": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\main.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\main.py",
       "imports": [
         "billing",
         "utils"
@@ -45,7 +45,7 @@
       "error": null
     },
     {
-      "file": "D:\\Projects\\CodeMigration\\outputs\\python2_migration_test_repo_migrated\\utils.py",
+      "file": "D:\\Projects\\legacy-code-migration\\outputs\\python2_migration_test_repo_migrated\\utils.py",
       "imports": [],
       "local_dependencies": [],
       "missing_local_dependencies": [],

@@ -1,7 +1,7 @@
 {
   "repository": "python2_migration_test_repo",
-  "scanned_at": "2026-09-24T04:43:36.419801+00:00",
-  "total_files": 11,
+  "scanned_at": "2026-09-24T10:01:05.531516+00:00",
+  "total_files": 17,
   "summary": {
     "languages_detected": [
       "Documentation",
@@ -11,7 +11,7 @@
       "Text"
     ],
     "language_file_counts": {
-      "Unknown": 1,
+      "Unknown": 7,
       "Python": 6,
       "Documentation": 1,
       "Text": 1,
@@ -22,7 +22,7 @@
       "code": 7,
       "config": 1,
       "non_code": 2,
-      "unknown": 1
+      "unknown": 7
     }
   },
   "files": [
@@ -51,6 +51,14 @@
       }
     },
     {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "billing.pyc",
+      "size_bytes": 3260
+    },
+    {
       "language": "Python",
       "category": "code",
       "detection_method": "extension",
@@ -63,6 +71,14 @@
         "method": "regex_heuristic_after_inconclusive_parso",
         "signals": []
       }
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "config.pyc",
+      "size_bytes": 633
     },
     {
       "language": "Python",
@@ -79,6 +95,14 @@
           "parses cleanly as Python 2 only"
         ]
       }
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "main.pyc",
+      "size_bytes": 944
     },
     {
       "language": "Documentation",
@@ -113,6 +137,14 @@
       }
     },
     {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "utils.pyc",
+      "size_bytes": 1350
+    },
+    {
       "language": "JSON",
       "category": "config",
       "detection_method": "extension",
@@ -143,6 +175,14 @@
       }
     },
     {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "tests/test_billing.pyc",
+      "size_bytes": 2359
+    },
+    {
       "language": "Python",
       "category": "code",
       "detection_method": "extension",
@@ -155,6 +195,14 @@
         "method": "regex_heuristic_after_inconclusive_parso",
         "signals": []
       }
+    },
+    {
+      "language": "Unknown",
+      "category": "unknown",
+      "detection_method": "none",
+      "confidence": "low",
+      "path": "tests/__init__.pyc",
+      "size_bytes": 193
     }
   ]
 }
