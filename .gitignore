@@ -67,13 +67,11 @@ credentials.json
 *.swo
 *.swn
 *.bak
-
-# VS Code local settings
 .history/
 
 
 # ============================================================
-# WINDOWS / OS
+# OPERATING SYSTEM
 # ============================================================
 
 Thumbs.db
@@ -82,14 +80,13 @@ desktop.ini
 
 
 # ============================================================
-# NODE.JS / REACT / VITE FRONTEND
+# NODE.JS / REACT / VITE
 # ============================================================
 
 node_modules/
 frontend/node_modules/
 
-# Vite build output
-dist/
+# Vite / frontend build output
 frontend/dist/
 frontend/.vite/
 
@@ -99,17 +96,26 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Local environment files
+# Frontend local environment files
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
+
+# Frontend generated build/cache files
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Frontend test/coverage output
+frontend/coverage/
+frontend/.eslintcache
 
 
 # ============================================================
 # CODEMIGRATE RUNTIME / UI JOB DATA
 # ============================================================
 
-# Temporary migration jobs created by the FastAPI UI
+# Temporary migration jobs created by FastAPI UI
 outputs/ui_jobs/
 
 # Uploaded repositories copied into runtime job directories
@@ -133,7 +139,7 @@ outputs/**/temp/
 # Large mined source-code corpus
 data/files/
 
-# Local datasets / archives
+# Local archives
 *.zip
 *.tar
 *.tar.gz
@@ -154,7 +160,7 @@ mlruns/
 
 
 # ============================================================
-# EMBEDDING / VECTOR / MODEL CACHE
+# EMBEDDING / MODEL CACHE
 # ============================================================
 
 .embeddings/
@@ -165,7 +171,6 @@ huggingface_cache/
 
 # Hugging Face cache
 .cache/huggingface/
-~/.cache/
 
 
 # ============================================================
@@ -182,21 +187,13 @@ logs/
 
 project_structure.txt
 
-# Temporary Python/debug files
+# Temporary/debug Python files
 debug_*.py
 diagnose_*.py
 
-# Temporary output files
+# Temporary files
 *.tmp
 *.temp
-
-
-# ============================================================
-# GENERATED FRONTEND FILES
-# ============================================================
-
-frontend/coverage/
-frontend/.eslintcache
 
 
 # ============================================================
@@ -216,27 +213,8 @@ frontend/.eslintcache
 
 
 # ============================================================
-# OS / TOOL SPECIFIC
+# TEST / LOCAL DEVELOPMENT
 # ============================================================
 
-*.DS_Store
-
-
-# ============================================================
-# TEMPORARY / LOCAL PROJECT FILES
-# ============================================================
-
-# Local test files
+# Local test directory
 test/
-
-# Temporary project structure listing
-project_structure.txt
-
-# Temporary/debug files
-debug_*.py
-diagnose_*.py.env
-
-# Frontend generated files
-frontend/*.tsbuildinfo
-frontend/vite.config.js
-frontend/vite.config.d.ts
