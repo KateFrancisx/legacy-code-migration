@@ -235,3 +235,8 @@ project_structure.txt
 # Temporary/debug files
 debug_*.py
 diagnose_*.py.env
+
+# Frontend generated files
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts

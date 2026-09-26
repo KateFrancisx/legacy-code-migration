@@ -1,9 +1,1 @@
-html,
-body,
-#root {
-  min-height: 100%;
-}
-
-#root {
-  min-height: 100vh;
-}
+html,body,#root{min-height:100%;margin:0}*{box-sizing:border-box}

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -65,6 +66,7 @@ PIPELINE_LOCK = threading.Lock()
 STAGES = [
     "scan",
     "version",
+    "selection",
     "extraction",
     "embeddings",
     "dependency",
@@ -73,20 +75,41 @@ STAGES = [
     "rag",
     "prompt",
     "llm",
+    "assembly",
+    "syntax",
+    "dependency_verification",
+    "test_generation",
+    "differential_testing",
+    "behavioral_verification",
+    "semantic_equivalence",
+    "risk_analysis",
+    "explainability",
+    "final_report",
 ]
 
 
 STAGE_TITLES = {
     "scan": "Repository Scan",
     "version": "Version Detection",
+    "selection": "Migration Selection",
     "extraction": "Code Extraction",
-    "embeddings": "Semantic Embeddings",
-    "dependency": "Dependency Analysis",
+    "embeddings": "CodeBERT Embeddings",
+    "dependency": "Dependency Graph",
     "planning": "Migration Planning",
     "context": "Repository Context",
     "rag": "RAG Retrieval",
     "prompt": "Prompt Construction",
     "llm": "LLM Migration",
+    "assembly": "Repository Assembly",
+    "syntax": "Syntax Verification",
+    "dependency_verification": "Dependency Verification",
+    "test_generation": "Test Generation",
+    "differential_testing": "Differential Testing",
+    "behavioral_verification": "Behavioral Verification",
+    "semantic_equivalence": "Semantic Equivalence",
+    "risk_analysis": "Risk Analysis",
+    "explainability": "Explainability",
+    "final_report": "Final Migration Report",
 }
 
 
@@ -159,6 +182,9 @@ def clean_previous_outputs(repo_name: str) -> None:
         "llm_prompts",
         "pre_llm_summary",
         "migration_results",
+        "assembly_manifest",
+        "syntax_verification",
+        "dependency_verification",
     ]
 
     for suffix in suffixes:
@@ -170,6 +196,15 @@ def clean_previous_outputs(repo_name: str) -> None:
 
         if path.exists():
             path.unlink()
+
+    for report_name in [
+        "semantic_verification_report.json",
+        "risk_report.json",
+    ]:
+        report_path = OUTPUT_ROOT / report_name
+
+        if report_path.exists():
+            report_path.unlink()
 
     migrated_dir = (
         OUTPUT_ROOT
@@ -193,6 +228,300 @@ def safe_json_size(value: Any) -> int:
     except Exception:
         return 0
 
+
+
+# ============================================================
+# STAGE / REPORT HELPERS
+# ============================================================
+
+def make_stage_result(
+    stage: str,
+    status: str,
+    data: Any = None,
+    message: str | None = None,
+    error: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "stage": stage,
+        "title": STAGE_TITLES.get(stage, stage),
+        "status": status,
+        "available": data is not None,
+        "message": message,
+        "error": error,
+        "data": data,
+    }
+
+
+def stage_counts(stage_status: dict[str, str]) -> dict[str, int]:
+    counts = {
+        "total": len(STAGES),
+        "completed": 0,
+        "running": 0,
+        "failed": 0,
+        "pending": 0,
+    }
+    for status in stage_status.values():
+        if status in counts:
+            counts[status] += 1
+    counts["not_completed"] = (
+        counts["running"] + counts["failed"] + counts["pending"]
+    )
+    return counts
+
+
+def derive_failure_message(
+    job: dict[str, Any],
+    fallback: str,
+) -> str:
+    logs = job.get("logs", [])
+    failure_lines = [
+        line for line in logs
+        if "[FAIL]" in line
+        or "Traceback" in line
+        or "Error:" in line
+        or "Exception" in line
+    ]
+
+    if failure_lines:
+        # Keep the most useful recent lines without exposing hundreds of
+        # log lines in the job error field.
+        recent = failure_lines[-5:]
+        return (
+            fallback
+            + " "
+            + " | ".join(recent)
+        )
+
+    return fallback
+
+
+def build_explainability(
+    semantic_report: Any,
+    risk_report: Any,
+    syntax_report: Any,
+    dependency_report: Any,
+    stage_status: dict[str, str],
+    error: str | None = None,
+) -> dict[str, Any]:
+    evidence = []
+
+    for source, value in [
+        ("syntax_verification", syntax_report),
+        ("dependency_verification", dependency_report),
+        ("semantic_verification", semantic_report),
+        ("risk_analysis", risk_report),
+    ]:
+        if value is not None:
+            evidence.append({
+                "source": source,
+                "available": True,
+                "result": value,
+            })
+
+    reasons = []
+
+    if stage_status.get("syntax") == "failed":
+        reasons.append("Syntax verification failed.")
+
+    if stage_status.get("dependency_verification") == "failed":
+        reasons.append("Dependency verification failed.")
+
+    if stage_status.get("differential_testing") == "failed":
+        reasons.append(
+            "Differential / semantic verification failed before "
+            "downstream verification and risk analysis completed."
+        )
+
+    if stage_status.get("risk_analysis") == "failed":
+        reasons.append("Risk analysis failed.")
+
+    if semantic_report is None:
+        reasons.append("No semantic verification report is available.")
+
+    if risk_report is None:
+        reasons.append("No risk report is available.")
+
+    if error:
+        reasons.append(error)
+
+    return {
+        "status": "available" if evidence else "not_available",
+        "summary": (
+            "Evidence assembled from the actual verification and "
+            "risk-analysis outputs."
+            if evidence
+            else
+            "Explainability evidence is unavailable because the "
+            "required downstream outputs were not produced."
+        ),
+        "reasons": reasons,
+        "evidence": evidence,
+    }
+
+
+def build_final_report(
+    repository_name: str,
+    status: str,
+    error: str | None,
+    stage_status: dict[str, str],
+    statistics: dict[str, Any],
+    results: dict[str, Any],
+) -> dict[str, Any]:
+    completed = [
+        stage for stage in STAGES
+        if stage_status.get(stage) == "completed"
+    ]
+    failed = [
+        stage for stage in STAGES
+        if stage_status.get(stage) == "failed"
+    ]
+    running = [
+        stage for stage in STAGES
+        if stage_status.get(stage) == "running"
+    ]
+    pending = [
+        stage for stage in STAGES
+        if stage_status.get(stage) == "pending"
+    ]
+
+    return {
+        "repository": repository_name,
+        "pipeline_status": status,
+        "summary": {
+            "message": (
+                "Migration pipeline completed successfully."
+                if status == "completed"
+                else
+                "Migration pipeline stopped before all stages completed."
+            ),
+            "error": error,
+        },
+        "statistics": statistics,
+        "stage_summary": {
+            "total": len(STAGES),
+            "completed": len(completed),
+            "failed": len(failed),
+            "running": len(running),
+            "pending": len(pending),
+        },
+        "completed_stages": completed,
+        "failed_stages": failed,
+        "running_stages": running,
+        "pending_stages": pending,
+        "verification": {
+            "syntax": results.get("syntax"),
+            "dependency_verification": results.get(
+                "dependency_verification"
+            ),
+            "test_generation": results.get("test_generation"),
+            "differential_testing": results.get(
+                "differential_testing"
+            ),
+            "behavioral_verification": results.get(
+                "behavioral_verification"
+            ),
+            "semantic_equivalence": results.get(
+                "semantic_equivalence"
+            ),
+            "risk_analysis": results.get("risk_analysis"),
+        },
+        "explainability": results.get("explainability"),
+    }
+
+
+def populate_derived_results(
+    results: dict[str, Any],
+    stage_status: dict[str, str],
+    repository_name: str,
+    pipeline_status: str,
+    error: str | None = None,
+) -> dict[str, Any]:
+    semantic_report = results.get("semantic_equivalence")
+    risk_report = results.get("risk_analysis")
+
+    # These four UI stages are views over the single Stage 5 command.
+    for stage, message in {
+        "test_generation": (
+            "Behavioral test generation is part of the "
+            "semantic-verification stage."
+        ),
+        "differential_testing": (
+            "Differential execution is part of the "
+            "semantic-verification stage."
+        ),
+        "behavioral_verification": (
+            "Behavioral verification is part of the "
+            "semantic-verification stage."
+        ),
+    }.items():
+        current = stage_status.get(stage, "pending")
+
+        if semantic_report is not None:
+            results[stage] = make_stage_result(
+                stage, "completed", semantic_report, message
+            )
+        elif current == "failed":
+            results[stage] = make_stage_result(
+                stage, "failed", message=message, error=error
+            )
+        elif current == "running":
+            results[stage] = make_stage_result(
+                stage, "running", message=message
+            )
+        else:
+            results[stage] = make_stage_result(
+                stage,
+                "pending",
+                message=(
+                    "Not reached because an earlier pipeline stage "
+                    "stopped execution."
+                ),
+            )
+
+    if semantic_report is None:
+        results["semantic_equivalence"] = make_stage_result(
+            "semantic_equivalence",
+            stage_status.get("semantic_equivalence", "pending"),
+            message="No semantic verification report was produced.",
+            error=error if stage_status.get(
+                "differential_testing"
+            ) == "failed" else None,
+        )
+
+    if risk_report is None:
+        results["risk_analysis"] = make_stage_result(
+            "risk_analysis",
+            stage_status.get("risk_analysis", "pending"),
+            message=(
+                "Risk analysis was not reached because the required "
+                "semantic verification did not complete."
+                if stage_status.get("risk_analysis") == "pending"
+                else "No risk report was produced."
+            ),
+            error=error if stage_status.get(
+                "risk_analysis"
+            ) == "failed" else None,
+        )
+
+    results["explainability"] = build_explainability(
+        semantic_report=semantic_report,
+        risk_report=risk_report,
+        syntax_report=results.get("syntax"),
+        dependency_report=results.get("dependency_verification"),
+        stage_status=stage_status,
+        error=error,
+    )
+
+    results["final_report"] = build_final_report(
+        repository_name=repository_name,
+        status=pipeline_status,
+        error=error,
+        stage_status=stage_status,
+        statistics=results.get("statistics", {}),
+        results=results,
+    )
+
+    return results
 
 # ============================================================
 # READ PIPELINE RESULTS
@@ -403,6 +732,61 @@ def collect_results(
 
         results["llm"] = migration_results
 
+
+    # --------------------------------------------------------
+    # Repository Assembly
+    # --------------------------------------------------------
+
+    results["assembly"] = load_json(
+        output_file(
+            repo_name,
+            "assembly_manifest",
+        )
+    )
+
+    # --------------------------------------------------------
+    # Syntax Verification
+    # --------------------------------------------------------
+
+    results["syntax"] = load_json(
+        output_file(
+            repo_name,
+            "syntax_verification",
+        )
+    )
+
+    # --------------------------------------------------------
+    # Dependency Verification
+    # --------------------------------------------------------
+
+    results["dependency_verification"] = load_json(
+        output_file(
+            repo_name,
+            "dependency_verification",
+        )
+    )
+
+    # --------------------------------------------------------
+    # Semantic Verification
+    # --------------------------------------------------------
+
+    semantic_report = OUTPUT_ROOT / "semantic_verification_report.json"
+
+    results["semantic_equivalence"] = load_json(
+        semantic_report
+    )
+
+    # --------------------------------------------------------
+    # Risk Analysis
+    # --------------------------------------------------------
+
+    risk_report = OUTPUT_ROOT / "risk_report.json"
+
+    results["risk_analysis"] = load_json(
+        risk_report
+    )
+
+
     # --------------------------------------------------------
     # Statistics
     # --------------------------------------------------------
@@ -513,60 +897,145 @@ def process_output_line(
         job["logs"] = job["logs"][-100:]
 
     # --------------------------------------------------------
-    # Pre-LLM stages
+    # Stage detection
     # --------------------------------------------------------
 
-    if not llm_phase:
+    stage_map = {
+        # Pre-LLM
+        "1. REPOSITORY SCANNING": "scan",
+        "2. PYTHON VERSION DETECTION": "version",
+        "3. MIGRATION JOB SELECTION": "selection",
+        "4. CODE EXTRACTION / STATIC FEATURES": "extraction",
+        "5. CODEBERT EMBEDDINGS": "embeddings",
+        "6. DEPENDENCY GRAPH": "dependency",
+        "7. MIGRATION PLANNING": "planning",
+        "8. REPOSITORY CONTEXT": "context",
+        "9. RAG MIGRATION KNOWLEDGE RETRIEVAL": "rag",
+        "10. FINAL LLM PROMPTS": "prompt",  
 
-        stage_map = {
-            "1. REPOSITORY SCANNING": "scan",
-            "2. PYTHON VERSION DETECTION": "version",
-            "3. MIGRATION JOB SELECTION": "extraction",
-            "4. CODE EXTRACTION / STATIC FEATURES": "extraction",
-            "5. CODEBERT EMBEDDINGS": "embeddings",
-            "6. DEPENDENCY GRAPH": "dependency",
-            "7. MIGRATION PLANNING": "planning",
-            "8. REPOSITORY CONTEXT": "context",
-            "9. RAG MIGRATION KNOWLEDGE RETRIEVAL": "rag",
-            "10. FINAL LLM PROMPTS": "prompt",
-        }
+        # LLM migration
+        "LLM MIGRATION ENGINE": "llm",
 
-        for title, stage in stage_map.items():
+        # Repository assembly
+        "REPOSITORY ASSEMBLY": "assembly",
+
+        # Verification
+        "CODEMIGRATE - SYNTAX VERIFICATION": "syntax",
+        "CODEMIGRATE - IMPORT & DEPENDENCY VERIFICATION":
+            "dependency_verification",
+
+        # Semantic / behavioral verification
+        "STAGE 5 - DIFFERENTIAL / SEMANTIC VERIFICATION":
+            "differential_testing",
+
+        # Risk analysis
+        "STAGE 6 - MIGRATION RISK PREDICTION":
+            "risk_analysis",
+    }
+
+
+    # --------------------------------------------------------
+    # Explicit stage completion / failure detection
+    # --------------------------------------------------------
+
+    pass_map = {
+        "STAGE 3 - SYNTAX VERIFICATION":
+            "syntax",
+
+        "STAGE 4 - IMPORT & DEPENDENCY VERIFICATION":
+            "dependency_verification",
+    }
+
+    fail_map = {
+        "STAGE 3 - SYNTAX VERIFICATION":
+            "syntax",
+
+        "STAGE 4 - IMPORT & DEPENDENCY VERIFICATION":
+            "dependency_verification",
+
+        "STAGE 5 - DIFFERENTIAL / SEMANTIC VERIFICATION":
+            "differential_testing",
+
+        "STAGE 6 - MIGRATION RISK PREDICTION":
+            "risk_analysis",
+    }
+
+    if "[PASS]" in text:
+
+        for title, stage in pass_map.items():
 
             if title in text:
-
-                # Mark previous stages complete.
-                stage_index = STAGES.index(
-                    stage
-                )
-
-                for previous in STAGES[:stage_index]:
-
-                    if (
-                        job["stage_status"]
-                        .get(previous)
-                        != "failed"
-                    ):
-                        job["stage_status"][
-                            previous
-                        ] = "completed"
 
                 update_stage(
                     job_id,
                     stage,
-                    "running",
+                    "completed",
+                )
+
+                return
+
+    if "[FAIL]" in text:
+
+        for title, stage in fail_map.items():
+
+            if title in text:
+
+                update_stage(
+                    job_id,
+                    stage,
+                    "failed",
                 )
 
                 return
 
     # --------------------------------------------------------
-    # LLM migration
+    # Detect current stage
+    # --------------------------------------------------------
+
+    detected_stage = None
+
+    for title, stage in stage_map.items():
+
+        if title in text:
+            detected_stage = stage
+            break
+
+    if detected_stage is not None:
+
+        stage_index = STAGES.index(
+            detected_stage
+        )
+
+        # Mark previous stages as completed.
+        for previous in STAGES[:stage_index]:
+
+            if (
+                job["stage_status"].get(previous)
+                not in ["failed"]
+            ):
+                job["stage_status"][
+                    previous
+                ] = "completed"
+
+        # Mark current stage as running.
+        update_stage(
+            job_id,
+            detected_stage,
+            "running",
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # LLM migration progress
     # --------------------------------------------------------
 
     if llm_phase:
 
-        if text.startswith("[") and "] Migrating:" in text:
-
+        if (
+            text.startswith("[")
+            and "] Migrating:" in text
+        ):
             update_stage(
                 job_id,
                 "llm",
@@ -581,6 +1050,44 @@ def process_output_line(
                 "running",
             )
 
+        return
+
+    # --------------------------------------------------------
+    # Verification sub-stage detection
+    # --------------------------------------------------------
+
+    if (
+        "Generating Groq cases for:" in text
+        or "GROQ REQUEST" in text
+    ):
+        update_stage(job_id, "test_generation", "running")
+
+    if "GROQ PARSED CASE COUNT:" in text:
+        update_stage(job_id, "test_generation", "completed")
+
+    # Stage 5 performs several kinds of verification together.
+    # We expose them separately in the UI, but they are executed
+    # by the same semantic-verification command.
+
+    if (
+        "Behavioral equivalence" in text
+        or "Behavioral cases" in text
+    ):
+        update_stage(
+            job_id,
+            "behavioral_verification",
+            "running",
+        )
+
+    if (
+        "Semantic differences" in text
+        or "Semantic verification" in text
+    ):
+        update_stage(
+            job_id,
+            "semantic_equivalence",
+            "running",
+        )
 
 # ============================================================
 # RUN PIPELINE
@@ -592,45 +1099,30 @@ def run_pipeline(
 ) -> None:
 
     job = JOBS[job_id]
-
     repo_name = repository_path.name
 
     try:
-
         with PIPELINE_LOCK:
-
             job["status"] = "running"
 
-            # ------------------------------------------------
-            # Clean stale output
-            # ------------------------------------------------
-
-            clean_previous_outputs(
-                repo_name
-            )
-
-            # ------------------------------------------------
-            # PRE-LLM
-            # ------------------------------------------------
+            clean_previous_outputs(repo_name)
 
             env = os.environ.copy()
-
-            # Force Python subprocesses to use UTF-8 on Windows.
             env["PYTHONIOENCODING"] = "utf-8"
             env["PYTHONUTF8"] = "1"
 
-            pre_command = [
+            command = [
                 sys.executable,
                 str(
                     PROJECT_ROOT
                     / "scripts"
-                    / "run_pre_llm_pipeline.py"
+                    / "run_complete_pipeline.py"
                 ),
                 str(repository_path),
             ]
 
             process = subprocess.Popen(
-                pre_command,
+                command,
                 cwd=str(PROJECT_ROOT),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -644,7 +1136,6 @@ def run_pipeline(
             assert process.stdout is not None
 
             for line in process.stdout:
-
                 process_output_line(
                     job_id,
                     line,
@@ -653,127 +1144,249 @@ def run_pipeline(
 
             return_code = process.wait()
 
-            if return_code != 0:
-
-                raise RuntimeError(
-                    "Pre-LLM pipeline failed. "
-                    "Check the pipeline log."
-                )
-
-            # Mark all pre-LLM stages completed.
-            for stage in STAGES[:-1]:
-
-                job["stage_status"][
-                    stage
-                ] = "completed"
-
-            # ------------------------------------------------
-            # Collect pre-LLM results
-            # ------------------------------------------------
-
+            # Always collect artifacts that were produced, even when
+            # a later stage fails.
             job["results"] = collect_results(
                 repo_name,
                 repository_path,
             )
 
-            job["statistics"] = (
-                job["results"]
-                .get(
-                    "statistics",
-                    {},
+            job["statistics"] = job["results"].get(
+                "statistics",
+                {},
+            )
+
+            if return_code != 0:
+                raise RuntimeError(
+                    "Complete migration pipeline failed. "
+                    "Check the pipeline logs for the failed stage."
                 )
-            )
 
-            # ------------------------------------------------
-            # LLM
-            # ------------------------------------------------
-
-            update_stage(
-                job_id,
+            # The complete executable pipeline currently reaches
+            # Risk Analysis. Explainability and Final Report are
+            # dashboard-derived views.
+            actual_completed = [
+                "scan",
+                "version",
+                "selection",
+                "extraction",
+                "embeddings",
+                "dependency",
+                "planning",
+                "context",
+                "rag",
+                "prompt",
                 "llm",
-                "running",
-            )
-
-            llm_command = [
-                sys.executable,
-                str(
-                    PROJECT_ROOT
-                    / "scripts"
-                    / "run_llm_migration.py"
-                ),
-                str(repository_path),
+                "assembly",
+                "syntax",
+                "dependency_verification",
             ]
 
-            process = subprocess.Popen(
-                llm_command,
-                cwd=str(PROJECT_ROOT),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                bufsize=1,
-                env=env,
+            if job["results"].get(
+                "semantic_equivalence"
+            ) is not None:
+                actual_completed.extend([
+                    "test_generation",
+                    "differential_testing",
+                    "behavioral_verification",
+                    "semantic_equivalence",
+                ])
+
+            if job["results"].get("risk_analysis") is not None:
+                actual_completed.append("risk_analysis")
+
+            for stage in actual_completed:
+                if job["stage_status"].get(stage) != "failed":
+                    job["stage_status"][stage] = "completed"
+
+            job["status"] = "completed"
+
+            if job["results"].get("risk_analysis") is not None:
+                job["current_stage"] = "risk_analysis"
+            elif job["results"].get(
+                "semantic_equivalence"
+            ) is not None:
+                job["current_stage"] = "semantic_equivalence"
+            else:
+                job["current_stage"] = "dependency_verification"
+
+            job["results"] = populate_derived_results(
+                results=job["results"],
+                stage_status=job["stage_status"],
+                repository_name=repo_name,
+                pipeline_status=job["status"],
             )
 
-            assert process.stdout is not None
+            # These are dashboard-derived reporting stages.
+            job["stage_status"]["explainability"] = "completed"
+            job["stage_status"]["final_report"] = "completed"
 
-            for line in process.stdout:
+            # Rebuild the report after reporting stages receive their
+            # final statuses so the report itself is internally consistent.
+            job["results"]["final_report"] = build_final_report(
+                repository_name=repo_name,
+                status=job["status"],
+                error=None,
+                stage_status=job["stage_status"],
+                statistics=job["statistics"],
+                results=job["results"],
+            )
 
-                process_output_line(
-                    job_id,
-                    line,
-                    llm_phase=True,
-                )
+    except Exception as exc:
+        job["status"] = "failed"
+        error_text = derive_failure_message(
+            job,
+            str(exc).strip(),
+        )
+        job["error"] = error_text
 
-            return_code = process.wait()
+        current = job.get("current_stage")
 
-            if return_code != 0:
+        if current in STAGES:
+            job["stage_status"][current] = "failed"
 
-                raise RuntimeError(
-                    "LLM migration failed. "
-                    "Check the pipeline log."
-                )
+        # Stages after a failed stage were not executed.
+        if current == "differential_testing":
+            for stage in [
+                "behavioral_verification",
+                "semantic_equivalence",
+                "risk_analysis",
+                "explainability",
+                "final_report",
+            ]:
+                if job["stage_status"].get(stage) != "failed":
+                    job["stage_status"][stage] = "pending"
 
-            # ------------------------------------------------
-            # Final results
-            # ------------------------------------------------
+        elif current == "risk_analysis":
+            for stage in [
+                "explainability",
+                "final_report",
+            ]:
+                if job["stage_status"].get(stage) != "failed":
+                    job["stage_status"][stage] = "pending"
 
+        # collect_results() normally already ran before the exception,
+        # but this also covers exceptions raised before collection.
+        try:
             job["results"] = collect_results(
                 repo_name,
                 repository_path,
             )
 
-            job["statistics"] = (
-                job["results"]
-                .get(
-                    "statistics",
-                    {},
-                )
+            job["statistics"] = job["results"].get(
+                "statistics",
+                {},
             )
 
-            job["stage_status"][
-                "llm"
-            ] = "completed"
+            job["results"] = populate_derived_results(
+                results=job["results"],
+                stage_status=job["stage_status"],
+                repository_name=repo_name,
+                pipeline_status=job["status"],
+                error=error_text,
+            )
 
-            job["status"] = "completed"
-            job["current_stage"] = "llm"
+            # The dashboard can still produce a failure report even
+            # when the migration pipeline stops early.
+            job["stage_status"]["final_report"] = "completed"
 
-    except Exception as exc:
+            if job["results"].get("explainability", {}).get(
+                "status"
+            ) == "available":
+                job["stage_status"]["explainability"] = "completed"
+            else:
+                job["stage_status"]["explainability"] = "pending"
 
-        job["status"] = "failed"
-        job["error"] = str(exc)
+            job["results"]["final_report"] = build_final_report(
+                repository_name=repo_name,
+                status=job["status"],
+                error=error_text,
+                stage_status=job["stage_status"],
+                statistics=job["statistics"],
+                results=job["results"],
+            )
 
-        current = job.get(
-            "current_stage"
+        except Exception as result_error:
+            job["results"] = {}
+            job["statistics"] = {}
+            job["error"] = (
+                f"{error_text}; "
+                f"Could not collect partial results: "
+                f"{result_error}"
+            )
+
+            job["results"]["final_report"] = {
+                "repository": repo_name,
+                "pipeline_status": "failed",
+                "summary": {
+                    "message": (
+                        "The migration pipeline failed before "
+                        "complete result collection."
+                    ),
+                    "error": job["error"],
+                },
+            }
+            job["stage_status"]["final_report"] = "completed"
+
+        # Guarantee that the failed stage has a visible result.
+        if current in STAGES:
+            existing = job["results"].get(current)
+
+            if existing is None:
+                job["results"][current] = make_stage_result(
+                    current,
+                    "failed",
+                    message=(
+                        f"{STAGE_TITLES.get(current, current)} "
+                        "failed before producing its report."
+                    ),
+                    error=error_text,
+                )
+            elif isinstance(existing, dict):
+                existing.setdefault("status", "failed")
+                existing.setdefault("error", error_text)
+
+        # Always produce a readable final report.
+        job["results"]["final_report"] = build_final_report(
+            repository_name=repo_name,
+            status=job["status"],
+            error=error_text,
+            stage_status=job["stage_status"],
+            statistics=job["statistics"],
+            results=job["results"],
         )
 
-        if current in STAGES:
 
-            job["stage_status"][
-                current
-            ] = "failed"
 
+# ============================================================
+# DOWNLOAD FINAL MIGRATED REPOSITORY
+# ============================================================
+
+@app.get("/api/jobs/{job_id}/download")
+def download_migrated_repository(job_id: str):
+    job = JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Migration job not found.")
+
+    if job.get("status") != "completed":
+        raise HTTPException(status_code=409, detail="The migrated repository is not ready yet.")
+
+    repo_name = job.get("repository_name")
+    if not repo_name:
+        raise HTTPException(status_code=404, detail="Repository name is unavailable.")
+
+    migrated_dir = OUTPUT_ROOT / f"{repo_name}_migrated"
+    if not migrated_dir.exists() or not migrated_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Migrated repository directory was not found.")
+
+    archive_base = OUTPUT_ROOT / f"{repo_name}_migrated_download"
+    archive_path = Path(shutil.make_archive(str(archive_base), "zip", root_dir=migrated_dir))
+
+    return FileResponse(
+        path=str(archive_path),
+        media_type="application/zip",
+        filename=f"{repo_name}_migrated.zip",
+    )
 
 # ============================================================
 # HEALTH
@@ -983,4 +1596,9 @@ def get_job(
             detail="Migration job not found.",
         )
 
-    return job
+    response = dict(job)
+    response["progress"] = stage_counts(
+        job.get("stage_status", {})
+    )
+    response["stage_titles"] = STAGE_TITLES
+    return response

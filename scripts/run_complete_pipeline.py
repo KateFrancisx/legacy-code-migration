@@ -445,6 +445,11 @@ def main() -> int:
             "-m",
             SEMANTIC_VERIFIER_MODULE,
             str(OUTPUTS_DIR),
+            "--report",
+            str(
+                OUTPUTS_DIR
+                / "semantic_verification_report.json"
+            ),
         ],
         allow_failure=False,
     ):
